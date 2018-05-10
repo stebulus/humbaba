@@ -1,0 +1,15 @@
+var test = require('./test.js');
+
+exports.tests = {};
+
+function addTests(name) {
+  var tests = require(name).tests;
+  for (var k in tests)
+    exports.tests[name + ':' + k] = tests[k];
+}
+
+addTests('./test_runtime.js')
+addTests('./test_test.js')
+
+if (require.main === module)
+  process.exit(test.runTests(exports.tests));
