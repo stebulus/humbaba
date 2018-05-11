@@ -23,5 +23,9 @@ exports.tests.nullLiteral = function () {
   test.assertSame(new rt.Box(null), expr(null));
 };
 
+exports.tests.stringLiteral = function () {
+  test.assertSame(new rt.Box("a string"), expr({"str": "a string"}));
+};
+
 if (require.main === module)
   process.exit(test.runTests(exports.tests));
