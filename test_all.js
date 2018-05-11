@@ -10,6 +10,7 @@ function addTests(name) {
 
 addTests('./test_runtime.js')
 addTests('./test_test.js')
+addTests('./test_lolo.js')
 
 if (require.main === module)
   process.exit(test.runTests(exports.tests));
