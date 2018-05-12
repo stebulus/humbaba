@@ -13,6 +13,16 @@ function exprToExpr(code, chunk) {
       if (code === null) {
         chunk(box(code));
         break;
+      } else if (Array.isArray(code)) {
+        chunk('new rt.Apply(');
+        exprToExpr(code[0], chunk);
+        chunk(', [');
+        for (var i = 1; i < code.length; i++) {
+          if (i > 1) chunk(', ');
+          exprToExpr(code[i], chunk);
+        }
+        chunk('])');
+        break;
       } else if ('str' in code) {
         chunk(box(code.str));
         break;
@@ -48,6 +58,16 @@ function exprOverwrite(code, target, chunk) {
       if (code === null) {
         chunk(boxOverwrite(code, target));
         break;
+      } else if (Array.isArray(code)) {
+        chunk('rt.Apply.call(' + target + ', ');
+        exprToExpr(code[0], chunk);
+        chunk(', [');
+        for (var i = 1; i < code.length; i++) {
+          if (i > 1) chunk(', ');
+          exprToExpr(code[i], chunk);
+        }
+        chunk('])');
+        break;
       } else if ('str' in code) {
         chunk(boxOverwrite(code['str'], target));
         break;
@@ -76,5 +96,29 @@ function boxOverwrite(value, target) {
   return 'rt.Box.call(' + target + ', ' + JSON.stringify(value) + ');';
 }
 
+function program(program, entry, chunk) {
+  chunk('(function () {');
+  var decls = program['declarations'];
+  for (var i = 0; i < decls.length; i++) {
+    if ('func' in decls[i]) {
+      var lhs = decls[i]['func'];
+      chunk('function func$' + lhs[0] + '(');
+      for (var j = 1; j < lhs.length; j++) {
+        if (j > 1) chunk(', ');
+        chunk('$' + lhs[j]);
+      }
+      chunk(') {');
+      exprOverwrite(decls[i]['='], 'this', chunk);
+      chunk('}');
+      chunk('var $' + lhs[0] + ' = new rt.Box(func$' + lhs[0] + ');');
+    } else {
+      throw new Error('weird code: ' + util.inspect(code));
+    }
+  }
+  chunk('return new rt.Apply($' + entry + ', []);');
+  chunk('})();');
+}
+
 module.exports.exprToExpr = exprToExpr;
 module.exports.exprOverwrite = exprOverwrite;
+module.exports.program = program;

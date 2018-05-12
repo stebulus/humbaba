@@ -24,6 +24,15 @@ function assertExprValue(expected, expression) {
   test.assertSame(expected, rt.smashIndirects(exprOver(expression)));
 }
 
+function assertProgramValue(expected, program) {
+  var s = '';
+  function chunk(text) { s += text; }
+  lolo.program(program, 'test', chunk);
+  var expr = eval(s);
+  rt.evaluate(expr);
+  test.assertSame(expected, rt.smashIndirects(expr));
+}
+
 exports.tests.numericLiteral = function () {
   assertExprValue(new rt.Box(3), 3);
 };
@@ -57,6 +66,13 @@ exports.tests.letrecAndVariable1 = function () {
 exports.tests.letrecAndVariable2 = function () {
   assertExprValue(new rt.Box(4),
     {"let": [["y", "x"], ["x", 4]], in: "y"});
+};
+
+exports.tests.apply = function () {
+  assertProgramValue(new rt.Box(2), {"declarations": [
+    {"func": ["identity", "x"], "=": "x"},
+    {"func": ["test"], "=": ["identity", 2]},
+  ]});
 };
 
 if (require.main === module)
