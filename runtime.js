@@ -5,6 +5,9 @@ var THUNK = 4;
 
 var Node = {};
 
+function Empty() {}
+Empty.prototype = Node;
+
 function Data(tag) {
   this.type = DATA;
   this.tag = tag;
@@ -132,6 +135,7 @@ function evaluate(expr) {
 }
 
 exports.Node = Node;
+exports.Empty = Empty;
 exports.Data = Data;
 exports.PartialApply = PartialApply;
 exports.Indirect = Indirect;
@@ -139,3 +143,4 @@ exports.Thunk = Thunk;
 exports.Apply = Apply;
 exports.Box = Box;
 exports.evaluate = evaluate;
+exports.smashIndirects = smashIndirects;
