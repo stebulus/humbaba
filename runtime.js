@@ -4,15 +4,18 @@ var INDIRECT = 3;
 var THUNK = 4;
 
 var Node = {};
+exports.Node = Node;
 
 function Empty() {}
 Empty.prototype = Node;
+exports.Empty = Empty;
 
 function Data(tag) {
   this.type = DATA;
   this.tag = tag;
 }
 Data.prototype = Node;
+exports.Data = Data;
 
 function PartialApply(func, args) {
   this.type = PARTIAL_APPLY;
@@ -20,12 +23,14 @@ function PartialApply(func, args) {
   this.args = args;
 }
 PartialApply.prototype = Node;
+exports.PartialApply = PartialApply;
 
 function Indirect(target) {
   this.type = INDIRECT;
   this.target = target;
 }
 Indirect.prototype = Node;
+exports.Indirect = Indirect;
 
 function Thunk(evaluand, continuation) {
   this.type = THUNK;
@@ -33,17 +38,20 @@ function Thunk(evaluand, continuation) {
   this.continuation = continuation;
 }
 Thunk.prototype = Node;
+exports.Thunk = Thunk;
 
 function Apply(func, args) {
   Thunk.call(this, func, applyTo(args));
 }
 Apply.prototype = Node;
+exports.Apply = Apply;
 
 function Box(value) {
   Data.call(this, 1);
   this.$value = value;
 }
 Box.prototype = Node;
+exports.Box = Box;
 
 function applyTo(args) {
   return function(func) {
@@ -90,6 +98,7 @@ function smashIndirects(expr) {
     indirects[i].target = expr;
   return expr;
 }
+exports.smashIndirects = smashIndirects;
 
 function setTarget(target) {
   this.target = target;
@@ -133,14 +142,4 @@ function evaluate(expr) {
     }
   }
 }
-
-exports.Node = Node;
-exports.Empty = Empty;
-exports.Data = Data;
-exports.PartialApply = PartialApply;
-exports.Indirect = Indirect;
-exports.Thunk = Thunk;
-exports.Apply = Apply;
-exports.Box = Box;
 exports.evaluate = evaluate;
-exports.smashIndirects = smashIndirects;

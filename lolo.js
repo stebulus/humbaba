@@ -44,6 +44,7 @@ function exprToExpr(code, chunk) {
       throw new Error('weird code: ' + util.inspect(code));
   }
 }
+exports.exprToExpr = exprToExpr;
 
 function exprOverwrite(code, target, chunk) {
   switch (typeof code) {
@@ -87,6 +88,7 @@ function exprOverwrite(code, target, chunk) {
       throw new Error('weird code: ' + util.inspect(code));
   }
 }
+exports.exprOverwrite = exprOverwrite;
 
 function box(value) {
   return 'new rt.Box(' + JSON.stringify(value) + ')';
@@ -118,7 +120,4 @@ function program(program, entry, chunk) {
   chunk('return new rt.Apply($' + entry + ', []);');
   chunk('})();');
 }
-
-module.exports.exprToExpr = exprToExpr;
-module.exports.exprOverwrite = exprOverwrite;
-module.exports.program = program;
+exports.program = program;
