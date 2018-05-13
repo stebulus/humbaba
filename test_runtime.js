@@ -1,14 +1,6 @@
 var test = require('./test.js');
 var rt = require('./runtime.js');
 
-exports.tests = {}
-
-exports.tests.evalData = function () {
-  var x = new rt.Data(1);
-  rt.evaluate(x);
-  test.assertSame(new rt.Data(1), x);
-};
-
 var CONS = 1;
 var NIL = 2;
 
@@ -23,6 +15,7 @@ function Nil() {
   rt.Data.call(this, NIL);
 }
 Nil.prototype = rt.Node;
+var nil = new Nil();
 
 function arrayToList(arr) {
   var head = new Nil();
@@ -40,144 +33,141 @@ function forceList(head) {
   }
 }
 
-(function () {
+function empty(x) {
+  // empty x = case x of { Cons _ _ -> false; Nil -> true; }
+  rt.Thunk.call(this, x, function (x) {
+    switch (x.tag) {
+      case CONS:
+        rt.Box.call(this, false)
+        break;
+      case NIL:
+        rt.Box.call(this, true)
+        break;
+      default:
+        throw new Error("not a List tag: " + x.tag);
+    }
+  });
+}
+var boxedEmpty = new rt.Box(empty);
 
-  function empty(x) {
-    // empty x = case x of { Cons _ _ -> false; Nil -> true; }
-    rt.Thunk.call(this, x, function (x) {
-      switch (x.tag) {
-        case CONS:
-          rt.Box.call(this, false)
-          break;
-        case NIL:
-          rt.Box.call(this, true)
-          break;
-        default:
-          throw new Error("not a List tag: " + x.tag);
-      }
-    });
-  }
-  var boxedEmpty = new rt.Box(empty);
+function indirect(n, value) {
+  for (var i = 0; i < n; i++)
+    value = new rt.Indirect(value);
+  return value;
+}
 
-  exports.tests.applyEmptyNil = function () {
+function identity(x) {
+  rt.Indirect.call(this, x);
+}
+var boxedIdentity = new rt.Box(identity);
+
+function prepend(value) {
+  return function(expr) {
+    Cons.call(this, new rt.Box(value), expr);
+  };
+}
+
+function composeApply(x, y, z) {  // composeApply x y z = x (y z)
+  var inner = new rt.Apply(y, [z]);
+  rt.Apply.call(this, x, [inner]);
+}
+boxedComposeApply = new rt.Box(composeApply);
+var prepend1 = new rt.Box(prepend(1));
+var prepend2 = new rt.Box(prepend(2));
+
+function doubly(f, x) {
+  // doubly f x = composeApply f f x
+  rt.Apply.call(this, boxedComposeApply, [f, f, x]);
+}
+var boxedDoubly = new rt.Box(doubly);
+
+tests = {
+
+  evalData() {
+    var x = new rt.Data(1);
+    rt.evaluate(x);
+    test.assertSame(new rt.Data(1), x);
+  },
+
+  applyEmptyNil() {
     var x = new rt.Apply(boxedEmpty, [new Nil()]);
     rt.evaluate(x);
     test.assertSame(new rt.Box(true), x);
-  };
+  },
 
-  exports.tests.applyEmptyCons = function () {
+  applyEmptyCons() {
     var x = new rt.Apply(boxedEmpty, [new Cons(new Nil(), new Nil())]);
     rt.evaluate(x);
     test.assertSame(new rt.Box(false), x);
-  };
+  },
 
-  exports.tests.applyEmptyIndirectNil = function () {
+  applyEmptyIndirectNil() {
     var x = new rt.Apply(boxedEmpty, [new rt.Indirect(new Nil())]);
     rt.evaluate(x);
     test.assertSame(new rt.Box(true), x);
-  };
+  },
 
-  exports.tests.applyEmptyIndirectIndirectNil = function () {
+  applyEmptyIndirectIndirectNil() {
     var x = new rt.Apply(boxedEmpty, [new rt.Indirect(new rt.Indirect(new Nil()))]);
     rt.evaluate(x);
     test.assertSame(new rt.Box(true), x);
-  };
+  },
 
-  exports.tests.applyEmptyIndirectCons = function () {
+  applyEmptyIndirectCons() {
     var x = new rt.Apply(boxedEmpty, [new rt.Indirect(new Cons(new Nil(), new Nil()))]);
     rt.evaluate(x);
     test.assertSame(new rt.Box(false), x);
-  };
+  },
 
-})();
-
-(function () {
-
-  function prepend(value) {
-    return function(expr) {
-      Cons.call(this, new rt.Box(value), expr);
-    };
-  }
-
-  function composeApply(x, y, z) {  // composeApply x y z = x (y z)
-    var inner = new rt.Apply(y, [z]);
-    rt.Apply.call(this, x, [inner]);
-  }
-  boxedComposeApply = new rt.Box(composeApply);
-  var prepend1 = new rt.Box(prepend(1));
-  var prepend2 = new rt.Box(prepend(2));
-  var nil = new Nil();
-
-  exports.tests.applyExact = function () {
+  applyExact() {
     // composeApply prepend1 prepend2 Nil
     var apply = new rt.Apply(boxedComposeApply, [prepend1, prepend2, nil]);
     forceList(apply);
     test.assertSame(arrayToList([1,2]), apply);
-  };
+  },
 
-  exports.tests.applyTooFew = function () {
+  applyTooFew() {
     // (composeApply prepend1 prepend2) Nil
     var apply = new rt.Apply(boxedComposeApply, [prepend1, prepend2]);
     var apply2 = new rt.Apply(apply, [nil]);
     forceList(apply2);
     test.assertSame(arrayToList([1,2]), apply2);
-  };
+  },
 
-  function doubly(f, x) {
-    // doubly f x = composeApply f f x
-    rt.Apply.call(this, boxedComposeApply, [f, f, x]);
-  }
-  var boxedDoubly = new rt.Box(doubly);
-
-  exports.tests.applyTooMany = function () {
+  applyTooMany() {
     // composeApply doubly doubly prepend1 Nil
     var apply = new rt.Apply(boxedComposeApply, [boxedDoubly, boxedDoubly, prepend1, nil]);
     forceList(apply);
     test.assertSame(arrayToList([1,1,1,1]), apply);
-  };
+  },
 
-})();
-
-(function () {
-
-  var nil = new Nil();
-
-  function indirect(n, value) {
-    for (var i = 0; i < n; i++)
-      value = new rt.Indirect(value);
-    return value;
-  }
-
-  function identity(x) {
-    rt.Indirect.call(this, x);
-  }
-  var boxedIdentity = new rt.Box(identity);
-
-  exports.tests.continuationArgDirect = function () {
+  continuationArgDirect() {
     var thunk = new rt.Apply(boxedIdentity, [nil]);
     rt.evaluate(thunk);
     test.assertSame(indirect(1, nil), thunk);
-  };
+  },
 
-  exports.tests.continuationArgIndirect = function () {
+  continuationArgIndirect() {
     var thunk = new rt.Apply(boxedIdentity, [indirect(1, nil)]);
     rt.evaluate(thunk);
     test.assertSame(indirect(1, nil), thunk);
-  };
+  },
 
-  exports.tests.continuationArgIndirect2 = function () {
+  continuationArgIndirect2() {
     var thunk = new rt.Apply(boxedIdentity, [indirect(2, nil)]);
     rt.evaluate(thunk);
     test.assertSame(indirect(1, nil), thunk);
-  };
+  },
 
-  exports.tests.continuationThisIndirect = function () {
+  continuationThisIndirect() {
     var thunk = new rt.Indirect(new rt.Apply(boxedIdentity, [nil]));
     rt.evaluate(thunk);
     test.assertSame(indirect(1, nil), thunk);
-  };
+  },
 
-})();
+};
+
+exports.tests = tests;
 
 if (require.main === module)
   process.exit(test.runTests(exports.tests));
