@@ -18,8 +18,12 @@ function exprOver(code) {
 }
 
 function assertExprValue(expected, expression) {
-  test.assertSame(expected, rt.smashIndirects(expr(expression)));
-  test.assertSame(expected, rt.smashIndirects(exprOver(expression)));
+  var ex = expr(expression);
+  rt.evaluate(ex);
+  test.assertSame(expected, rt.smashIndirects(ex));
+  ex = exprOver(expression);
+  rt.evaluate(ex);
+  test.assertSame(expected, rt.smashIndirects(ex));
 }
 
 function assertProgramValue(expected, program) {
@@ -72,6 +76,29 @@ tests = {
     assertProgramValue(new rt.Box(2), {"declarations": [
       {"func": ["identity", "x"], "=": "x"},
       {"func": ["test"], "=": ["identity", 2]},
+    ]});
+  },
+
+  caseNumber1() {
+    assertExprValue(new rt.Box(3),
+      {"case": 2, "of": [[2, 3], [3, 2], ["n", 8]]});
+  },
+
+  caseNumber2() {
+    assertExprValue(new rt.Box(3),
+      {"case": 2, "of": [[3, 2], [2, 3], ["n", 8]]});
+  },
+
+  caseNumberDefault() {
+    assertExprValue(new rt.Box(8),
+      {"case": 17, "of": [[3, 2], [2, 3], ["n", 8]]});
+  },
+
+  caseNumberEvaluate() {
+    assertProgramValue(new rt.Box(3), {"declarations": [
+      {"func": ["identity", "x"], "=": "x"},
+      {"func": ["test"],
+       "=": {"case": ["identity", 2], "of": [[3, 2], [2, 3], ["n", 8]]}}
     ]});
   },
 

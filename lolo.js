@@ -38,6 +38,24 @@ function exprToExpr(code, chunk) {
         chunk(';');
         chunk('})()');
         break;
+      } else if ('case' in code) {
+        chunk('new rt.Thunk(');
+        exprToExpr(code['case'], chunk);
+        chunk(', function (x) {');
+        var alts = code['of'];
+        chunk('switch (x.$value) {');
+        for (var i = 0; i < alts.length; i++) {
+          if (typeof alts[i][0] === 'string') {
+            chunk('default: var $' + alts[i][0] + ' = x.$value;');
+          } else {
+            chunk('case ' + alts[i][0] + ': ');
+          }
+          exprOverwrite(alts[i][1], 'this', chunk);
+          chunk('break;');
+        }
+        chunk('};');
+        chunk('})');
+        break;
       }
       // fall through!
     default:
@@ -81,6 +99,24 @@ function exprOverwrite(code, target, chunk) {
           exprOverwrite(bindings[i][1], '$' + bindings[i][0], chunk);
         exprOverwrite(code['in'], target, chunk);
         chunk('})();');
+        break;
+      } else if ('case' in code) {
+        chunk('rt.Thunk.call(' + target + ', ');
+        exprToExpr(code['case'], chunk);
+        chunk(', function (x) {');
+        var alts = code['of'];
+        chunk('switch (x.$value) {');
+        for (var i = 0; i < alts.length; i++) {
+          if (typeof alts[i][0] === 'string') {
+            chunk('default: var $' + alts[i][0] + ' = x.$value;');
+          } else {
+            chunk('case ' + alts[i][0] + ': ');
+          }
+          exprOverwrite(alts[i][1], 'this', chunk);
+          chunk('break;');
+        }
+        chunk('};');
+        chunk('});');
         break;
       }
       // fall through!
