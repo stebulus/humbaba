@@ -4,14 +4,14 @@ function exprToExpr(code, chunk) {
   switch (typeof code) {
     case 'boolean':
     case 'number':
-      chunk(box(code));
+      box(code, chunk);
       break;
     case 'string':
       chunk('$' + code);
       break;
     case 'object':
       if (code === null) {
-        chunk(box(code));
+        box(code, chunk);
         break;
       } else if (Array.isArray(code)) {
         chunk('new rt.Apply(');
@@ -19,7 +19,7 @@ function exprToExpr(code, chunk) {
         chunk(')');
         break;
       } else if ('str' in code) {
-        chunk(box(code.str));
+        box(code.str, chunk);
         break;
       } else if ('let' in code) {
         withBindings(code['let'], function () {
@@ -45,14 +45,14 @@ function exprOverwrite(code, target, chunk) {
   switch (typeof code) {
     case 'boolean':
     case 'number':
-      chunk(boxOverwrite(code, target));
+      boxOverwrite(code, target, chunk);
       break;
     case 'string':
       chunk('rt.Indirect.call(' + target + ', $' + code + ');');
       break;
     case 'object':
       if (code === null) {
-        chunk(boxOverwrite(code, target));
+        boxOverwrite(code, target, chunk);
         break;
       } else if (Array.isArray(code)) {
         chunk('rt.Apply.call(' + target + ', ');
@@ -60,7 +60,7 @@ function exprOverwrite(code, target, chunk) {
         chunk(');');
         break;
       } else if ('str' in code) {
-        chunk(boxOverwrite(code['str'], target));
+        boxOverwrite(code['str'], target, chunk);
         break;
       } else if ('let' in code) {
         withBindings(code['let'], function () {
@@ -80,12 +80,18 @@ function exprOverwrite(code, target, chunk) {
 }
 exports.exprOverwrite = exprOverwrite;
 
-function box(value) {
-  return 'new rt.Box(' + JSON.stringify(value) + ')';
+function box(value, chunk) {
+  chunk('new rt.Box(');
+  chunk(JSON.stringify(value));
+  chunk(')');
 }
 
-function boxOverwrite(value, target) {
-  return 'rt.Box.call(' + target + ', ' + JSON.stringify(value) + ');';
+function boxOverwrite(value, target, chunk) {
+  chunk('rt.Box.call(');
+  chunk(target);
+  chunk(', ');
+  chunk(JSON.stringify(value));
+  chunk(');');
 }
 
 function applyArgs(applyExpr, chunk) {
