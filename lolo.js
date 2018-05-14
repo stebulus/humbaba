@@ -1,5 +1,9 @@
 var util = require('util');
 
+function weirdCode(code) {
+  throw new Error('weird code: ' + util.inspect(code));
+}
+
 function exprToExpr(code, chunk) {
   switch (typeof code) {
     case 'boolean':
@@ -37,7 +41,7 @@ function exprToExpr(code, chunk) {
       }
       // fall through!
     default:
-      throw new Error('weird code: ' + util.inspect(code));
+      weirdCode(code);
   }
 }
 exports.exprToExpr = exprToExpr;
@@ -84,7 +88,7 @@ function exprOverwrite(code, target, chunk) {
       }
       // fall through!
     default:
-      throw new Error('weird code: ' + util.inspect(code));
+      weirdCode(code);
   }
 }
 exports.exprOverwrite = exprOverwrite;
@@ -142,7 +146,7 @@ function caseThunkArgs(caseExpr, chunk) {
         chunk(JSON.stringify(alts[i][0]['str']));
         chunk(': ');
       } else {
-        throw new Error('weird code: ' + alts[i][0]);
+        weirdCode(alts[i][0]);
       }
     } else {
       chunk('case ');
@@ -178,7 +182,7 @@ function program(program, entry, chunk) {
       chunk(lhs[0]);
       chunk(');');
     } else {
-      throw new Error('weird code: ' + util.inspect(code));
+      weirdCode(code);
     }
   }
   chunk('return new rt.Apply($');
