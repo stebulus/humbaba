@@ -94,6 +94,14 @@ tests = {
       {"case": 17, "of": [[3, 2], [2, 3], ["n", 8]]});
   },
 
+  caseNumberVariable() {
+    assertProgramValue(new rt.Box(2), {"declarations": [
+      {"func": ["identity", "x"], "=": "x"},
+      {"func": ["test"],
+       "=": {"case": 2, "of": [["n", ["identity", "n"]]]}}
+    ]});
+  },
+
   caseNumberEvaluate() {
     assertProgramValue(new rt.Box(3), {"declarations": [
       {"func": ["identity", "x"], "=": "x"},

@@ -121,7 +121,9 @@ function caseThunkArgs(caseExpr, chunk) {
   var alts = caseExpr['of'];
   for (var i = 0; i < alts.length; i++) {
     if (typeof alts[i][0] === 'string') {
-      chunk('default: var $' + alts[i][0] + ' = x.$value;');
+      chunk('default: var $');
+      chunk(alts[i][0]);
+      chunk(' = new rt.Box(x.$value);');
     } else {
       chunk('case ' + alts[i][0] + ': ');
     }
