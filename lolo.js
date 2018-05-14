@@ -57,7 +57,7 @@ function exprOverwrite(code, target, chunk) {
       } else if (Array.isArray(code)) {
         chunk('rt.Apply.call(' + target + ', ');
         applyArgs(code, chunk);
-        chunk(')');
+        chunk(');');
         break;
       } else if ('str' in code) {
         chunk(boxOverwrite(code['str'], target));
