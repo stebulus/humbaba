@@ -27,16 +27,11 @@ function exprToExpr(code, chunk) {
         chunk(box(code.str));
         break;
       } else if ('let' in code) {
-        chunk('(function () {');
-        const bindings = code['let']
-        for (var i = 0; i < bindings.length; i++)
-          chunk('var $' + bindings[i][0] + ' = new rt.Empty();');
-        for (var i = 0; i < bindings.length; i++)
-          exprOverwrite(bindings[i][1], '$' + bindings[i][0], chunk);
-        chunk('return ');
-        exprToExpr(code['in'], chunk);
-        chunk(';');
-        chunk('})()');
+        withBindings(code['let'], function () {
+          chunk('return ');
+          exprToExpr(code['in'], chunk);
+          chunk(';');
+        }, chunk);
         break;
       } else if ('case' in code) {
         chunk('new rt.Thunk(');
@@ -78,14 +73,9 @@ function exprOverwrite(code, target, chunk) {
         chunk(boxOverwrite(code['str'], target));
         break;
       } else if ('let' in code) {
-        chunk('(function () {');
-        const bindings = code['let']
-        for (var i = 0; i < bindings.length; i++)
-          chunk('var $' + bindings[i][0] + ' = new rt.Empty();');
-        for (var i = 0; i < bindings.length; i++)
-          exprOverwrite(bindings[i][1], '$' + bindings[i][0], chunk);
-        exprOverwrite(code['in'], target, chunk);
-        chunk('})();');
+        withBindings(code['let'], function () {
+          exprOverwrite(code['in'], target, chunk);
+        }, chunk);
         break;
       } else if ('case' in code) {
         chunk('rt.Thunk.call(' + target + ', ');
@@ -106,6 +96,16 @@ function box(value) {
 
 function boxOverwrite(value, target) {
   return 'rt.Box.call(' + target + ', ' + JSON.stringify(value) + ');';
+}
+
+function withBindings(bindings, f, chunk) {
+  chunk('(function () {');
+  for (var i = 0; i < bindings.length; i++)
+    chunk('var $' + bindings[i][0] + ' = new rt.Empty();');
+  for (var i = 0; i < bindings.length; i++)
+    exprOverwrite(bindings[i][1], '$' + bindings[i][0], chunk);
+  f();
+  chunk('})();');
 }
 
 function caseThunkArgs(caseExpr, chunk) {
