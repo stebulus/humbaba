@@ -120,6 +120,18 @@ tests = {
       {"case": true, "of": [[false, 2], [true, 3]]});
   },
 
+  caseString1() {
+    assertExprValue(new rt.Box(3),
+      {"case": {"str": "foo"},
+       "of": [[{"str": "foo"}, 3], [{"str": "bar"}, 2]]});
+  },
+
+  caseString2() {
+    assertExprValue(new rt.Box(3),
+      {"case": {"str": "foo"},
+       "of": [[{"str": "bar"}, 2], [{"str": "foo"}, 3]]});
+  },
+
 };
 
 exports.tests = tests;

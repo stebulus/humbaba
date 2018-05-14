@@ -136,6 +136,14 @@ function caseThunkArgs(caseExpr, chunk) {
       chunk('default: var $');
       chunk(alts[i][0]);
       chunk(' = new rt.Box(x.$value);');
+    } else if (typeof alts[i][0] === 'object') {
+      if ('str' in alts[i][0]) {
+        chunk('case ');
+        chunk(JSON.stringify(alts[i][0]['str']));
+        chunk(': ');
+      } else {
+        throw new Error('weird code: ' + alts[i][0]);
+      }
     } else {
       chunk('case ');
       chunk(alts[i][0]);
