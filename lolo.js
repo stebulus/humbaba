@@ -15,13 +15,8 @@ function exprToExpr(code, chunk) {
         break;
       } else if (Array.isArray(code)) {
         chunk('new rt.Apply(');
-        exprToExpr(code[0], chunk);
-        chunk(', [');
-        for (var i = 1; i < code.length; i++) {
-          if (i > 1) chunk(', ');
-          exprToExpr(code[i], chunk);
-        }
-        chunk('])');
+        applyArgs(code, chunk);
+        chunk(')');
         break;
       } else if ('str' in code) {
         chunk(box(code.str));
@@ -61,13 +56,8 @@ function exprOverwrite(code, target, chunk) {
         break;
       } else if (Array.isArray(code)) {
         chunk('rt.Apply.call(' + target + ', ');
-        exprToExpr(code[0], chunk);
-        chunk(', [');
-        for (var i = 1; i < code.length; i++) {
-          if (i > 1) chunk(', ');
-          exprToExpr(code[i], chunk);
-        }
-        chunk('])');
+        applyArgs(code, chunk);
+        chunk(')');
         break;
       } else if ('str' in code) {
         chunk(boxOverwrite(code['str'], target));
@@ -96,6 +86,16 @@ function box(value) {
 
 function boxOverwrite(value, target) {
   return 'rt.Box.call(' + target + ', ' + JSON.stringify(value) + ');';
+}
+
+function applyArgs(applyExpr, chunk) {
+  exprToExpr(applyExpr[0], chunk);
+  chunk(', [');
+  for (var i = 1; i < applyExpr.length; i++) {
+    if (i > 1) chunk(', ');
+    exprToExpr(applyExpr[i], chunk);
+  }
+  chunk(']');
 }
 
 function withBindings(bindings, f, chunk) {
