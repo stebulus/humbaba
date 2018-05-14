@@ -7,7 +7,8 @@ function exprToExpr(code, chunk) {
       box(code, chunk);
       break;
     case 'string':
-      chunk('$' + code);
+      chunk('$')
+      chunk(code);
       break;
     case 'object':
       if (code === null) {
@@ -48,14 +49,20 @@ function exprOverwrite(code, target, chunk) {
       boxOverwrite(code, target, chunk);
       break;
     case 'string':
-      chunk('rt.Indirect.call(' + target + ', $' + code + ');');
+      chunk('rt.Indirect.call(');
+      chunk(target);
+      chunk(', $');
+      chunk(code);
+      chunk(');');
       break;
     case 'object':
       if (code === null) {
         boxOverwrite(code, target, chunk);
         break;
       } else if (Array.isArray(code)) {
-        chunk('rt.Apply.call(' + target + ', ');
+        chunk('rt.Apply.call(');
+        chunk(target);
+        chunk(', ');
         applyArgs(code, chunk);
         chunk(');');
         break;
@@ -68,7 +75,9 @@ function exprOverwrite(code, target, chunk) {
         }, chunk);
         break;
       } else if ('case' in code) {
-        chunk('rt.Thunk.call(' + target + ', ');
+        chunk('rt.Thunk.call(');
+        chunk(target);
+        chunk(', ');
         caseThunkArgs(code, chunk);
         chunk(');');
         break;
@@ -106,8 +115,11 @@ function applyArgs(applyExpr, chunk) {
 
 function withBindings(bindings, f, chunk) {
   chunk('(function () {');
-  for (var i = 0; i < bindings.length; i++)
-    chunk('var $' + bindings[i][0] + ' = new rt.Empty();');
+  for (var i = 0; i < bindings.length; i++) {
+    chunk('var $');
+    chunk(bindings[i][0]);
+    chunk(' = new rt.Empty();');
+  }
   for (var i = 0; i < bindings.length; i++)
     exprOverwrite(bindings[i][1], '$' + bindings[i][0], chunk);
   f();
@@ -125,7 +137,9 @@ function caseThunkArgs(caseExpr, chunk) {
       chunk(alts[i][0]);
       chunk(' = new rt.Box(x.$value);');
     } else {
-      chunk('case ' + alts[i][0] + ': ');
+      chunk('case ');
+      chunk(alts[i][0]);
+      chunk(': ');
     }
     exprOverwrite(alts[i][1], 'this', chunk);
     chunk('break;');
@@ -139,20 +153,28 @@ function program(program, entry, chunk) {
   for (var i = 0; i < decls.length; i++) {
     if ('func' in decls[i]) {
       var lhs = decls[i]['func'];
-      chunk('function func$' + lhs[0] + '(');
+      chunk('function func$');
+      chunk(lhs[0]);
+      chunk('(');
       for (var j = 1; j < lhs.length; j++) {
         if (j > 1) chunk(', ');
-        chunk('$' + lhs[j]);
+        chunk('$');
+        chunk(lhs[j]);
       }
       chunk(') {');
       exprOverwrite(decls[i]['='], 'this', chunk);
       chunk('}');
-      chunk('var $' + lhs[0] + ' = new rt.Box(func$' + lhs[0] + ');');
+      chunk('var $');
+      chunk(lhs[0]);
+      chunk(' = new rt.Box(func$');
+      chunk(lhs[0]);
+      chunk(');');
     } else {
       throw new Error('weird code: ' + util.inspect(code));
     }
   }
-  chunk('return new rt.Apply($' + entry + ', []);');
-  chunk('})();');
+  chunk('return new rt.Apply($');
+  chunk(entry);
+  chunk(', []);})();');
 }
 exports.program = program;
