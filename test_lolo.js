@@ -102,6 +102,16 @@ tests = {
     ]});
   },
 
+  caseBoolean1() {
+    assertExprValue(new rt.Box(3),
+      {"case": true, "of": [[true, 3], [false, 2]]});
+  },
+
+  caseBoolean2() {
+    assertExprValue(new rt.Box(3),
+      {"case": true, "of": [[false, 2], [true, 3]]});
+  },
+
 };
 
 exports.tests = tests;
