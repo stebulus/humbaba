@@ -5,14 +5,14 @@ var lolo = require('./lolo.js');
 function expr(code) {
   var s = '';
   function chunk(text) { s += text; }
-  lolo.exprToExpr(code, chunk);
+  lolo.expr(code, chunk);
   return eval(s);
 }
 
 function exprOver(code) {
   var s = '(function () { var o = new rt.Empty(); ';
   function chunk(text) { s += text; }
-  lolo.exprOverwrite(code, 'o', chunk);
+  lolo.expr(code, chunk, 'o');
   s += 'return o; })()';
   return eval(s);
 }
