@@ -81,24 +81,24 @@ tests = {
 
   caseNumber1() {
     assertExprValue(new rt.Box(3),
-      {"case": 2, "of": [[2, 3], [3, 2], ["n", 8]]});
+      {"casel": 2, "of": [[2, 3], [3, 2], ["n", 8]]});
   },
 
   caseNumber2() {
     assertExprValue(new rt.Box(3),
-      {"case": 2, "of": [[3, 2], [2, 3], ["n", 8]]});
+      {"casel": 2, "of": [[3, 2], [2, 3], ["n", 8]]});
   },
 
   caseNumberDefault() {
     assertExprValue(new rt.Box(8),
-      {"case": 17, "of": [[3, 2], [2, 3], ["n", 8]]});
+      {"casel": 17, "of": [[3, 2], [2, 3], ["n", 8]]});
   },
 
   caseNumberVariable() {
     assertProgramValue(new rt.Box(2), {"declarations": [
       {"func": ["identity", "x"], "=": "x"},
       {"func": ["test"],
-       "=": {"case": 2, "of": [["n", ["identity", "n"]]]}}
+       "=": {"casel": 2, "of": [["n", ["identity", "n"]]]}}
     ]});
   },
 
@@ -106,29 +106,29 @@ tests = {
     assertProgramValue(new rt.Box(3), {"declarations": [
       {"func": ["identity", "x"], "=": "x"},
       {"func": ["test"],
-       "=": {"case": ["identity", 2], "of": [[3, 2], [2, 3], ["n", 8]]}}
+       "=": {"casel": ["identity", 2], "of": [[3, 2], [2, 3], ["n", 8]]}}
     ]});
   },
 
   caseBoolean1() {
     assertExprValue(new rt.Box(3),
-      {"case": true, "of": [[true, 3], [false, 2]]});
+      {"casel": true, "of": [[true, 3], [false, 2]]});
   },
 
   caseBoolean2() {
     assertExprValue(new rt.Box(3),
-      {"case": true, "of": [[false, 2], [true, 3]]});
+      {"casel": true, "of": [[false, 2], [true, 3]]});
   },
 
   caseString1() {
     assertExprValue(new rt.Box(3),
-      {"case": {"str": "foo"},
+      {"casel": {"str": "foo"},
        "of": [[{"str": "foo"}, 3], [{"str": "bar"}, 2]]});
   },
 
   caseString2() {
     assertExprValue(new rt.Box(3),
-      {"case": {"str": "foo"},
+      {"casel": {"str": "foo"},
        "of": [[{"str": "bar"}, 2], [{"str": "foo"}, 3]]});
   },
 

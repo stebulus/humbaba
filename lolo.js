@@ -33,9 +33,9 @@ function exprToExpr(code, chunk) {
           chunk(';');
         }, chunk);
         break;
-      } else if ('case' in code) {
+      } else if ('casel' in code) {
         chunk('new rt.Thunk(');
-        caseThunkArgs(code, chunk);
+        caseLiteralThunkArgs(code, chunk);
         chunk(')');
         break;
       }
@@ -78,11 +78,11 @@ function exprOverwrite(code, target, chunk) {
           exprOverwrite(code['in'], target, chunk);
         }, chunk);
         break;
-      } else if ('case' in code) {
+      } else if ('casel' in code) {
         chunk('rt.Thunk.call(');
         chunk(target);
         chunk(', ');
-        caseThunkArgs(code, chunk);
+        caseLiteralThunkArgs(code, chunk);
         chunk(');');
         break;
       }
@@ -130,8 +130,8 @@ function withBindings(bindings, f, chunk) {
   chunk('})();');
 }
 
-function caseThunkArgs(caseExpr, chunk) {
-  exprToExpr(caseExpr['case'], chunk);
+function caseLiteralThunkArgs(caseExpr, chunk) {
+  exprToExpr(caseExpr['casel'], chunk);
   chunk(', function (x) {');
   chunk('switch (x.$value) {');
   var alts = caseExpr['of'];
