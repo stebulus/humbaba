@@ -162,7 +162,7 @@ function program(program, entry, chunk) {
       chunk(lhs[0]);
       chunk(');');
     } else {
-      weirdCode(code);
+      weirdCode(decls[i]);
     }
   }
   chunk('return new rt.Apply($');
