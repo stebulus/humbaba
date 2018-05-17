@@ -77,3 +77,8 @@ function runTests(tests) {
   return failures;
 }
 exports.runTests = runTests;
+
+function main(tests) {
+  process.exit(runTests(tests));
+}
+exports.main = main;

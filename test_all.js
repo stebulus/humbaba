@@ -13,4 +13,4 @@ addTests('./test_test.js')
 addTests('./test_lolo.js')
 
 if (require.main === module)
-  process.exit(test.runTests(exports.tests));
+  test.main(tests);

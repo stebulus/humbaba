@@ -91,4 +91,4 @@ tests = {
 exports.tests = tests;
 
 if (require.main === module)
-  process.exit(test.runTests(exports.tests));
+  test.main(tests);
