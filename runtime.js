@@ -10,9 +10,10 @@ function Empty() {}
 Empty.prototype = Node;
 exports.Empty = Empty;
 
-function Data(tag) {
+function Data(tag, fields) {
   this.type = DATA;
   this.tag = tag;
+  this.fields = fields;
 }
 Data.prototype = Node;
 exports.Data = Data;
@@ -47,8 +48,7 @@ Apply.prototype = Node;
 exports.Apply = Apply;
 
 function Box(value) {
-  Data.call(this, 1);
-  this.$value = value;
+  Data.call(this, 1, [value]);
 }
 Box.prototype = Node;
 exports.Box = Box;
@@ -60,7 +60,7 @@ function applyTo(args) {
     switch (func.type) {
       case DATA:
         allArgs = args;
-        unboxedFunc = func.$value;
+        unboxedFunc = func.fields[0];
         break;
       case PARTIAL_APPLY:
         allArgs = func.args.concat(args);

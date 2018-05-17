@@ -132,6 +132,44 @@ tests = {
        "of": [[{"str": "bar"}, 2], [{"str": "foo"}, 3]]});
   },
 
+  caseData1() {
+    assertProgramValue(new rt.Box(4), {"declarations": [
+      {"data": "List",
+       "=": [["Cons", 2], ["Nil", 0]]},
+      {"func": ["test"],
+       "=": {"cased": "Nil", "of": [["Nil", 4], ["Cons", "x", "y", 5]]}}
+    ]});
+  },
+
+  caseData2() {
+    assertProgramValue(new rt.Box(4), {"declarations": [
+      {"data": "List",
+       "=": [["Cons", 2], ["Nil", 0]]},
+      {"func": ["test"],
+       "=": {"cased": "Nil", "of": [["Cons", "x", "y", 5], ["Nil", 4]]}}
+    ]});
+  },
+
+  caseDataEvaluate() {
+    assertProgramValue(new rt.Box(4), {"declarations": [
+      {"data": "List",
+       "=": [["Cons", 2], ["Nil", 0]]},
+      {"func": ["identity", "x"], "=": "x"},
+      {"func": ["test"],
+       "=": {"cased": ["identity", "Nil"], "of": [["Cons", "x", "y", 5], ["Nil", 4]]}}
+    ]});
+  },
+
+  caseDataVariables() {
+    assertProgramValue(new rt.Box(3), {"declarations": [
+      {"data": "List",
+       "=": [["Cons", 2], ["Nil", 0]]},
+      {"func": ["test"],
+       "=": {"cased": ["Cons", 3, "Nil"],
+             "of": [["Cons", "x", "y", "x"], ["Nil", 4]]}}
+    ]});
+  },
+
 };
 
 exports.tests = tests;
