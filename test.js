@@ -55,9 +55,7 @@ function assertNotSame(notExpected, actual) {
 }
 exports.assertNotSame = assertNotSame;
 
-function runTests(tests) {
-  var keys = Object.keys(tests);
-  keys.sort();
+function runTests(tests, keys) {
   var failures = 0;
   for (var i = 0; i < keys.length; i++) {
     try {
@@ -77,3 +75,15 @@ function runTests(tests) {
   return failures;
 }
 exports.runTests = runTests;
+
+function main(tests) {
+  var testsToRun;
+  if (process.argv.length <= 2) {
+    testsToRun = Object.keys(tests);
+    testsToRun.sort();
+  } else {
+    testsToRun = process.argv.slice(2);
+  }
+  process.exit(runTests(tests, testsToRun));
+}
+exports.main = main;
