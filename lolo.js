@@ -156,7 +156,7 @@ function caseData(code, chunk, target) {
   for (var i = 0; i < alts.length; i++) {
     var con = alts[i][0];
     var args = alts[i].slice(1, -1);
-    var rhs = alts[i][alts.length-1];
+    var rhs = alts[i][alts[i].length-1];
     chunk('case ');
     chunk('tag$');
     chunk(con);

@@ -160,13 +160,26 @@ tests = {
     ]});
   },
 
-  caseDataVariables() {
+  caseDataVariables1() {
     assertProgramValue(new rt.Box(3), {"declarations": [
       {"data": "List",
        "=": [["Cons", 2], ["Nil", 0]]},
       {"func": ["test"],
        "=": {"cased": ["Cons", 3, "Nil"],
              "of": [["Cons", "x", "y", "x"], ["Nil", 4]]}}
+    ]});
+  },
+
+  caseDataVariables2() {
+    assertProgramValue(new rt.Box(2), {"declarations": [
+      {"data": "List",
+       "=": [["Cons", 2], ["Nil", 0]]},
+      {"func": ["test"],
+       "=": {"cased": ["Cons", 3, ["Cons", 2, "Nil"]],
+             "of": [["Cons", "x", "y",
+                     {"cased": "y",
+                      "of": [["Cons", "h", "t", "h"], ["Nil", 7]]}],
+                    ["Nil", 4]]}}
     ]});
   },
 
