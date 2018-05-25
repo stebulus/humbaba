@@ -1,6 +1,6 @@
-var test = require('./test.js');
-var rt = require('./runtime.js');
-var lolo = require('./lolo.js');
+var test = require('./test');
+var rt = require('./runtime');
+var lolo = require('./lolo');
 
 function expr(code) {
   var s = '';
