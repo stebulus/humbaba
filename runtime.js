@@ -143,3 +143,51 @@ function evaluate(expr) {
   }
 }
 exports.evaluate = evaluate;
+
+var IOPURE = 1;
+exports.IOPURE = IOPURE;
+var IOBIND = 2;
+exports.IOBIND = IOBIND;
+var PUTCHAR = 3;
+exports.PUTCHAR = PUTCHAR;
+var GETCHAR = 4;
+exports.GETCHAR = GETCHAR;
+var ISEOF = 5;
+exports.ISEOF = ISEOF;
+
+function IoPure(value) {
+  Data.call(this, IOPURE, [value]);
+}
+IoPure.prototype = Node;
+exports.IoPure = IoPure;
+
+function IoBind(x, f) {
+  Data.call(this, IOBIND, [x, f]);
+}
+IoBind.prototype = Node;
+exports.IoBind = IoBind;
+
+function PutChar(char) {
+  Data.call(this, PUTCHAR, [char]);
+}
+PutChar.prototype = Node;
+exports.PutChar = PutChar;
+
+GetChar = new Data(GETCHAR, []);
+exports.GetChar = GetChar;
+
+IsEof = new Data(ISEOF, []);
+exports.IsEof = IsEof;
+
+var TRUE = 1;
+exports.TRUE = TRUE;
+var FALSE = 2;
+exports.FALSE = FALSE;
+
+True = new Data(TRUE, []);
+exports.True = True;
+False = new Data(FALSE, []);
+exports.False = False;
+
+Unit = new Data(1, []);
+exports.Unit = Unit;

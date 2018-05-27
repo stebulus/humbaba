@@ -1,5 +1,5 @@
 let nixpkgs = import <nixpkgs> {};
 in import ./humbaba.nix {
-  inherit (nixpkgs) nodejs;
+  nodejs = nixpkgs.nodejs-8_x;
   inherit (nixpkgs) stdenv;
 }

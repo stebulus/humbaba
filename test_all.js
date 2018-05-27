@@ -11,6 +11,7 @@ function addTests(name) {
 addTests('./test_test.js');
 addTests('./test_runtime.js');
 addTests('./test_lolo.js');
+addTests('./test_runtime_stream.js');
 
 if (require.main === module)
   test.main(tests);
