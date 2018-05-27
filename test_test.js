@@ -6,29 +6,33 @@ tests = {
     test.assertSame(0, 0);
   },
 
-  sameNumbersThrow() {
-    var ok = false;
-    try {
-      test.assertNotSame(0, 0);
-    } catch (e) {
-      ok = true;
-    }
-    if (!ok) throw new Error("no exception thrown");
+  sameNumbersCallback(callback) {
+    process.nextTick(function () {
+      test.runTest(function () {
+        test.assertSame(0, 0);
+      }, callback);
+    });
   },
+
+  sameNumbersThrow: test.expectFailure(function () {
+    test.assertNotSame(0, 0);
+  }),
 
   differentNumbers() {
     test.assertNotSame(0, 1);
   },
 
-  differentNumbersThrow() {
-    var ok = false;
-    try {
-      test.assertSame(0, 1);
-    } catch (e) {
-      ok = true;
-    }
-    if (!ok) throw new Error("no exception thrown");
-  },
+  differentNumbersThrow: test.expectFailure(function () {
+    test.assertSame(0, 1);
+  }),
+
+  errorCallback: test.expectFailure(function (callback) {
+    process.nextTick(function () {
+      test.runTest(function () {
+        test.assertSame(0, 1);
+      }, callback);
+    });
+  }),
 
   differentTypes() {
     test.assertNotSame(1, '1');

@@ -55,24 +55,59 @@ function assertNotSame(notExpected, actual) {
 }
 exports.assertNotSame = assertNotSame;
 
-function runTests(tests, keys) {
-  var failures = 0;
-  for (var i = 0; i < keys.length; i++) {
-    try {
-      tests[keys[i]]()
-      console.log("test ok " + keys[i]);
-    } catch (e) {
-      console.log("test fail " + keys[i]);
-      if (e.stack)
-        console.log(e.stack);
+function expectFailure(test) {
+  return function (callback) {
+    runTest(test, function (err) {
+      if (err)
+        callback(null);
       else
-        console.log(e);
-      failures++;
+        callback(new Error("expected failure, got success"));
+    });
+  };
+}
+exports.expectFailure = expectFailure;
+
+function runTest(test, callback) {
+  try {
+    switch (test.length) {
+      case 0:
+        test();
+        callback(null);
+        break;
+      case 1:
+        test(callback);
+        break;
+      default:
+        throw new Error("I don't know how to run a test with arity " + test.length);
     }
+  } catch (e) {
+    callback(e);
   }
-  console.log("tests: " + keys.length);
-  console.log("failures: " + failures);
-  return failures;
+}
+exports.runTest = runTest;
+
+function runTests(tests, keys, callback) {
+  var failures = 0;
+  function runNextTest(i) {
+    runTest(tests[keys[i]], function (err) {
+      if (err) {
+        console.log("test fail " + keys[i]);
+        if (err.stack)
+          console.log(err.stack);
+        else
+          console.log(err);
+        failures++;
+      } else {
+        console.log("test ok " + keys[i]);
+      }
+      var next = i+1;
+      if (next < keys.length)
+        process.nextTick(function () { runNextTest(next); });
+      else
+        process.nextTick(function () { callback(failures); });
+    })
+  }
+  runNextTest(0);
 }
 exports.runTests = runTests;
 
@@ -84,6 +119,9 @@ function main(tests) {
   } else {
     testsToRun = process.argv.slice(2);
   }
-  process.exit(runTests(tests, testsToRun));
+  runTests(tests, testsToRun, function (failures) {
+    console.log("failures: " + failures);
+    process.exit(failures);
+  });
 }
 exports.main = main;
