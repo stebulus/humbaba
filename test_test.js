@@ -8,9 +8,12 @@ tests = {
 
   sameNumbersCallback(callback) {
     process.nextTick(function () {
-      test.runTest(function () {
+      try {
         test.assertSame(0, 0);
-      }, callback);
+        callback(null);
+      } catch (e) {
+        callback(e);
+      }
     });
   },
 
@@ -28,9 +31,12 @@ tests = {
 
   errorCallback: test.expectFailure(function (callback) {
     process.nextTick(function () {
-      test.runTest(function () {
+      try {
         test.assertSame(0, 1);
-      }, callback);
+        callback(null);
+      } catch (e) {
+        callback(e);
+      }
     });
   }),
 
