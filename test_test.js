@@ -96,6 +96,17 @@ tests = {
     test.assertNotSame({a: [1,2,3], b: [4,5,6]}, {a: [1,2,3], b: [4,5,7]});
   },
 
+  noCallbackCall(callback) {
+    test.runTest(function (callback) {
+      // neglecting to call callback
+    }, function (err) {
+      if (err)
+        callback(null);
+      else
+        callback(new Error("expected error, got success"));
+    }, test.TEST_TIMEOUT/10);
+  },
+
 };
 
 exports.tests = tests;

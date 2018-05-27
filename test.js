@@ -67,7 +67,7 @@ function expectFailure(test) {
 }
 exports.expectFailure = expectFailure;
 
-function runTest(test, callback) {
+function runTest(test, callback, timeout) {
   try {
     switch (test.length) {
       case 0:
@@ -75,7 +75,22 @@ function runTest(test, callback) {
         callback(null);
         break;
       case 1:
-        test(callback);
+        var callbackEnabled = true;
+        var callbackCalled = false;
+        setTimeout(function () {
+          callbackEnabled = false;
+          if (!callbackCalled) {
+            callback(new Error("test didn't call callback in time"));
+          }
+        }, timeout);
+        test(function (err) {
+          if (callbackEnabled) {
+            callback(err);
+            callbackCalled = true;
+          } else {
+            console.warn("callback called after it was disabled by timeout");
+          }
+        });
         break;
       default:
         throw new Error("I don't know how to run a test with arity " + test.length);
@@ -85,6 +100,9 @@ function runTest(test, callback) {
   }
 }
 exports.runTest = runTest;
+
+TEST_TIMEOUT = 1000;
+exports.TEST_TIMEOUT = TEST_TIMEOUT;
 
 function runTests(tests, keys, callback) {
   var failures = 0;
@@ -105,7 +123,7 @@ function runTests(tests, keys, callback) {
         process.nextTick(function () { runNextTest(next); });
       else
         process.nextTick(function () { callback(failures); });
-    })
+    }, TEST_TIMEOUT)
   }
   runNextTest(0);
 }
