@@ -77,8 +77,9 @@ function Stream(program) {
             if (s.pendingChunkIndex >= s.pendingChunk.length) {
               s.pendingChunk = null;
               s.pendingChunkIndex = null;
-              s.pendingChunkCallback();
+              var callback = s.pendingChunkCallback;
               s.pendingChunkCallback = null;
+              callback();
             }
           }
           break;
