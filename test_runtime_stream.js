@@ -73,7 +73,7 @@ tests = {
     );
     var program = {};
     rt.IoBind.call(program,
-      rt.IsEof,
+      rt.IsEOF,
       new rt.Box(function (eof) {
         switch (eof.tag) {
           case rt.TRUE:

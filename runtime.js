@@ -176,8 +176,8 @@ exports.PutChar = PutChar;
 GetChar = new Data(GETCHAR, []);
 exports.GetChar = GetChar;
 
-IsEof = new Data(ISEOF, []);
-exports.IsEof = IsEof;
+IsEOF = new Data(ISEOF, []);
+exports.IsEOF = IsEOF;
 
 var TRUE = 1;
 exports.TRUE = TRUE;
