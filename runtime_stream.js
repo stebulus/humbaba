@@ -5,6 +5,8 @@
   runtime.GetChar; dually, the program's emissions via runtime.PutChar
   can be read out of the stream.
 */
+var debugRT = require('debug')('humbaba:runtime');
+var debugIO = require('debug')('humbaba:io');
 var stream = require('stream');
 
 var rt = require('./runtime');
@@ -23,13 +25,16 @@ function Stream(program) {
   return s;
 
   function intermediateResult(result) {
+    debugRT('intermediateResult %s', rt.nodeType(result));
     var moreToDo;
     if (s.stack.length > 0) {
       s.expr = new rt.Apply(s.stack.pop(), [result]);
       moreToDo = true;
     } else {
+      debugRT('program ending');
       s.expr = null;
       process.nextTick(function () {
+        debugRT('closing stdout');
         s.push(null);
       });
       if (s.pendingChunk) {
@@ -45,11 +50,13 @@ function Stream(program) {
 
   function advance() {
     if (s.advancing) {
+      debugRT('advance shortcircuit');
       return;
     } else if (!s.expr) {
       debugRT('not advancing, because program is ending');
       return;
     }
+    debugRT('advance');
     s.advancing = true;
     var moreToDo;
     do {
@@ -66,12 +73,14 @@ function Stream(program) {
           break;
         case rt.PUTCHAR:
           if (!s.okToEmit) {
+            debugIO('putchar stall');
             moreToDo = false;
           } else {
             var char = s.expr.fields[0];
             rt.evaluate(char);
             char = rt.smashIndirects(char);
             process.nextTick(function (c) {
+              debugIO('putchar %j', char.fields[0]);
               s.okToEmit = s.push(c);
             }, char.fields[0]);
             moreToDo = intermediateResult(rt.Unit);
@@ -79,9 +88,11 @@ function Stream(program) {
           break;
         case rt.GETCHAR:
           if (!s.pendingChunk) {
+            debugIO('getchar stall');
             moreToDo = false;
           } else {
             var char = s.pendingChunk.charAt(s.pendingChunkIndex++);
+            debugIO('getchar %j', char);
             moreToDo = intermediateResult(new rt.Box(char));
             if (s.pendingChunkIndex >= s.pendingChunk.length) {
               s.pendingChunk = null;
@@ -93,10 +104,13 @@ function Stream(program) {
           break;
         case rt.ISEOF:
           if (s.pendingChunk) {
+            debugIO('iseof false');
             moreToDo = intermediateResult(rt.False);
           } else if (s.noMoreChunks) {
+            debugIO('iseof true');
             moreToDo = intermediateResult(rt.True);
           } else {
+            debugIO('iseof stall');
             moreToDo = false;
           }
           break;
@@ -108,11 +122,13 @@ function Stream(program) {
   }
 
   function read() {
+    debugRT('reading on stdout');
     s.okToEmit = true;
     advance();
   }
 
   function write(chunk, _encoding, callback) {
+    debugRT('writing %d to stdin', chunk.length);
     if (s.pendingChunk)
       throw new Error("write() called while chunk pending");
     s.pendingChunk = chunk.toString();
@@ -122,6 +138,7 @@ function Stream(program) {
   }
 
   function final(callback) {
+    debugRT('closing stdin');
     s.noMoreChunks = true;
     s.finalCallback = callback;
     advance();

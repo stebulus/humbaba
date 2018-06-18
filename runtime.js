@@ -3,6 +3,22 @@ var PARTIAL_APPLY = 2;
 var INDIRECT = 3;
 var THUNK = 4;
 
+function nodeType(node) {
+  switch (node.type) {
+    case DATA:
+      return 'data(' + node.tag.toString() + ')';
+    case PARTIAL_APPLY:
+      return 'pap(' + node.func.name + ',' + node.args.length + ')';
+    case INDIRECT:
+      return '*' + nodeType(node.target);
+    case THUNK:
+      return 'thunk';
+    default:
+      return 'unknown';
+  }
+}
+exports.nodeType = nodeType
+
 var Node = {};
 exports.Node = Node;
 
