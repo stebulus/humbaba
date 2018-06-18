@@ -220,7 +220,7 @@ function dataDeclaration(decl, chunk) {
   for (var i = 0; i < alts.length; i++) {
     var name = alts[i][0];
     var arity = alts[i][1];
-    declareTag(name, i, chunk);
+    declareTag(name, i+1, chunk);
     declareUnboxedConstructor(name, arity, chunk);
     if (arity === 0)
       declareSingleton(name, chunk);
