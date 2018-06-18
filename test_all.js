@@ -12,6 +12,7 @@ addTests('./test_test.js');
 addTests('./test_runtime.js');
 addTests('./test_lolo.js');
 addTests('./test_runtime_stream.js');
+addTests('./test_runtime_stream_cat.js');
 
 if (require.main === module)
   test.main(tests);
