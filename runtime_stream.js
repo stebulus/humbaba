@@ -109,7 +109,7 @@ function Stream(program) {
   function final(callback) {
     s.noMoreChunks = true;
     s.finalCallback = callback;
-    advance();
+    if (s.expr !== null) advance();
   }
 
 }
