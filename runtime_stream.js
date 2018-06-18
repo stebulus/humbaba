@@ -19,6 +19,7 @@ function Stream(program) {
   s.okToEmit = false;
   s.noMoreChunks = false;
   s.finalCallback = null;
+  s.advancing = false;
   return s;
 
   function intermediateResult(result) {
@@ -39,6 +40,10 @@ function Stream(program) {
   }
 
   function advance() {
+    if (s.advancing) {
+      return;
+    }
+    s.advancing = true;
     var moreToDo;
     do {
       rt.evaluate(s.expr);
@@ -90,6 +95,7 @@ function Stream(program) {
           throw new Error('weird tag ' + s.expr.tag);
       }
     } while (moreToDo);
+    s.advancing = false;
   }
 
   function read() {
