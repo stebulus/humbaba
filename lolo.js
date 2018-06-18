@@ -171,6 +171,7 @@ function caseData(code, chunk, target) {
     expr(rhs, chunk, 'this');
     chunk('break;');
   }
+  chunk('default: throw new Error("failure to match in cased: " + x.tag);');
   chunk('};})');
   if (target) chunk(';');
 }
