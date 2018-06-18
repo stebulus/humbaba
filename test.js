@@ -107,16 +107,15 @@ exports.TEST_TIMEOUT = TEST_TIMEOUT;
 function runTests(tests, keys, callback) {
   var failures = 0;
   function runNextTest(i) {
+    console.log(keys[i]);
     runTest(tests[keys[i]], function (err) {
       if (err) {
-        console.log("test fail " + keys[i]);
+        console.log("test fail");
         if (err.stack)
           console.log(err.stack);
         else
           console.log(err);
         failures++;
-      } else {
-        console.log("test ok " + keys[i]);
       }
       var next = i+1;
       if (next < keys.length)
