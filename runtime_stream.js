@@ -29,11 +29,15 @@ function Stream(program) {
       moreToDo = true;
     } else {
       s.expr = null;
-      s.push(null);
-      if (s.pendingChunk)
-        s.pendingChunkCallback(new Error("humbaba program ended"));
+      process.nextTick(function () {
+        s.push(null);
+      });
+      if (s.pendingChunk) {
+        process.nextTick(s.pendingChunkCallback,
+          new Error("humbaba program ended"));
+      }
       if (s.finalCallback)
-        s.finalCallback();
+        process.nextTick(s.finalCallback);
       moreToDo = false;
     }
     return moreToDo;
@@ -41,6 +45,9 @@ function Stream(program) {
 
   function advance() {
     if (s.advancing) {
+      return;
+    } else if (!s.expr) {
+      debugRT('not advancing, because program is ending');
       return;
     }
     s.advancing = true;
@@ -64,7 +71,9 @@ function Stream(program) {
             var char = s.expr.fields[0];
             rt.evaluate(char);
             char = rt.smashIndirects(char);
-            s.okToEmit = s.push(char.fields[0]);
+            process.nextTick(function (c) {
+              s.okToEmit = s.push(c);
+            }, char.fields[0]);
             moreToDo = intermediateResult(rt.Unit);
           }
           break;
@@ -77,9 +86,8 @@ function Stream(program) {
             if (s.pendingChunkIndex >= s.pendingChunk.length) {
               s.pendingChunk = null;
               s.pendingChunkIndex = null;
-              var callback = s.pendingChunkCallback;
+              process.nextTick(s.pendingChunkCallback);
               s.pendingChunkCallback = null;
-              callback();
             }
           }
           break;
@@ -116,7 +124,7 @@ function Stream(program) {
   function final(callback) {
     s.noMoreChunks = true;
     s.finalCallback = callback;
-    if (s.expr !== null) advance();
+    advance();
   }
 
 }
