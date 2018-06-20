@@ -19,6 +19,7 @@ function Stream(program) {
   s.okToEmit = false;
   s.noMoreChunks = false;
   s.finalCallback = null;
+  s.advancing = false;
   return s;
 
   function intermediateResult(result) {
@@ -28,17 +29,28 @@ function Stream(program) {
       moreToDo = true;
     } else {
       s.expr = null;
-      s.push(null);
-      if (s.pendingChunk)
-        s.pendingChunkCallback(new Error("humbaba program ended"));
+      process.nextTick(function () {
+        s.push(null);
+      });
+      if (s.pendingChunk) {
+        process.nextTick(s.pendingChunkCallback,
+          new Error("humbaba program ended"));
+      }
       if (s.finalCallback)
-        s.finalCallback();
+        process.nextTick(s.finalCallback);
       moreToDo = false;
     }
     return moreToDo;
   }
 
   function advance() {
+    if (s.advancing) {
+      return;
+    } else if (!s.expr) {
+      debugRT('not advancing, because program is ending');
+      return;
+    }
+    s.advancing = true;
     var moreToDo;
     do {
       rt.evaluate(s.expr);
@@ -59,7 +71,9 @@ function Stream(program) {
             var char = s.expr.fields[0];
             rt.evaluate(char);
             char = rt.smashIndirects(char);
-            s.okToEmit = s.push(char.fields[0]);
+            process.nextTick(function (c) {
+              s.okToEmit = s.push(c);
+            }, char.fields[0]);
             moreToDo = intermediateResult(rt.Unit);
           }
           break;
@@ -72,7 +86,7 @@ function Stream(program) {
             if (s.pendingChunkIndex >= s.pendingChunk.length) {
               s.pendingChunk = null;
               s.pendingChunkIndex = null;
-              s.pendingChunkCallback();
+              process.nextTick(s.pendingChunkCallback);
               s.pendingChunkCallback = null;
             }
           }
@@ -90,6 +104,7 @@ function Stream(program) {
           throw new Error('weird tag ' + s.expr.tag);
       }
     } while (moreToDo);
+    s.advancing = false;
   }
 
   function read() {

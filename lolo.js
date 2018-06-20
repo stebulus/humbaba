@@ -1,3 +1,10 @@
+/*
+  Lolo -> Javascript
+
+  Lolo is a very low-level functional programming language whose syntax
+  is JSON.  This module contains facilities to generate JavaScript
+  code for Lolo programs.  See ljc.js for the simplest use.
+*/
 var util = require('util');
 
 function weirdCode(code) {
@@ -190,7 +197,7 @@ function program(program, entry, chunk) {
   }
   chunk('return new rt.Apply($');
   chunk(entry);
-  chunk(', []);})();');
+  chunk(', []);})()');
 }
 exports.program = program;
 
