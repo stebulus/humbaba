@@ -37,12 +37,14 @@ function properties(obj) {
   return ents;
 }
 
+var inspectOptions = {depth: null, breakLength: Infinity};
+
 function assertSame(expected, actual) {
   if (!same(expected, actual))
-    throw new Error("expected same as: "
-      + util.inspect(expected)
-      + "\nactual: "
-      + util.inspect(actual))
+    throw new Error("expected same as:\n"
+      + "    " + util.inspect(expected, inspectOptions)
+      + "\nactual:\n"
+      + "    " + util.inspect(actual, inspectOptions))
 }
 exports.assertSame = assertSame;
 
