@@ -185,6 +185,8 @@ function caseData(code, chunk, target) {
 
 function program(program, entry, chunk) {
   chunk('(function () {');
+  chunk('function charEq(a, b) { var eq = a.fields[0] === b.fields[0] ? rt.True : rt.False; rt.Indirect.call(this, eq); }');
+  chunk('var $charEq = new rt.Box(charEq);');
   var decls = program['declarations'];
   for (var i = 0; i < decls.length; i++) {
     if ('func' in decls[i]) {
