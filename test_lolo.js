@@ -26,13 +26,18 @@ function assertExprValue(expected, expression) {
   test.assertSame(expected, rt.smashIndirects(ex));
 }
 
-function assertProgramValue(expected, program) {
-  var s = '';
-  function chunk(text) { s += text; }
+function programValue(program) {
+  var chunks = [];
+  function chunk(text) { chunks.push(text); }
   lolo.program(program, 'test', chunk);
-  var expr = eval(s);
+  var expr = eval(chunks.join(''));
   rt.evaluate(expr);
-  test.assertSame(expected, rt.smashIndirects(expr));
+  return rt.smashIndirects(expr);
+}
+exports.programValue = programValue;
+
+function assertProgramValue(expected, program) {
+  test.assertSame(expected, programValue(program));
 }
 
 tests = {
