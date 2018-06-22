@@ -187,6 +187,14 @@ function program(program, entry, chunk) {
   chunk('(function () {');
   chunk('function charEq(a, b) { rt.evaluate(a); a = rt.smashIndirects(a); rt.evaluate(b); b = rt.smashIndirects(b); var eq = a.fields[0] === b.fields[0] ? rt.True : rt.False; rt.Indirect.call(this, eq); }');
   chunk('var $charEq = new rt.Box(charEq);');
+  chunk('function charOrd(a) { rt.evaluate(a); a = rt.smashIndirects(a); var ord = a.fields[0].charCodeAt(0); rt.Box.call(this, ord); }');
+  chunk('var $charOrd = new rt.Box(charOrd);');
+  chunk('function intAdd(a, b) { rt.evaluate(a); a = rt.smashIndirects(a); rt.evaluate(b); b = rt.smashIndirects(b); var sum = a.fields[0] + b.fields[0]; rt.Box.call(this, sum); }');
+  chunk('var $intAdd = new rt.Box(intAdd);');
+  chunk('function intMul(a, b) { rt.evaluate(a); a = rt.smashIndirects(a); rt.evaluate(b); b = rt.smashIndirects(b); var prod = a.fields[0] * b.fields[0]; rt.Box.call(this, prod); }');
+  chunk('var $intMul = new rt.Box(intMul);');
+  chunk('function intLe(a, b) { rt.evaluate(a); a = rt.smashIndirects(a); rt.evaluate(b); b = rt.smashIndirects(b); var cmp = a.fields[0] <= b.fields[0] ? rt.True : rt.False; rt.Indirect.call(this, cmp); }');
+  chunk('var $intLe = new rt.Box(intLe);');
   var decls = program['declarations'];
   for (var i = 0; i < decls.length; i++) {
     if ('func' in decls[i]) {
