@@ -178,7 +178,7 @@ function caseData(code, chunk, target) {
     expr(rhs, chunk, 'this');
     chunk('break;');
   }
-  chunk('default: throw new Error("failure to match in cased: " + x.tag);');
+  chunk('default: throw new Error("failure to match in cased: " + JSON.stringify(x));');
   chunk('};})');
   if (target) chunk(';');
 }
