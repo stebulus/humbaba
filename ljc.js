@@ -44,4 +44,7 @@ if (require.main === module) {
   out("process.stdin.pipe(new rts.Stream(");
   lolo.program(code, 'main', out);
   out(")).pipe(process.stdout);");
+  // forget ref to stdin, so process exits when program finishes
+  // despite theoretically waiting for data from stdin
+  out("process.stdin.unref();");
 }
