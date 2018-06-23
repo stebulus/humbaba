@@ -31,7 +31,7 @@ function programValue(program) {
   function chunk(text) { chunks.push(text); }
   lolo.program(program, 'test', chunk);
   var expr = eval(chunks.join(''));
-  rt.evaluate(expr);
+  rt.evaluateDeep(expr);
   return rt.smashIndirects(expr);
 }
 exports.programValue = programValue;

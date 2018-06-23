@@ -160,6 +160,20 @@ function evaluate(expr) {
 }
 exports.evaluate = evaluate;
 
+function evaluateDeep(expr) {
+  evaluate(expr);
+  expr = smashIndirects(expr);
+  if (expr.type === DATA) {
+    for (var i = 0; i < expr.fields.length; i++) {
+      if (expr.fields[i].type) {
+        evaluateDeep(expr.fields[i]);
+        expr.fields[i] = smashIndirects(expr.fields[i]);
+      }
+    }
+  }
+}
+exports.evaluateDeep = evaluateDeep;
+
 var IOPURE = 1;
 exports.IOPURE = IOPURE;
 var IOBIND = 2;
