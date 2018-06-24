@@ -70,7 +70,7 @@ Box.prototype = Node;
 exports.Box = Box;
 
 function applyTo(args) {
-  return function(func) {
+  return function actuallyApply(func) {
     var allArgs;
     var unboxedFunc;
     switch (func.type) {
