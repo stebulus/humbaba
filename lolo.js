@@ -185,7 +185,7 @@ function caseData(code, chunk, target) {
 
 function program(program, entry, chunk) {
   chunk('(function () {');
-  chunk('function charEq(a, b) { var eq = a.fields[0] === b.fields[0] ? rt.True : rt.False; rt.Indirect.call(this, eq); }');
+  chunk('function charEq(a, b) { rt.evaluate(a); a = rt.smashIndirects(a); rt.evaluate(b); b = rt.smashIndirects(b); var eq = a.fields[0] === b.fields[0] ? rt.True : rt.False; rt.Indirect.call(this, eq); }');
   chunk('var $charEq = new rt.Box(charEq);');
   var decls = program['declarations'];
   for (var i = 0; i < decls.length; i++) {
