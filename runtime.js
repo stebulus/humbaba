@@ -128,7 +128,7 @@ function evaluate(expr) {
       case PARTIAL_APPLY:
         if (stack.length === 0)
           return;
-        oldexpr = smashIndirects(stack.pop());
+        var oldexpr = smashIndirects(stack.pop());
         continuation = stack.pop();
         continuation.call(oldexpr, expr);
         expr = smashIndirects(oldexpr);

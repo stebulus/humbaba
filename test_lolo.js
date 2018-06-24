@@ -188,6 +188,16 @@ tests = {
     ]});
   },
 
+  caseWithNestedEvaluand() {
+    assertProgramValue(rt.False, {"declarations": [
+      {"data": "Bool", "=": [["True", 0], ["False", 0]]},
+      {"func": ["id", "x"], "=": "x"},
+      {"func": ["test"], "=":
+        {"cased": ["charEq", 1, ["id", 0]],
+         "of": [["True", "True"], ["False", "False"]]}}
+    ]});
+  },
+
 };
 
 exports.tests = tests;
