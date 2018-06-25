@@ -27,7 +27,7 @@ function withLolo(expr) {
 
 function assertParseResult(expected, parser, input) {
   var expectedValue = withLolo(expected);
-  var actualValue = withLolo(["parseString", parser, charList(input)]);
+  var actualValue = withLolo(["parseList", parser, charList(input)]);
   test.assertSame(expectedValue, actualValue);
 }
 
@@ -112,7 +112,7 @@ tests = {
   },
 
   parseAnyChar() {
-    assertParsed({"str": "b"}, ["anyChar"], "b");
+    assertParsed({"str": "b"}, ["item"], "b");
   },
 
   parseCharLiteral() {
