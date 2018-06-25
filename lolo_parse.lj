@@ -131,6 +131,17 @@
       [["Done", "r", ["GoodEof", "r"]],
        ["More", "onEof", "_", "onEof"]]}}
 
+  , {"comment": "parseList :: Parser i r -> List i -> Either Char r",
+     "func": ["parseList", "parser", "s"], "=":
+    {"cased": "s", "of":
+      [["Nil", {"cased": ["feedEof", "parser"], "of":
+         [["GoodEof", "r", ["Right", "r"]],
+          ["BadEof", ["Left", {"str": "e"}]]]}],
+       ["Cons", "i", "is", {"cased": ["feed", "i", "parser"], "of":
+         [["Consume", "p", ["parseList", "p", "is"]],
+          ["Pushback", "r", ["Left", {"str": "p"}]],
+          ["Fail", ["Left", {"str": "f"}]]]}]]}}
+
   , {"comments":
       ["data Eofed r = GoodEof r | BadEof\n",
        "Result when (Parser i r) sees end of input.",
@@ -417,17 +428,6 @@
     ["pAlt", ["pRight", ["char", {"str": ";"}], ["pPure", "Semicolon"]],
              ["pRight", ["char", {"str": "|"}], ["pPure", "Pipe"]]
     ]]]]]]]]]]]}
-
-  , {"comment": "parseList :: Parser i r -> List i -> Either Char r",
-     "func": ["parseList", "parser", "s"], "=":
-    {"cased": "s", "of":
-      [["Nil", {"cased": ["feedEof", "parser"], "of":
-         [["GoodEof", "r", ["Right", "r"]],
-          ["BadEof", ["Left", {"str": "e"}]]]}],
-       ["Cons", "i", "is", {"cased": ["feed", "i", "parser"], "of":
-         [["Consume", "p", ["parseList", "p", "is"]],
-          ["Pushback", "r", ["Left", {"str": "p"}]],
-          ["Fail", ["Left", {"str": "f"}]]]}]]}}
 
   ]
 }
