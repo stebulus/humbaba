@@ -740,10 +740,7 @@
 
   , {"comment": "identChar :: Parser Char Char",
      "func": ["identChar"], "=":
-    ["pAlt", ["small"],
-    ["pAlt", ["large"],
-    ["pAlt", ["digit"],
-             ["char", {"str": "'"}]]]]}
+    ["pAlt", ["small"], ["pAlt", ["large"], ["digit"]]]}
 
   , {"comment": "varidOrReserved :: Parser Char Token",
      "func": ["varidOrReserved"], "=":
