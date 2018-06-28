@@ -807,5 +807,119 @@
              ["pRight", ["char", {"str": "|"}], ["pPure", "Pipe"]]
     ]]]]]]]]]]]}
 
+  , {"comments":
+      ["data Exp = LetExp (List Binding) Exp\n",
+       "         | CasedExp Exp (List DAlt)\n",
+       "         | CaselExp Exp (List LAlt)\n",
+       "         | FExp (List AExp)\n"],
+    "data": "Exp", "=":
+    [["LetExp", 2],
+     ["CasedExp", 2],
+     ["CaselExp", 2],
+     ["FExp", 1]]}
+
+  , {"comment": "exp :: Parser Token Exp",
+     "func": ["exp"], "=":
+    ["pAlt", ["letExp"], ["fExp"]]}
+
+  , {"comment": "data Binding = Binding String Exp",
+     "data": "Binding", "=": [["Binding", 2]]}
+
+  , {"comment": "varid :: Parser Token String",
+     "func": ["varid"], "=":
+    ["More", "BadEof", "varidPeek"]}
+
+  , {"comment": "varidPeek :: Token -> Peeked Token String",
+     "func": ["varidPeek", "token"], "=":
+    {"cased": "token", "of":
+      [["IntLiteral", "_", "Fail"],
+       ["CharLiteral", "_", "Fail"],
+       ["VarId", "s", ["Consume", ["Done", "s"]]],
+       ["ConId", "_", "Fail"],
+       ["Let", "Fail"],
+       ["In", "Fail"],
+       ["Cased", "Fail"],
+       ["Casel", "Fail"],
+       ["Of", "Fail"],
+       ["Data", "Fail"],
+       ["Equals", "Fail"],
+       ["Arrow", "Fail"],
+       ["LParen", "Fail"],
+       ["RParen", "Fail"],
+       ["LBrace", "Fail"],
+       ["RBrace", "Fail"],
+       ["Semicolon", "Fail"],
+       ["Pipe", "Fail"]]}}
+
+  , {"comment": "binding :: Parser Token Binding",
+     "func": ["binding"], "=":
+    ["pApply",
+      ["pMap", "Binding", ["varid"]],
+      ["pRight", ["require", ["tokenEq", "Equals"]], ["exp"]]]}
+
+  , {"comment": "bracedList :: Parser Token a -> Parser Token (List a)",
+     "func": ["bracedList", "p"], "=":
+    ["pRight",
+      ["require", ["tokenEq", "LBrace"]],
+      ["pLeft",
+        ["pApply",
+          ["pMap", "Cons", "p"],
+          ["pSome",
+            ["pRight", ["require", ["tokenEq", "Semicolon"]], "p"]]],
+        ["require", ["tokenEq", "RBrace"]]]]}
+
+  , {"comment": "letExp :: Parser Token Exp",
+     "func": ["letExp"], "=":
+    ["pApply",
+      ["pApply",
+        ["pRight", ["require", ["tokenEq", "Let"]], ["pPure", "LetExp"]],
+        ["bracedList", ["binding"]]],
+      ["pRight",
+        ["require", ["tokenEq", "In"]],
+        ["exp"]]]}
+
+  , {"comment": "fExp :: Parser Token Exp",
+     "func": ["fExp"], "=": ["pMap", "FExp", ["pMany", ["aExp"]]]}
+
+  , {"comments":
+      ["data AExp = AChar Char\n",
+       "          | AInt Int\n",
+       "          | AVar String\n",
+       "          | ACon String\n",
+       "          | ASub Exp"],
+     "data": "AExp", "=":
+     [["AChar", 1],
+      ["AInt", 1],
+      ["AVar", 1],
+      ["ACon", 1],
+      ["ASub", 1]]}
+
+  , {"comment": "aExp :: Parser Token AExp",
+     "func": ["aExp"], "=": ["More", "BadEof", "aExpPeek"]}
+
+  , {"comment": "aExpPeek :: Token -> Peeked Token AExp",
+     "func": ["aExpPeek", "token"], "=":
+    {"cased": "token", "of":
+      [["IntLiteral", "n", ["Consume", ["Done", ["AInt", "n"]]]],
+       ["CharLiteral", "c", ["Consume", ["Done", ["AChar", "c"]]]],
+       ["VarId", "s", ["Consume", ["Done", ["AVar", "s"]]]],
+       ["ConId", "s", ["Consume", ["Done", ["ACon", "s"]]]],
+       ["Let", "Fail"],
+       ["In", "Fail"],
+       ["Cased", "Fail"],
+       ["Casel", "Fail"],
+       ["Of", "Fail"],
+       ["Data", "Fail"],
+       ["Equals", "Fail"],
+       ["Arrow", "Fail"],
+       ["LParen", ["Consume",
+          ["pMap", "ASub",
+            ["pLeft", ["exp"], ["require", ["tokenEq", "RParen"]]]]]],
+       ["RParen", "Fail"],
+       ["LBrace", "Fail"],
+       ["RBrace", "Fail"],
+       ["Semicolon", "Fail"],
+       ["Pipe", "Fail"]]}}
+
   ]
 }

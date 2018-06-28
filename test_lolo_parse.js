@@ -27,16 +27,20 @@ function withLolo(expr) {
 
 function assertParseResult(expected, parser, input) {
   var expectedValue = withLolo(expected);
-  var actualValue = withLolo(["parseList", parser, charList(input)]);
+  var actualValue = withLolo(["parseList", parser, input]);
   test.assertSame(expectedValue, actualValue);
 }
 
 function assertParsed(expected, parser, input) {
+  assertParseResult(["Right", expected], parser, charList(input));
+}
+
+function assertParsedTokens(expected, parser, input) {
   assertParseResult(["Right", expected], parser, input);
 }
 
 function assertParseFail(parser, input) {
-  assertParseResult(["Left", {"str": "f"}], parser, input);
+  assertParseResult(["Left", {"str": "f"}], parser, charList(input));
 }
 
 tests = {
@@ -170,6 +174,61 @@ tests = {
 
   symbol() {
     assertParsed("LParen", ["token"], "(");
+  },
+
+  letExp1() {
+    var bindings = ["Cons",
+      ["Binding",
+        charList("x"),
+        ["FExp", ["Cons", ["AInt", 3], "Nil"]]],
+      "Nil"];
+    var exp = ["FExp",
+      ["Cons", ["AVar", charList("f")],
+      ["Cons", ["AVar", charList("x")],
+       "Nil"]]];
+    assertParsedTokens(["LetExp", bindings, exp],
+      ["exp"],
+      ["Cons", "Let",
+      ["Cons", "LBrace",
+      ["Cons", ["VarId", charList("x")],
+      ["Cons", "Equals",
+      ["Cons", ["IntLiteral", 3],
+      ["Cons", "RBrace",
+      ["Cons", "In",
+      ["Cons", ["VarId", charList("f")],
+      ["Cons", ["VarId", charList("x")],
+       "Nil"]]]]]]]]]);
+  },
+
+  letExp2() {
+    var bindings =
+      ["Cons", ["Binding",
+        charList("x"),
+        ["FExp", ["Cons", ["AInt", 3], "Nil"]]],
+      ["Cons", ["Binding",
+        charList("y"),
+        ["FExp", ["Cons", ["AVar", charList("x")], "Nil"]]],
+      "Nil"]];
+    var exp = ["FExp",
+      ["Cons", ["AVar", charList("f")],
+      ["Cons", ["AVar", charList("y")],
+       "Nil"]]];
+    assertParsedTokens(["LetExp", bindings, exp],
+      ["exp"],
+      ["Cons", "Let",
+      ["Cons", "LBrace",
+      ["Cons", ["VarId", charList("x")],
+      ["Cons", "Equals",
+      ["Cons", ["IntLiteral", 3],
+      ["Cons", "Semicolon",
+      ["Cons", ["VarId", charList("y")],
+      ["Cons", "Equals",
+      ["Cons", ["VarId", charList("x")],
+      ["Cons", "RBrace",
+      ["Cons", "In",
+      ["Cons", ["VarId", charList("f")],
+      ["Cons", ["VarId", charList("y")],
+       "Nil"]]]]]]]]]]]]]);
   },
 
 }
