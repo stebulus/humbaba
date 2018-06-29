@@ -231,6 +231,44 @@ tests = {
        "Nil"]]]]]]]]]]]]]);
   },
 
+  casedExp() {
+    assertParsedTokens(
+      ["CasedExp",
+        ["FExp",
+          ["Cons", ["AVar", charList("f")],
+          ["Cons", ["AVar", charList("x")],
+           "Nil"]]],
+        ["Cons",
+          ["DAlt",
+            charList("Cons"),
+            ["Cons", charList("hd"), ["Cons", charList("tl"), "Nil"]],
+            ["FExp", ["Cons", ["AInt", 1], "Nil"]]],
+        ["Cons",
+          ["DAlt",
+            charList("Nil"),
+            "Nil",
+            ["FExp", ["Cons", ["AInt", 0], "Nil"]]],
+          "Nil"]]],
+      ["exp"],
+      ["Cons", "Cased",
+      ["Cons", ["VarId", charList("f")],
+      ["Cons", ["VarId", charList("x")],
+      ["Cons", "Of",
+      ["Cons", "LBrace",
+      ["Cons", ["ConId", charList("Cons")],
+      ["Cons", ["VarId", charList("hd")],
+      ["Cons", ["VarId", charList("tl")],
+      ["Cons", "Arrow",
+      ["Cons", ["IntLiteral", 1],
+      ["Cons", "Semicolon",
+      ["Cons", ["ConId", charList("Nil")],
+      ["Cons", "Arrow",
+      ["Cons", ["IntLiteral", 0],
+      ["Cons", "RBrace",
+       "Nil"]]]]]]]]]]]]]]]
+    );
+  },
+
 }
 
 exports.tests = tests;

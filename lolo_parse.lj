@@ -820,17 +820,19 @@
 
   , {"comment": "exp :: Parser Token Exp",
      "func": ["exp"], "=":
-    ["pAlt", ["letExp"], ["fExp"]]}
+    ["pAlt", ["letExp"],
+    ["pAlt", ["casedExp"],
+             ["fExp"]]]}
 
   , {"comment": "data Binding = Binding String Exp",
      "data": "Binding", "=": [["Binding", 2]]}
 
-  , {"comment": "varid :: Parser Token String",
-     "func": ["varid"], "=":
-    ["More", "BadEof", "varidPeek"]}
+  , {"comment": "varidString :: Parser Token String",
+     "func": ["varidString"], "=":
+    ["More", "BadEof", "varidStringPeek"]}
 
-  , {"comment": "varidPeek :: Token -> Peeked Token String",
-     "func": ["varidPeek", "token"], "=":
+  , {"comment": "varidStringPeek :: Token -> Peeked Token String",
+     "func": ["varidStringPeek", "token"], "=":
     {"cased": "token", "of":
       [["IntLiteral", "_", "Fail"],
        ["CharLiteral", "_", "Fail"],
@@ -854,7 +856,7 @@
   , {"comment": "binding :: Parser Token Binding",
      "func": ["binding"], "=":
     ["pApply",
-      ["pMap", "Binding", ["varid"]],
+      ["pMap", "Binding", ["varidString"]],
       ["pRight", ["require", ["tokenEq", "Equals"]], ["exp"]]]}
 
   , {"comment": "bracedList :: Parser Token a -> Parser Token (List a)",
@@ -877,6 +879,56 @@
       ["pRight",
         ["require", ["tokenEq", "In"]],
         ["exp"]]]}
+
+  , {"comment": "casedExp :: Parser Token Exp",
+     "func": ["casedExp"], "=":
+    ["pApply",
+      ["pApply",
+        ["pRight",
+          ["require", ["tokenEq", "Cased"]],
+          ["pPure", "CasedExp"]],
+        ["exp"]],
+      ["pRight",
+        ["require", ["tokenEq", "Of"]],
+        ["bracedList", ["dalt"]]]]}
+
+  , {"comment": "data DAlt = DAlt String (List String) Exp",
+     "data": "DAlt", "=": [["DAlt", 3]]}
+
+  , {"comment": "dalt :: Parser Token DAlt",
+     "func": ["dalt"], "=":
+    ["pApply",
+      ["pApply",
+        ["pMap", "DAlt", ["conidString"]],
+        ["pSome", ["varidString"]]],
+      ["pRight", ["require", ["tokenEq", "Arrow"]],
+        ["exp"]]]}
+
+  , {"comment": "conidString :: Parser Token String",
+     "func": ["conidString"], "=":
+    ["More", "BadEof", "conidStringPeek"]}
+
+  , {"comment": "conidStringPeek :: Token -> Peeked Token String",
+     "func": ["conidStringPeek", "token"], "=":
+    {"cased": "token", "of":
+      [["IntLiteral", "_", "Fail"],
+       ["CharLiteral", "_", "Fail"],
+       ["VarId", "_", "Fail"],
+       ["ConId", "s", ["Consume", ["Done", "s"]]],
+       ["Let", "Fail"],
+       ["In", "Fail"],
+       ["Cased", "Fail"],
+       ["Casel", "Fail"],
+       ["Of", "Fail"],
+       ["Data", "Fail"],
+       ["Equals", "Fail"],
+       ["Arrow", "Fail"],
+       ["LParen", "Fail"],
+       ["RParen", "Fail"],
+       ["LBrace", "Fail"],
+       ["RBrace", "Fail"],
+       ["Semicolon", "Fail"],
+       ["Pipe", "Fail"]]}}
 
   , {"comment": "fExp :: Parser Token Exp",
      "func": ["fExp"], "=": ["pMap", "FExp", ["pMany", ["aExp"]]]}
