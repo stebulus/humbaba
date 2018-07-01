@@ -1,6 +1,6 @@
 { "comment": "Parse lolo code on stdin and emit lolo-json code on stdout",
   "declarations":
-  [ {"func": ["main"], "=": ["putChar", {"str": "a"}]}
+  [ {"data": "Unit", "=": [["Unit", 0]]}
 
   , {"data": "Bool", "=": [["True", 0], ["False", 0]]}
 
@@ -67,6 +67,9 @@
     ["intLe", ["charOrd", "a"], ["charOrd", "b"]]}
 
   , {"func": ["stringEq"], "=": ["listEq", "charEq"]}
+
+  , {"func": ["ioThen", "ioa", "iob"], "=":
+    ["ioBind", "ioa", ["const", "iob"]]}
 
   , {"func": ["digits2int", "digits"], "=":
     ["foldl", "digits2intStep", 0, "digits"]}
@@ -706,6 +709,10 @@
       [["True", ["Consume", ["Done", "a"]]],
        ["False", "Fail"]]}}
 
+  , {"comment": "ignoreSome :: Parser i r -> Parser i Unit",
+     "func": ["ignoreSome", "p"], "=":
+    ["pAlt", ["pRight", "p", ["ignoreSome", "p"]], ["Done", "Unit"]]}
+
   , {"comment": "charBetween :: Char -> Char -> Char -> Bool",
      "func": ["charBetween", "lo", "hi", "c"], "=":
     ["boolAnd", ["charLe", "lo", "c"], ["charLe", "c", "hi"]]}
@@ -778,6 +785,28 @@
 
   , {"comment": "large :: Parser Char Char",
      "func": ["large"], "=": ["ascLarge"]}
+
+  , {"comment": "newline :: Parser Char Unit",
+     "func": ["newline"], "=":
+    ["pRight",
+      ["pAlt",
+        ["pLeft",
+          ["char", {"str": "\r"}],
+          ["optional", ["char", {"str": "\n"}]]],
+      ["pAlt",
+        ["char", {"str": "\n"}],
+        ["char", {"str": "\f"}]]],
+      ["Done", "Unit"]]}
+
+  , {"comment": "whitechar :: Parser Char Char",
+     "func": ["whitechar"], "=": ["ascWhitechar"]}
+
+  , {"comment": "ascWhitechar :: Parser Char Char",
+     "func": ["ascWhitechar"], "=":
+    ["pAlt", ["char", {"str": " "}],
+    ["pAlt", ["char", {"str": "\t"}],
+    ["pAlt", ["newline"],
+             ["char", {"str": "\u000B"}]]]]}
 
   , {"comment": "identChar :: Parser Char Char",
      "func": ["identChar"], "=":
@@ -854,6 +883,16 @@
     ["pAlt", ["pRight", ["char", {"str": ";"}], ["pPure", "Semicolon"]],
              ["pRight", ["char", {"str": "|"}], ["pPure", "Pipe"]]
     ]]]]]]]]]]]}
+
+  , {"comment": "ignoreWhitespace :: Parser Char Unit",
+     "func": ["ignoreWhitespace"], "=":
+    ["ignoreSome", ["whitechar"]]}
+
+  , {"comment": "tokenInWhitespace :: Parser Char Token",
+     "func": ["tokenInWhitespace"], "=":
+    ["pLeft",
+      ["pRight", ["ignoreWhitespace"], ["token"]],
+      ["ignoreWhitespace"]]}
 
   , {"comments":
       ["data Exp = LetExp (List Binding) Exp\n",
@@ -1191,6 +1230,97 @@
 
   , {"comment": "program :: Parser Token (List Decl)",
      "func": ["program"], "=": ["pMany", ["decl"]]}
+
+  , {"comment": "parseStdin :: IO (Either Char (List Decl))",
+     "func": ["parseStdin"], "=":
+    ["parseStdinHelper", ["tokenInWhitespace"], ["program"]]}
+
+  , {"comment": "parseStdinHelper :: Parser Char Token -> Parser Token a -> IO (Either Char a)",
+     "func": ["parseStdinHelper", "charstate", "tokenstate"], "=":
+    ["ioBind", "isEOF",
+      ["parseStdinLoop", "charstate", "tokenstate"]]}
+
+  , {"comment": "parseStdinLoop :: Parser Char Token -> Parser Token a -> Bool -> IO (Either Char a)",
+     "func": ["parseStdinLoop", "charstate", "tokenstate", "eof"], "=":
+    {"cased": "eof", "of":
+      [["True", {"cased": ["feedEof", "charstate"], "of":
+        [["GoodEof", "token",
+          {"cased": ["feed", "token", "tokenstate"], "of":
+            [["Consume", "tokenstate2",
+              {"cased": ["feedEof", "tokenstate2"], "of":
+                [["GoodEof", "r", ["ioPure", ["Right", "r"]]],
+                 ["BadEof", ["ioPure", ["Left", {"str": "e"}]]]]}],
+             ["Pushback", "_", ["ioPure", ["Left", {"str": "p"}]]],
+             ["Fail", ["ioPure", ["Left", {"str": "f"}]]]]}],
+         ["BadEof", ["ioPure", ["Left", {"str": "e"}]]]]}],
+       ["False", ["ioBind", "getChar",
+        ["parseStdinLoopChar", "charstate", "tokenstate"]]]]}}
+
+  , {"comment": "parseStdinLoopChar :: Parser Char Token -> Parser Token a -> Char -> IO (Either Char a)",
+     "func": ["parseStdinLoopChar", "charstate", "tokenstate", "c"], "=":
+    {"cased": ["feed", "c", "charstate"], "of":
+      [["Consume", "charstate2",
+        ["ioBind", "isEOF",
+          ["parseStdinLoop", "charstate2", "tokenstate"]]],
+       ["Pushback", "token",
+          {"cased": ["feed", "token", "tokenstate"], "of":
+            [["Consume", "tokenstate2",
+                ["parseStdinLoopChar", ["tokenInWhitespace"],
+                  "tokenstate2", "c"]],
+             ["Pushback", "_", ["ioPure", ["Left", {"str": "p"}]]],
+             ["Fail", ["ioPure", ["Left", {"str": "f"}]]]]}],
+       ["Fail", ["ioPure", ["Left", {"str": "f"}]]]]}}
+
+  , {"func": ["emitArray", "emit", "items"], "=":
+    ["ioThen",
+      ["putChar", {"str": "["}],
+      ["ioThen",
+        {"cased": "items", "of":
+          [["Nil", ["ioPure", "Unit"]],
+           ["Cons", "item", "rest",
+              ["ioThen",
+                ["emit", "item"],
+                ["emitMoreItems", "emit", "rest"]]]]},
+        ["putChar", {"str": "]"}]]]}
+
+  , {"func": ["emitMoreItems", "emit", "items"], "=":
+    {"cased": "items", "of":
+      [["Nil", ["ioPure", "Unit"]],
+       ["Cons", "item", "rest",
+          ["ioThen", ["putChar", {"str": ","}],
+          ["ioThen", ["emit", "item"],
+                     ["emitMoreItems", "emit", "rest"]]]]]}}
+
+  , {"func": ["emitDecls", "decls"], "=":
+    ["ioThen", ["putChar", {"str": "{"}],
+    ["ioThen", ["putChar", {"str": "\""}],
+    ["ioThen", ["putChar", {"str": "d"}],
+    ["ioThen", ["putChar", {"str": "e"}],
+    ["ioThen", ["putChar", {"str": "c"}],
+    ["ioThen", ["putChar", {"str": "l"}],
+    ["ioThen", ["putChar", {"str": "a"}],
+    ["ioThen", ["putChar", {"str": "r"}],
+    ["ioThen", ["putChar", {"str": "a"}],
+    ["ioThen", ["putChar", {"str": "t"}],
+    ["ioThen", ["putChar", {"str": "i"}],
+    ["ioThen", ["putChar", {"str": "o"}],
+    ["ioThen", ["putChar", {"str": "n"}],
+    ["ioThen", ["putChar", {"str": "s"}],
+    ["ioThen", ["putChar", {"str": "\""}],
+    ["ioThen", ["putChar", {"str": ":"}],
+    ["ioThen", ["emitArray", "emitDecl", "decls"],
+               ["putChar", {"str": "}"}]]]]]]]]]]]]]]]]]]}
+
+  , {"func": ["emitDecl", "decl"], "=":
+    ["putChar", {"str": "!"}]}
+
+  , {"func": ["checkParseResult", "result"], "=":
+    {"cased": "result", "of":
+      [["Left", "c", ["putChar", "c"]],
+       ["Right", "decls", ["emitDecls", "decls"]]]}}
+
+  , {"func": ["main"], "=":
+    ["ioBind", ["parseStdin"], "checkParseResult"]}
 
   ]
 }
