@@ -37,23 +37,21 @@ function properties(obj) {
   return ents;
 }
 
-var inspectOptions = {depth: null, breakLength: Infinity};
-
 function assertSame(expected, actual) {
   if (!same(expected, actual))
     throw new Error("expected same as:\n"
-      + "    " + util.inspect(expected, inspectOptions)
+      + "    " + JSON.stringify(expected)
       + "\nactual:\n"
-      + "    " + util.inspect(actual, inspectOptions))
+      + "    " + JSON.stringify(actual));
 }
 exports.assertSame = assertSame;
 
 function assertNotSame(notExpected, actual) {
   if (same(notExpected, actual))
     throw new Error("expected different from: "
-      + util.inspect(notExpected)
+      + JSON.stringify(notExpected)
       + "\nactual: "
-      + util.inspect(actual))
+      + JSON.stringify(actual))
 }
 exports.assertNotSame = assertNotSame;
 
