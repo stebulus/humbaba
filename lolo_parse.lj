@@ -912,16 +912,21 @@
       ["pMap", "Binding", ["varidString"]],
       ["pRight", ["require", ["tokenEq", "Equals"]], ["exp"]]]}
 
+  , {"comment": "delimitedList :: Parser i d -> Parser i a -> Parser i (List a)",
+     "func": ["delimitedList", "delimiter", "item"], "=":
+    ["pApply",
+      ["pMap", "Cons", "item"],
+      ["pSome", ["pRight", "delimiter", "item"]]]}
+
+  , {"comment": "inBraces :: Parser Token a -> Parser Token a",
+     "func": ["inBraces", "p"], "=":
+    ["pRight", ["require", ["tokenEq", "LBrace"]],
+      ["pLeft", "p", ["require", ["tokenEq", "RBrace"]]]]}
+
   , {"comment": "bracedList :: Parser Token a -> Parser Token (List a)",
      "func": ["bracedList", "p"], "=":
-    ["pRight",
-      ["require", ["tokenEq", "LBrace"]],
-      ["pLeft",
-        ["pApply",
-          ["pMap", "Cons", "p"],
-          ["pSome",
-            ["pRight", ["require", ["tokenEq", "Semicolon"]], "p"]]],
-        ["require", ["tokenEq", "RBrace"]]]]}
+    ["inBraces",
+      ["delimitedList", ["require", ["tokenEq", "Semicolon"]], "p"]]}
 
   , {"comment": "letExp :: Parser Token Exp",
      "func": ["letExp"], "=":
@@ -1141,6 +1146,51 @@
        ["RBrace", "Fail"],
        ["Semicolon", "Fail"],
        ["Pipe", "Fail"]]}}
+
+  , {"comments":
+      ["data Decl = DataDecl String (List ConDecl) \n",
+       "          | FuncDecl String (List String) Exp\n"],
+     "data": "Decl", "=": [["DataDecl", 2], ["FuncDecl", 3]]}
+
+  , {"comment": "decl :: Parser Token Decl",
+     "func": ["decl"], "=":
+    ["pAlt", ["dataDecl"], ["funcDecl"]]}
+
+  , {"comment": "dataDecl :: Parser Token Decl",
+     "func": ["dataDecl"], "=":
+    ["pApply",
+      ["pApply",
+        ["pRight",
+          ["require", ["tokenEq", "Data"]],
+          ["pPure", "DataDecl"]],
+        ["conidString"]],
+      ["pRight",
+        ["require", ["tokenEq", "Equals"]],
+        ["delimitedList",
+          ["require", ["tokenEq", "Pipe"]],
+          ["conDecl"]]]]}
+
+  , {"comment": "data ConDecl = ConDecl String Int",
+     "data": "ConDecl", "=": [["ConDecl", 2]]}
+
+  , {"comment": "conDecl :: Parser Token ConDecl",
+     "func": ["conDecl"], "=":
+    ["pApply",
+      ["pMap", "ConDecl", ["conidString"]],
+      ["intFromLiteral"]]}
+
+  , {"comment": "funcDecl :: Parser Token Decl",
+     "func": ["funcDecl"], "=":
+    ["pApply",
+      ["pApply",
+        ["pMap", "FuncDecl", ["varidString"]],
+        ["pSome", ["varidString"]]],
+      ["pRight",
+        ["require", ["tokenEq", "Equals"]],
+        ["exp"]]]}
+
+  , {"comment": "program :: Parser Token (List Decl)",
+     "func": ["program"], "=": ["pMany", ["decl"]]}
 
   ]
 }

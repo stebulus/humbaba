@@ -337,6 +337,44 @@ tests = {
     );
   },
 
+  dataDecl() {
+    assertParsedTokens(
+      ["DataDecl",
+        charList("List"),
+        ["Cons", ["ConDecl", charList("Cons"), 2],
+        ["Cons", ["ConDecl", charList("Nil"), 0],
+         "Nil"]]],
+      ["decl"],
+      ["Cons", "Data",
+      ["Cons", ["ConId", charList("List")],
+      ["Cons", "Equals",
+      ["Cons", ["ConId", charList("Cons")],
+      ["Cons", ["IntLiteral", 2],
+      ["Cons", "Pipe",
+      ["Cons", ["ConId", charList("Nil")],
+      ["Cons", ["IntLiteral", 0],
+       "Nil"]]]]]]]]
+    );
+  },
+
+  funcDecl() {
+    assertParsedTokens(
+      ["FuncDecl",
+        charList("const"),
+        ["Cons", charList("first"),
+        ["Cons", charList("second"),
+         "Nil"]],
+        ["FExp", ["Cons", ["AVar", charList("first")], "Nil"]]],
+      ["decl"],
+      ["Cons", ["VarId", charList("const")],
+      ["Cons", ["VarId", charList("first")],
+      ["Cons", ["VarId", charList("second")],
+      ["Cons", "Equals",
+      ["Cons", ["VarId", charList("first")],
+       "Nil"]]]]]
+    );
+  },
+
 }
 
 exports.tests = tests;
