@@ -2,8 +2,10 @@ var fs = require('fs');
 var path = require('path');
 
 var rt = require('./runtime');
+var rts = require('./runtime_stream');
 var test = require('./test');
 var lltest = require('./test_lolo');
+var test_rts = require('./test_runtime_stream');
 
 var llparse = (function () {
   var here = path.dirname(module.filename)
@@ -18,11 +20,14 @@ function charList(s) {
   return list;
 }
 
-function withLolo(expr) {
-  var program = {"declarations": llparse['declarations'].concat([
+function withLoloProgram(expr) {
+  return {"declarations": llparse['declarations'].concat([
     {"func": ["test"], "=": expr}
   ])};
-  return lltest.programValue(program);
+}
+
+function withLolo(expr) {
+  return lltest.programValue(withLoloProgram(expr));
 }
 
 function assertParseResult(expected, parser, input) {
@@ -372,6 +377,18 @@ tests = {
       ["Cons", "Equals",
       ["Cons", ["VarId", charList("first")],
        "Nil"]]]]]
+    );
+  },
+
+  through(callback) {
+    var strm = new rts.Stream(withLoloProgram(["main"]));
+    strm.end("main = putChar 'x'");
+    test_rts.expectOutput(
+      JSON.stringify({"declarations":
+        [{"func":["main"], "=": ["putChar", {"str": "x"}]}]
+      }),
+      strm,
+      callback
     );
   },
 

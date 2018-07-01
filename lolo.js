@@ -214,6 +214,14 @@ function program(program, entry, chunk) {
 }
 exports.program = program;
 
+function programToJavaScript(prog, entry) {
+  var chunks = [];
+  function chunk(text) { chunks.push(text); }
+  program(prog, entry, chunk);
+  return chunks.join('');
+}
+exports.programToJavaScript = programToJavaScript;
+
 function functionDeclaration(decl, chunk) {
   var lhs = decl['func'];
   var name = lhs[0];
@@ -298,3 +306,15 @@ function declareBoxedConstructor(name, chunk) {
   chunk(name);
   chunk(');');
 }
+
+exports.ioDeclsJavaScript =
+  'var $ioPure = new rt.Box(rt.IoPure);' +
+  'var $ioBind = new rt.Box(rt.IoBind);' +
+  'var $getChar = rt.GetChar;' +
+  'var $putChar = new rt.Box(rt.PutChar);' +
+  'var $isEOF = rt.IsEOF;';
+
+exports.preludeLolo = [
+  {"data": "Bool", "=": [["True"], ["False"]]},
+  {"data": "Unit", "=": [["Unit"]]},
+];

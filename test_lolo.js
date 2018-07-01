@@ -27,10 +27,7 @@ function assertExprValue(expected, expression) {
 }
 
 function programValue(program) {
-  var chunks = [];
-  function chunk(text) { chunks.push(text); }
-  lolo.program(program, 'test', chunk);
-  var expr = eval(chunks.join(''));
+  var expr = eval(lolo.programToJavaScript(program, 'test'));
   rt.evaluateDeep(expr);
   return rt.smashIndirects(expr);
 }

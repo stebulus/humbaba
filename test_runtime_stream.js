@@ -26,6 +26,17 @@ function expectOutput(expected, stream, callback) {
 }
 exports.expectOutput = expectOutput;
 
+function expectOutputString(expected, stream, callback) {
+  var actualOutput = []
+  stream.pipe(collect(actualOutput))
+    .on('finish', function () {
+      test.runTest(function () {
+        test.assertSame(expected, actualOutput.join(''));
+      }, callback);
+    });
+}
+exports.expectOutputString = expectOutputString;
+
 tests = {
 
   nullProgram(callback) {
