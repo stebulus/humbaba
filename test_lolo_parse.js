@@ -269,6 +269,74 @@ tests = {
     );
   },
 
+  caseiExp() {
+    assertParsedTokens(
+      ["CaseiExp",
+        ["FExp",
+          ["Cons", ["AVar", charList("f")],
+          ["Cons", ["AVar", charList("x")],
+           "Nil"]]],
+        ["Cons",
+          ["IAltInt",
+            3,
+            ["FExp", ["Cons", ["AInt", 1], "Nil"]]],
+        ["Cons",
+          ["IAltVar",
+            charList("foo"),
+            ["FExp", ["Cons", ["AInt", 0], "Nil"]]],
+          "Nil"]]],
+      ["exp"],
+      ["Cons", "Casei",
+      ["Cons", ["VarId", charList("f")],
+      ["Cons", ["VarId", charList("x")],
+      ["Cons", "Of",
+      ["Cons", "LBrace",
+      ["Cons", ["IntLiteral", 3],
+      ["Cons", "Arrow",
+      ["Cons", ["IntLiteral", 1],
+      ["Cons", "Semicolon",
+      ["Cons", ["VarId", charList("foo")],
+      ["Cons", "Arrow",
+      ["Cons", ["IntLiteral", 0],
+      ["Cons", "RBrace",
+       "Nil"]]]]]]]]]]]]]
+    );
+  },
+
+  casecExp() {
+    assertParsedTokens(
+      ["CasecExp",
+        ["FExp",
+          ["Cons", ["AVar", charList("f")],
+          ["Cons", ["AVar", charList("x")],
+           "Nil"]]],
+        ["Cons",
+          ["CAltChar",
+            {"str": "a"},
+            ["FExp", ["Cons", ["AInt", 1], "Nil"]]],
+        ["Cons",
+          ["CAltVar",
+            charList("foo"),
+            ["FExp", ["Cons", ["AInt", 0], "Nil"]]],
+          "Nil"]]],
+      ["exp"],
+      ["Cons", "Casec",
+      ["Cons", ["VarId", charList("f")],
+      ["Cons", ["VarId", charList("x")],
+      ["Cons", "Of",
+      ["Cons", "LBrace",
+      ["Cons", ["CharLiteral", {"str": "a"}],
+      ["Cons", "Arrow",
+      ["Cons", ["IntLiteral", 1],
+      ["Cons", "Semicolon",
+      ["Cons", ["VarId", charList("foo")],
+      ["Cons", "Arrow",
+      ["Cons", ["IntLiteral", 0],
+      ["Cons", "RBrace",
+       "Nil"]]]]]]]]]]]]]
+    );
+  },
+
 }
 
 exports.tests = tests;
