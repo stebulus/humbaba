@@ -21,7 +21,7 @@ tests = {
       {"declarations": [
         {"func": ["main"], "=": ["putChar", {"str": "x"}]}
       ]},
-      "main = putChar 'x'",
+      "{ main = putChar 'x' }",
       callback
     );
   },
@@ -31,7 +31,7 @@ tests = {
       {"declarations": [
         {"data": "List", "=": [["Cons", 2], ["Nil", 0]]}
       ]},
-      "data List = Cons 2 | Nil 0",
+      "{ data List = Cons 2 | Nil 0 }",
       callback
     );
   },

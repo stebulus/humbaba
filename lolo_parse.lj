@@ -1248,7 +1248,7 @@
         ["exp"]]]}
 
   , {"comment": "program :: Parser Token (List Decl)",
-     "func": ["program"], "=": ["pMany", ["decl"]]}
+     "func": ["program"], "=": ["bracedList", ["decl"]]}
 
   , {"comment": "parseStdin :: IO (Either Char (List Decl))",
      "func": ["parseStdin"], "=":
