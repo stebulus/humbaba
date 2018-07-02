@@ -87,7 +87,8 @@
      ["Let", 0],
      ["In", 0],
      ["Cased", 0],
-     ["Casel", 0],
+     ["Casei", 0],
+     ["Casec", 0],
      ["Of", 0],
      ["Data", 0],
      ["Equals", 0],
@@ -99,9 +100,431 @@
      ["Semicolon", 0],
      ["Pipe", 0]]}
 
+  , {"func": ["tokenEq", "a", "b"], "=":
+    {"cased": "a", "of":
+      [["IntLiteral", "n",
+          {"cased": "b", "of":
+            [["IntLiteral", "m", ["intEq", "m", "n"]],
+             ["CharLiteral", "_", "False"],
+             ["VarId", "_", "False"],
+             ["ConId", "_", "False"],
+             ["Let", "False"],
+             ["In", "False"],
+             ["Cased", "False"],
+             ["Casei", "False"],
+             ["Casec", "False"],
+             ["Of", "False"],
+             ["Data", "False"],
+             ["Equals", "False"],
+             ["Arrow", "False"],
+             ["LParen", "False"],
+             ["RParen", "False"],
+             ["LBrace", "False"],
+             ["RBrace", "False"],
+             ["Semicolon", "False"],
+             ["Pipe", "False"]]}
+          ],
+       ["CharLiteral", "c",
+          {"cased": "b", "of":
+            [["IntLiteral", "_", "False"],
+             ["CharLiteral", "d", ["intEq", "c", "d"]],
+             ["VarId", "_", "False"],
+             ["ConId", "_", "False"],
+             ["Let", "False"],
+             ["In", "False"],
+             ["Cased", "False"],
+             ["Casei", "False"],
+             ["Casec", "False"],
+             ["Of", "False"],
+             ["Data", "False"],
+             ["Equals", "False"],
+             ["Arrow", "False"],
+             ["LParen", "False"],
+             ["RParen", "False"],
+             ["LBrace", "False"],
+             ["RBrace", "False"],
+             ["Semicolon", "False"],
+             ["Pipe", "False"]]}
+          ],
+       ["VarId", "ident",
+          {"cased": "b", "of":
+            [["IntLiteral", "_", "False"],
+             ["CharLiteral", "_", "False"],
+             ["VarId", "ident2", ["stringEq", "ident", "ident2"]],
+             ["ConId", "_", "False"],
+             ["Let", "False"],
+             ["In", "False"],
+             ["Cased", "False"],
+             ["Casei", "False"],
+             ["Casec", "False"],
+             ["Of", "False"],
+             ["Data", "False"],
+             ["Equals", "False"],
+             ["Arrow", "False"],
+             ["LParen", "False"],
+             ["RParen", "False"],
+             ["LBrace", "False"],
+             ["RBrace", "False"],
+             ["Semicolon", "False"],
+             ["Pipe", "False"]]}
+          ],
+       ["ConId", "ident",
+          {"cased": "b", "of":
+            [["IntLiteral", "_", "False"],
+             ["CharLiteral", "_", "False"],
+             ["VarId", "_", "False"],
+             ["ConId", "ident2", ["stringEq", "ident", "ident2"]],
+             ["Let", "False"],
+             ["In", "False"],
+             ["Cased", "False"],
+             ["Casei", "False"],
+             ["Casec", "False"],
+             ["Of", "False"],
+             ["Data", "False"],
+             ["Equals", "False"],
+             ["Arrow", "False"],
+             ["LParen", "False"],
+             ["RParen", "False"],
+             ["LBrace", "False"],
+             ["RBrace", "False"],
+             ["Semicolon", "False"],
+             ["Pipe", "False"]]}
+          ],
+       ["Let",
+          {"cased": "b", "of":
+            [["IntLiteral", "_", "False"],
+             ["CharLiteral", "_", "False"],
+             ["VarId", "_", "False"],
+             ["ConId", "_", "False"],
+             ["Let", "True"],
+             ["In", "False"],
+             ["Cased", "False"],
+             ["Casei", "False"],
+             ["Casec", "False"],
+             ["Of", "False"],
+             ["Data", "False"],
+             ["Equals", "False"],
+             ["Arrow", "False"],
+             ["LParen", "False"],
+             ["RParen", "False"],
+             ["LBrace", "False"],
+             ["RBrace", "False"],
+             ["Semicolon", "False"],
+             ["Pipe", "False"]]}
+          ],
+       ["In",
+          {"cased": "b", "of":
+            [["IntLiteral", "_", "False"],
+             ["CharLiteral", "_", "False"],
+             ["VarId", "_", "False"],
+             ["ConId", "_", "False"],
+             ["Let", "False"],
+             ["In", "True"],
+             ["Cased", "False"],
+             ["Casei", "False"],
+             ["Casec", "False"],
+             ["Of", "False"],
+             ["Data", "False"],
+             ["Equals", "False"],
+             ["Arrow", "False"],
+             ["LParen", "False"],
+             ["RParen", "False"],
+             ["LBrace", "False"],
+             ["RBrace", "False"],
+             ["Semicolon", "False"],
+             ["Pipe", "False"]]}
+          ],
+       ["Cased",
+          {"cased": "b", "of":
+            [["IntLiteral", "_", "False"],
+             ["CharLiteral", "_", "False"],
+             ["VarId", "_", "False"],
+             ["ConId", "_", "False"],
+             ["Let", "False"],
+             ["In", "False"],
+             ["Cased", "True"],
+             ["Casei", "False"],
+             ["Casec", "False"],
+             ["Of", "False"],
+             ["Data", "False"],
+             ["Equals", "False"],
+             ["Arrow", "False"],
+             ["LParen", "False"],
+             ["RParen", "False"],
+             ["LBrace", "False"],
+             ["RBrace", "False"],
+             ["Semicolon", "False"],
+             ["Pipe", "False"]]}
+          ],
+       ["Casei",
+          {"cased": "b", "of":
+            [["IntLiteral", "_", "False"],
+             ["CharLiteral", "_", "False"],
+             ["VarId", "_", "False"],
+             ["ConId", "_", "False"],
+             ["Let", "False"],
+             ["In", "False"],
+             ["Cased", "False"],
+             ["Casei", "True"],
+             ["Casec", "False"],
+             ["Of", "False"],
+             ["Data", "False"],
+             ["Equals", "False"],
+             ["Arrow", "False"],
+             ["LParen", "False"],
+             ["RParen", "False"],
+             ["LBrace", "False"],
+             ["RBrace", "False"],
+             ["Semicolon", "False"],
+             ["Pipe", "False"]]}
+          ],
+       ["Casec",
+          {"cased": "b", "of":
+            [["IntLiteral", "_", "False"],
+             ["CharLiteral", "_", "False"],
+             ["VarId", "_", "False"],
+             ["ConId", "_", "False"],
+             ["Let", "False"],
+             ["In", "False"],
+             ["Cased", "False"],
+             ["Casei", "False"],
+             ["Casec", "True"],
+             ["Of", "False"],
+             ["Data", "False"],
+             ["Equals", "False"],
+             ["Arrow", "False"],
+             ["LParen", "False"],
+             ["RParen", "False"],
+             ["LBrace", "False"],
+             ["RBrace", "False"],
+             ["Semicolon", "False"],
+             ["Pipe", "False"]]}
+          ],
+       ["Of",
+          {"cased": "b", "of":
+            [["IntLiteral", "_", "False"],
+             ["CharLiteral", "_", "False"],
+             ["VarId", "_", "False"],
+             ["ConId", "_", "False"],
+             ["Let", "False"],
+             ["In", "False"],
+             ["Cased", "False"],
+             ["Casei", "False"],
+             ["Casec", "False"],
+             ["Of", "True"],
+             ["Data", "False"],
+             ["Equals", "False"],
+             ["Arrow", "False"],
+             ["LParen", "False"],
+             ["RParen", "False"],
+             ["LBrace", "False"],
+             ["RBrace", "False"],
+             ["Semicolon", "False"],
+             ["Pipe", "False"]]}
+          ],
+       ["Data",
+          {"cased": "b", "of":
+            [["IntLiteral", "_", "False"],
+             ["CharLiteral", "_", "False"],
+             ["VarId", "_", "False"],
+             ["ConId", "_", "False"],
+             ["Let", "False"],
+             ["In", "False"],
+             ["Cased", "False"],
+             ["Casei", "False"],
+             ["Casec", "False"],
+             ["Of", "False"],
+             ["Data", "True"],
+             ["Equals", "False"],
+             ["Arrow", "False"],
+             ["LParen", "False"],
+             ["RParen", "False"],
+             ["LBrace", "False"],
+             ["RBrace", "False"],
+             ["Semicolon", "False"],
+             ["Pipe", "False"]]}
+          ],
+       ["Equals",
+          {"cased": "b", "of":
+            [["IntLiteral", "_", "False"],
+             ["CharLiteral", "_", "False"],
+             ["VarId", "_", "False"],
+             ["ConId", "_", "False"],
+             ["Let", "False"],
+             ["In", "False"],
+             ["Cased", "False"],
+             ["Casei", "False"],
+             ["Casec", "False"],
+             ["Of", "False"],
+             ["Data", "False"],
+             ["Equals", "True"],
+             ["Arrow", "False"],
+             ["LParen", "False"],
+             ["RParen", "False"],
+             ["LBrace", "False"],
+             ["RBrace", "False"],
+             ["Semicolon", "False"],
+             ["Pipe", "False"]]}
+          ],
+       ["Arrow",
+          {"cased": "b", "of":
+            [["IntLiteral", "_", "False"],
+             ["CharLiteral", "_", "False"],
+             ["VarId", "_", "False"],
+             ["ConId", "_", "False"],
+             ["Let", "False"],
+             ["In", "False"],
+             ["Cased", "False"],
+             ["Casei", "False"],
+             ["Casec", "False"],
+             ["Of", "False"],
+             ["Data", "False"],
+             ["Equals", "False"],
+             ["Arrow", "True"],
+             ["LParen", "False"],
+             ["RParen", "False"],
+             ["LBrace", "False"],
+             ["RBrace", "False"],
+             ["Semicolon", "False"],
+             ["Pipe", "False"]]}
+          ],
+       ["LParen",
+          {"cased": "b", "of":
+            [["IntLiteral", "_", "False"],
+             ["CharLiteral", "_", "False"],
+             ["VarId", "_", "False"],
+             ["ConId", "_", "False"],
+             ["Let", "False"],
+             ["In", "False"],
+             ["Cased", "False"],
+             ["Casei", "False"],
+             ["Casec", "False"],
+             ["Of", "False"],
+             ["Data", "False"],
+             ["Equals", "False"],
+             ["Arrow", "False"],
+             ["LParen", "True"],
+             ["RParen", "False"],
+             ["LBrace", "False"],
+             ["RBrace", "False"],
+             ["Semicolon", "False"],
+             ["Pipe", "False"]]}
+          ],
+       ["RParen",
+          {"cased": "b", "of":
+            [["IntLiteral", "_", "False"],
+             ["CharLiteral", "_", "False"],
+             ["VarId", "_", "False"],
+             ["ConId", "_", "False"],
+             ["Let", "False"],
+             ["In", "False"],
+             ["Cased", "False"],
+             ["Casei", "False"],
+             ["Casec", "False"],
+             ["Of", "False"],
+             ["Data", "False"],
+             ["Equals", "False"],
+             ["Arrow", "False"],
+             ["LParen", "False"],
+             ["RParen", "True"],
+             ["LBrace", "False"],
+             ["RBrace", "False"],
+             ["Semicolon", "False"],
+             ["Pipe", "False"]]}
+          ],
+       ["LBrace",
+          {"cased": "b", "of":
+            [["IntLiteral", "_", "False"],
+             ["CharLiteral", "_", "False"],
+             ["VarId", "_", "False"],
+             ["ConId", "_", "False"],
+             ["Let", "False"],
+             ["In", "False"],
+             ["Cased", "False"],
+             ["Casei", "False"],
+             ["Casec", "False"],
+             ["Of", "False"],
+             ["Data", "False"],
+             ["Equals", "False"],
+             ["Arrow", "False"],
+             ["LParen", "False"],
+             ["RParen", "False"],
+             ["LBrace", "True"],
+             ["RBrace", "False"],
+             ["Semicolon", "False"],
+             ["Pipe", "False"]]}
+          ],
+       ["RBrace",
+          {"cased": "b", "of":
+            [["IntLiteral", "_", "False"],
+             ["CharLiteral", "_", "False"],
+             ["VarId", "_", "False"],
+             ["ConId", "_", "False"],
+             ["Let", "False"],
+             ["In", "False"],
+             ["Cased", "False"],
+             ["Casei", "False"],
+             ["Casec", "False"],
+             ["Of", "False"],
+             ["Data", "False"],
+             ["Equals", "False"],
+             ["Arrow", "False"],
+             ["LParen", "False"],
+             ["RParen", "False"],
+             ["LBrace", "False"],
+             ["RBrace", "True"],
+             ["Semicolon", "False"],
+             ["Pipe", "False"]]}
+          ],
+       ["Semicolon",
+          {"cased": "b", "of":
+            [["IntLiteral", "_", "False"],
+             ["CharLiteral", "_", "False"],
+             ["VarId", "_", "False"],
+             ["ConId", "_", "False"],
+             ["Let", "False"],
+             ["In", "False"],
+             ["Cased", "False"],
+             ["Casei", "False"],
+             ["Casec", "False"],
+             ["Of", "False"],
+             ["Data", "False"],
+             ["Equals", "False"],
+             ["Arrow", "False"],
+             ["LParen", "False"],
+             ["RParen", "False"],
+             ["LBrace", "False"],
+             ["RBrace", "False"],
+             ["Semicolon", "True"],
+             ["Pipe", "False"]]}
+          ],
+       ["Pipe",
+          {"cased": "b", "of":
+            [["IntLiteral", "_", "False"],
+             ["CharLiteral", "_", "False"],
+             ["VarId", "_", "False"],
+             ["ConId", "_", "False"],
+             ["Let", "False"],
+             ["In", "False"],
+             ["Cased", "False"],
+             ["Casei", "False"],
+             ["Casec", "False"],
+             ["Of", "False"],
+             ["Data", "False"],
+             ["Equals", "False"],
+             ["Arrow", "False"],
+             ["LParen", "False"],
+             ["RParen", "False"],
+             ["LBrace", "False"],
+             ["RBrace", "False"],
+             ["Semicolon", "False"],
+             ["Pipe", "True"]]}
+          ]]}}
+
   , {"comments":
-      ["data Parser a = Done a | More (Eofed a) (Char -> Peeked a)\n",
-       "Represents the state of a parser with eventual result of type a.",
+      ["data Parser i r = Done r | More (Eofed r) (i -> Peeked i r)\n",
+       "Represents the state of a parser with input items of type i",
+       "and eventual result of type r.",
        "Done means the parser doesn't want any more input.",
        "More means it wants to look ahead:",
        "the Eofed field is the result if there's no more input;",
@@ -118,35 +541,46 @@
        "for <|> -- which suggests it deserves more scrutiny.)"],
      "data": "Parser", "=": [["Done", 1], ["More", 2]]}
 
-  , {"comment": "feed :: Char -> Parser a -> Peeked a",
-     "func": ["feed", "c", "parser"], "=":
+  , {"comment": "feed :: i -> Parser i r -> Peeked i r",
+     "func": ["feed", "i", "parser"], "=":
     {"cased": "parser", "of":
-      [["Done", "a", ["Pushback", "a"]],
-       ["More", "onEof", "onChar", ["onChar", "c"]]]}}
+      [["Done", "r", ["Pushback", "r"]],
+       ["More", "onEof", "onInput", ["onInput", "i"]]]}}
 
-  , {"comment": "feedEof :: Parser a -> Eofed a",
+  , {"comment": "feedEof :: Parser i r -> Eofed r",
      "func": ["feedEof", "parser"], "=":
     {"cased": "parser", "of":
-      [["Done", "a", ["GoodEof", "a"]],
+      [["Done", "r", ["GoodEof", "r"]],
        ["More", "onEof", "_", "onEof"]]}}
 
+  , {"comment": "parseList :: Parser i r -> List i -> Either Char r",
+     "func": ["parseList", "parser", "s"], "=":
+    {"cased": "s", "of":
+      [["Nil", {"cased": ["feedEof", "parser"], "of":
+         [["GoodEof", "r", ["Right", "r"]],
+          ["BadEof", ["Left", {"str": "e"}]]]}],
+       ["Cons", "i", "is", {"cased": ["feed", "i", "parser"], "of":
+         [["Consume", "p", ["parseList", "p", "is"]],
+          ["Pushback", "r", ["Left", {"str": "p"}]],
+          ["Fail", ["Left", {"str": "f"}]]]}]]}}
+
   , {"comments":
-      ["data Eofed a = GoodEof a | BadEof\n",
-       "Result when (Parser a) sees end of input.",
+      ["data Eofed r = GoodEof r | BadEof\n",
+       "Result when (Parser i r) sees end of input.",
        "GoodEof means the end of input is accepted;",
        "BadEof means the parse failed."],
      "data": "Eofed", "=": [["GoodEof", 1], ["BadEof", 0]]}
 
   , {"comments":
-      ["data Peeked a = Consume (Parser a) | Pushback a | Fail\n",
-       "Result when (Parser a) sees a character.",
-       "Consume p means it consumes the character",
+      ["data Peeked i r = Consume (Parser i r) | Pushback r | Fail\n",
+       "Result when (Parser i r) sees an input item.",
+       "Consume p means it consumes the input item",
        "and the next state of the parser is p.",
-       "Pushback a means it doesn't consume the character",
-       "but completes its work, producing value a;",
-       "the caller should arrange for the character to be presented",
+       "Pushback r means it doesn't consume the input item",
+       "but completes its work, producing result r;",
+       "the caller should arrange for the input item to be presented",
        "to the 'next' parser, whatever that means.  (See pApply.)",
-       "Fail means the character is unexpected."],
+       "Fail means the input item is unexpected."],
      "data": "Peeked", "=": [["Consume", 1], ["Pushback", 1], ["Fail", 0]]}
 
   , {"comment": "<$> for Eofed instance of Functor",
@@ -205,11 +639,11 @@
             ["eofedApply", "onEof", ["feedEof", "px"]],
             ["ppFeedApply", "onChar", "px"]]]]}}
 
-  , {"comment": "ppFeedApply :: (Char -> Peeked (a->b)) -> Parser a -> Char -> Peeked b",
-     "func": ["ppFeedApply", "c2peekedf", "parserx", "c"], "=":
-    {"cased": ["c2peekedf", "c"], "of":
+  , {"comment": "ppFeedApply :: (i -> Peeked i (a->b)) -> Parser i a -> i -> Peeked i b",
+     "func": ["ppFeedApply", "i2peekedf", "parserx", "i"], "=":
+    {"cased": ["i2peekedf", "i"], "of":
       [["Consume", "parserf", ["Consume", ["pApply", "parserf", "parserx"]]],
-       ["Pushback", "f", ["peekedMap", "f", ["feed", "c", "parserx"]]],
+       ["Pushback", "f", ["peekedMap", "f", ["feed", "i", "parserx"]]],
        ["Fail", "Fail"]]}}
 
   , {"comment": "empty for Parser instance of Applicative",
@@ -218,22 +652,22 @@
 
   , {"comments":
       ["<|> for Parser instance of Alternative.",
-       "p <|> q is the same as p, unless p fails on the next character,",
+       "p <|> q is the same as p, unless p fails on the next input item,",
        "in which case it's the same as q.",
-       "There's only 1 character of lookahead (see comments on Peeked);",
-       "if p accepts the first character and fails later,",
+       "There's only 1 input item of lookahead (see comments on Peeked);",
+       "if p accepts the first input item and fails later,",
        "then p <|> q will fail; it won't backtrack."],
      "func": ["pAlt", "left", "right"], "=":
     {"cased": "left", "of":
       [["Done", "a", "left"],
-       ["More", "onEof", "onChar",
+       ["More", "onEof", "onInput",
           ["More",
             ["eofedAlt", "onEof", ["feedEof", "right"]],
-            ["ppFeedAlt", "onChar", "right"]]]]}}
+            ["ppFeedAlt", "onInput", "right"]]]]}}
 
-  , {"comment": "ppFeedAlt :: (Char -> Peeked a) -> Parser a -> Char -> Peeked a",
-     "func": ["ppFeedAlt", "c2peeked1", "fallback", "c"], "=":
-    ["peekedAlt", ["c2peeked1", "c"], ["feed", "c", "fallback"]]}
+  , {"comment": "ppFeedAlt :: (i -> Peeked i a) -> Parser i a -> i -> Peeked i a",
+     "func": ["ppFeedAlt", "i2peeked1", "fallback", "i"], "=":
+    ["peekedAlt", ["i2peeked1", "i"], ["feed", "i", "fallback"]]}
 
   , {"comment": "*> for Parser instance of Applicative",
      "func": ["pRight", "left", "right"], "=":
@@ -251,36 +685,36 @@
      "func": ["pMany", "p"], "=":
     ["pApply", ["pMap", "Cons", "p"], ["pSome", "p"]]}
 
-  , {"comment": "optional :: Parser a -> Parser (Maybe a)",
+  , {"comment": "optional :: Parser i a -> Parser i (Maybe a)",
      "func": ["optional", "p"], "=":
     ["pAlt", ["pMap", "Just", "p"], ["pPure", "Nothing"]]}
 
-  , {"comment": "char :: Char -> Parser Char",
+  , {"comment": "char :: Char -> Parser Char Char",
      "func": ["char", "c"], "=": ["require", ["charEq", "c"]]}
 
-  , {"comment": "anyChar :: Parser Char",
-     "func": ["anyChar"], "=":
+  , {"comment": "item :: Parser a a",
+     "func": ["item"], "=":
     ["More", "BadEof", ["compose", "Consume", "Done"]]}
 
-  , {"comment": "require :: (Char -> Bool) -> Parser Char",
+  , {"comment": "require :: (a -> Bool) -> Parser a a",
      "func": ["require", "pred"], "=":
     ["More", "BadEof", ["requirePeek", "pred"]]}
 
-  , {"comment": "requirePeek :: (Char -> Bool) -> Char -> Peeked Char",
-     "func": ["requirePeek", "pred", "c"], "=":
-    {"cased": ["pred", "c"], "of":
-      [["True", ["Consume", ["Done", "c"]]],
+  , {"comment": "requirePeek :: (a -> Bool) -> a -> Peeked a a",
+     "func": ["requirePeek", "pred", "a"], "=":
+    {"cased": ["pred", "a"], "of":
+      [["True", ["Consume", ["Done", "a"]]],
        ["False", "Fail"]]}}
 
   , {"comment": "charBetween :: Char -> Char -> Char -> Bool",
      "func": ["charBetween", "lo", "hi", "c"], "=":
     ["boolAnd", ["charLe", "lo", "c"], ["charLe", "c", "hi"]]}
 
-  , {"comment": "charRange :: Char -> Char -> Parser Char",
+  , {"comment": "charRange :: Char -> Char -> Parser Char Char",
      "func": ["charRange", "lo", "hi"], "=":
     ["require", ["charBetween", "lo", "hi"]]}
 
-  , {"comment": "optsign :: Parser Bool",
+  , {"comment": "optsign :: Parser Char Bool",
      "func": ["optsign"], "=":
     ["pAlt",
       ["pRight", ["char", {"str": "-"}],
@@ -288,18 +722,18 @@
       ["pRight", ["optional", ["char", {"str": "+"}]],
         ["pPure", "True"]]]}
 
-  , {"comment": "digit :: Parser Char",
+  , {"comment": "digit :: Parser Char Char",
      "func": ["digit"], "=": ["ascDigit"]}
 
-  , {"comment": "ascDigit :: Parser Char",
+  , {"comment": "ascDigit :: Parser Char Char",
      "func": ["ascDigit"], "=":
     ["charRange", {"str": "0"}, {"str": "9"}]}
 
-  , {"comment": "natLiteral :: Parser Int",
+  , {"comment": "natLiteral :: Parser Char Int",
      "func": ["natLiteral"], "=":
     ["pMap", "digits2int", ["pMany", ["digit"]]]}
 
-  , {"comment": "intLiteral :: Parser Int",
+  , {"comment": "intLiteral :: Parser Char Int",
      "func": ["intLiteral"], "=":
     ["pApply", ["pMap", "makeIntLiteral", ["optsign"]], ["natLiteral"]]}
 
@@ -310,15 +744,15 @@
         [["True", "n"],
          ["False", ["intMul", -1, "n"]]]}]}
 
-  , {"comment": "charLiteral :: Parser Char",
+  , {"comment": "charLiteral :: Parser Char Char",
      "func": ["charLiteral"], "=":
     ["pLeft",
       ["pRight",
         ["char", {"str": "'"}],
-        ["pMap", "CharLiteral", ["anyChar"]]],
+        ["pMap", "CharLiteral", ["item"]]],
       ["char", {"str": "'"}]]}
 
-  , {"comment": "ascSmall :: Parser Char",
+  , {"comment": "ascSmall :: Parser Char Char",
      "func": ["ascSmall"], "=":
     ["require", "isAscSmall"]}
 
@@ -328,11 +762,11 @@
       ["charLe", {"str": "a"}, "c"],
       ["charLe", "c", {"str": "z"}]]}
 
-  , {"comment": "small :: Parser Char",
+  , {"comment": "small :: Parser Char Char",
      "func": ["small"], "=":
     ["pAlt", ["ascSmall"], ["char", {"str": "_"}]]}
 
-  , {"comment": "ascLarge :: Parser Char",
+  , {"comment": "ascLarge :: Parser Char Char",
      "func": ["ascLarge"], "=":
     ["require", "isAscLarge"]}
 
@@ -342,17 +776,14 @@
       ["charLe", {"str": "A"}, "c"],
       ["charLe", "c", {"str": "Z"}]]}
 
-  , {"comment": "large :: Parser Char",
+  , {"comment": "large :: Parser Char Char",
      "func": ["large"], "=": ["ascLarge"]}
 
-  , {"comment": "identChar :: Parser Char",
+  , {"comment": "identChar :: Parser Char Char",
      "func": ["identChar"], "=":
-    ["pAlt", ["small"],
-    ["pAlt", ["large"],
-    ["pAlt", ["digit"],
-             ["char", {"str": "'"}]]]]}
+    ["pAlt", ["small"], ["pAlt", ["large"], ["digit"]]]}
 
-  , {"comment": "varidOrReserved :: Parser Token",
+  , {"comment": "varidOrReserved :: Parser Char Token",
      "func": ["varidOrReserved"], "=":
     ["pMap", "fixupReserved",
       ["pApply", ["pMap", "Cons", ["small"]], ["pSome", ["identChar"]]]]}
@@ -380,8 +811,15 @@
       ["Cons", {"str": "a"},
       ["Cons", {"str": "s"},
       ["Cons", {"str": "e"},
-      ["Cons", {"str": "l"},
-      "Nil"]]]]], "Casel"],
+      ["Cons", {"str": "i"},
+      "Nil"]]]]], "Casei"],
+    ["Cons", ["Tuple2",
+      ["Cons", {"str": "c"},
+      ["Cons", {"str": "a"},
+      ["Cons", {"str": "s"},
+      ["Cons", {"str": "e"},
+      ["Cons", {"str": "c"},
+      "Nil"]]]]], "Casec"],
     ["Cons", ["Tuple2",
       ["Cons", {"str": "o"},
       ["Cons", {"str": "f"},
@@ -392,7 +830,7 @@
       ["Cons", {"str": "t"},
       ["Cons", {"str": "a"},
       "Nil"]]]], "Data"],
-    "Nil"]]]]]]}
+    "Nil"]]]]]]]}
 
   , {"comment": "fixupReserved :: String -> Token",
      "func": ["fixupReserved", "ident"], "=":
@@ -400,12 +838,12 @@
       [["Nothing", ["VarId", "ident"]],
        ["Just", "x", "x"]]}}
 
-  , {"comment": "conid :: Parser Token",
+  , {"comment": "conid :: Parser Char Token",
      "func": ["conid"], "=":
     ["pMap", "ConId",
       ["pApply", ["pMap", "Cons", ["large"]], ["pSome", ["identChar"]]]]}
 
-  , {"comment": "token :: Parser Token",
+  , {"comment": "token :: Parser Char Token",
      "func": ["token"], "=":
     ["pAlt", ["varidOrReserved"],
     ["pAlt", ["conid"],
@@ -421,16 +859,292 @@
              ["pRight", ["char", {"str": "|"}], ["pPure", "Pipe"]]
     ]]]]]]]]]]]}
 
-  , {"comment": "parseString :: Parser a -> String -> Either Char a",
-     "func": ["parseString", "parser", "s"], "=":
-    {"cased": "s", "of":
-      [["Nil", {"cased": ["feedEof", "parser"], "of":
-         [["GoodEof", "a", ["Right", "a"]],
-          ["BadEof", ["Left", {"str": "e"}]]]}],
-       ["Cons", "c", "cs", {"cased": ["feed", "c", "parser"], "of":
-         [["Consume", "p", ["parseString", "p", "cs"]],
-          ["Pushback", "a", ["Left", {"str": "p"}]],
-          ["Fail", ["Left", {"str": "f"}]]]}]]}}
+  , {"comments":
+      ["data Exp = LetExp (List Binding) Exp\n",
+       "         | CasedExp Exp (List DAlt)\n",
+       "         | CaseiExp Exp (List IAlt)\n",
+       "         | CasecExp Exp (List CAlt)\n",
+       "         | FExp (List AExp)\n"],
+    "data": "Exp", "=":
+    [["LetExp", 2],
+     ["CasedExp", 2],
+     ["CaseiExp", 2],
+     ["CasecExp", 2],
+     ["FExp", 1]]}
+
+  , {"comment": "exp :: Parser Token Exp",
+     "func": ["exp"], "=":
+    ["pAlt", ["letExp"],
+    ["pAlt", ["casedExp"],
+    ["pAlt", ["caseiExp"],
+    ["pAlt", ["casecExp"],
+             ["fExp"]]]]]}
+
+  , {"comment": "data Binding = Binding String Exp",
+     "data": "Binding", "=": [["Binding", 2]]}
+
+  , {"comment": "varidString :: Parser Token String",
+     "func": ["varidString"], "=":
+    ["More", "BadEof", "varidStringPeek"]}
+
+  , {"comment": "varidStringPeek :: Token -> Peeked Token String",
+     "func": ["varidStringPeek", "token"], "=":
+    {"cased": "token", "of":
+      [["IntLiteral", "_", "Fail"],
+       ["CharLiteral", "_", "Fail"],
+       ["VarId", "s", ["Consume", ["Done", "s"]]],
+       ["ConId", "_", "Fail"],
+       ["Let", "Fail"],
+       ["In", "Fail"],
+       ["Cased", "Fail"],
+       ["Casei", "Fail"],
+       ["Casec", "Fail"],
+       ["Of", "Fail"],
+       ["Data", "Fail"],
+       ["Equals", "Fail"],
+       ["Arrow", "Fail"],
+       ["LParen", "Fail"],
+       ["RParen", "Fail"],
+       ["LBrace", "Fail"],
+       ["RBrace", "Fail"],
+       ["Semicolon", "Fail"],
+       ["Pipe", "Fail"]]}}
+
+  , {"comment": "binding :: Parser Token Binding",
+     "func": ["binding"], "=":
+    ["pApply",
+      ["pMap", "Binding", ["varidString"]],
+      ["pRight", ["require", ["tokenEq", "Equals"]], ["exp"]]]}
+
+  , {"comment": "bracedList :: Parser Token a -> Parser Token (List a)",
+     "func": ["bracedList", "p"], "=":
+    ["pRight",
+      ["require", ["tokenEq", "LBrace"]],
+      ["pLeft",
+        ["pApply",
+          ["pMap", "Cons", "p"],
+          ["pSome",
+            ["pRight", ["require", ["tokenEq", "Semicolon"]], "p"]]],
+        ["require", ["tokenEq", "RBrace"]]]]}
+
+  , {"comment": "letExp :: Parser Token Exp",
+     "func": ["letExp"], "=":
+    ["pApply",
+      ["pApply",
+        ["pRight", ["require", ["tokenEq", "Let"]], ["pPure", "LetExp"]],
+        ["bracedList", ["binding"]]],
+      ["pRight",
+        ["require", ["tokenEq", "In"]],
+        ["exp"]]]}
+
+  , {"comment": "casedExp :: Parser Token Exp",
+     "func": ["casedExp"], "=":
+    ["pApply",
+      ["pApply",
+        ["pRight",
+          ["require", ["tokenEq", "Cased"]],
+          ["pPure", "CasedExp"]],
+        ["exp"]],
+      ["pRight",
+        ["require", ["tokenEq", "Of"]],
+        ["bracedList", ["dalt"]]]]}
+
+  , {"comment": "data DAlt = DAlt String (List String) Exp",
+     "data": "DAlt", "=": [["DAlt", 3]]}
+
+  , {"comment": "dalt :: Parser Token DAlt",
+     "func": ["dalt"], "=":
+    ["pApply",
+      ["pApply",
+        ["pMap", "DAlt", ["conidString"]],
+        ["pSome", ["varidString"]]],
+      ["pRight", ["require", ["tokenEq", "Arrow"]],
+        ["exp"]]]}
+
+  , {"comment": "conidString :: Parser Token String",
+     "func": ["conidString"], "=":
+    ["More", "BadEof", "conidStringPeek"]}
+
+  , {"comment": "conidStringPeek :: Token -> Peeked Token String",
+     "func": ["conidStringPeek", "token"], "=":
+    {"cased": "token", "of":
+      [["IntLiteral", "_", "Fail"],
+       ["CharLiteral", "_", "Fail"],
+       ["VarId", "_", "Fail"],
+       ["ConId", "s", ["Consume", ["Done", "s"]]],
+       ["Let", "Fail"],
+       ["In", "Fail"],
+       ["Cased", "Fail"],
+       ["Casei", "Fail"],
+       ["Casec", "Fail"],
+       ["Of", "Fail"],
+       ["Data", "Fail"],
+       ["Equals", "Fail"],
+       ["Arrow", "Fail"],
+       ["LParen", "Fail"],
+       ["RParen", "Fail"],
+       ["LBrace", "Fail"],
+       ["RBrace", "Fail"],
+       ["Semicolon", "Fail"],
+       ["Pipe", "Fail"]]}}
+
+  , {"comment": "caseiExp :: Parser Token Exp",
+     "func": ["caseiExp"], "=":
+    ["pApply",
+      ["pApply",
+        ["pRight",
+          ["require", ["tokenEq", "Casei"]],
+          ["pPure", "CaseiExp"]],
+        ["exp"]],
+      ["pRight",
+        ["require", ["tokenEq", "Of"]],
+        ["bracedList", ["ialt"]]]]}
+
+  , {"comment": "data IAlt = IAltInt Int Exp | IAltVar String Exp",
+     "data": "IAlt", "=": [["IAltInt", 2], ["IAltVar", 2]]}
+
+  , {"comment": "ialt :: Parser Token IAlt",
+     "func": ["ialt"], "=": ["pAlt", ["ialtInt"], ["ialtVar"]]}
+
+  , {"comment": "ialtInt :: Parser Token IAlt",
+     "func": ["ialtInt"], "=":
+    ["pApply",
+      ["pMap", "IAltInt", ["intFromLiteral"]],
+      ["pRight", ["require", ["tokenEq", "Arrow"]], ["exp"]]]}
+
+  , {"comment": "ialtVar :: Parser Token IAlt",
+     "func": ["ialtVar"], "=":
+    ["pApply",
+      ["pMap", "IAltVar", ["varidString"]],
+      ["pRight", ["require", ["tokenEq", "Arrow"]], ["exp"]]]}
+
+  , {"comment": "intFromLiteral :: Parser Token Int",
+     "func": ["intFromLiteral"], "=":
+    ["More", "BadEof", "intFromLiteralPeek"]}
+
+  , {"comment": "intFromLiteralPeek :: Token -> Peeked Token Int",
+     "func": ["intFromLiteralPeek", "token"], "=":
+    {"cased": "token", "of":
+      [["IntLiteral", "n", ["Consume", ["Done", "n"]]],
+       ["CharLiteral", "_", "Fail"],
+       ["VarId", "_", "Fail"],
+       ["ConId", "_", "Fail"],
+       ["Let", "Fail"],
+       ["In", "Fail"],
+       ["Cased", "Fail"],
+       ["Casei", "Fail"],
+       ["Casec", "Fail"],
+       ["Of", "Fail"],
+       ["Data", "Fail"],
+       ["Equals", "Fail"],
+       ["Arrow", "Fail"],
+       ["LParen", "Fail"],
+       ["RParen", "Fail"],
+       ["LBrace", "Fail"],
+       ["RBrace", "Fail"],
+       ["Semicolon", "Fail"],
+       ["Pipe", "Fail"]]}}
+
+  , {"comment": "casecExp :: Parser Token Exp",
+     "func": ["casecExp"], "=":
+    ["pApply",
+      ["pApply",
+        ["pRight",
+          ["require", ["tokenEq", "Casec"]],
+          ["pPure", "CasecExp"]],
+        ["exp"]],
+      ["pRight",
+        ["require", ["tokenEq", "Of"]],
+        ["bracedList", ["calt"]]]]}
+
+  , {"comment": "data CAlt = CAltChar Char Exp | CAltVar String Exp",
+     "data": "CAlt", "=": [["CAltChar", 2], ["CAltVar", 2]]}
+
+  , {"comment": "calt :: Parser Token CAlt",
+     "func": ["calt"], "=": ["pAlt", ["caltChar"], ["caltVar"]]}
+
+  , {"comment": "caltChar :: Parser Token CAlt",
+     "func": ["caltChar"], "=":
+    ["pApply",
+      ["pMap", "CAltChar", ["charFromLiteral"]],
+      ["pRight", ["require", ["tokenEq", "Arrow"]], ["exp"]]]}
+
+  , {"comment": "caltVar :: Parser Token CAlt",
+     "func": ["caltVar"], "=":
+    ["pApply",
+      ["pMap", "CAltVar", ["varidString"]],
+      ["pRight", ["require", ["tokenEq", "Arrow"]], ["exp"]]]}
+
+  , {"comment": "charFromLiteral :: Parser Token Char",
+     "func": ["charFromLiteral"], "=":
+    ["More", "BadEof", "charFromLiteralPeek"]}
+
+  , {"comment": "charFromLiteralPeek :: Token -> Peeked Token Char",
+     "func": ["charFromLiteralPeek", "token"], "=":
+    {"cased": "token", "of":
+      [["IntLiteral", "_", "Fail"],
+       ["CharLiteral", "c", ["Consume", ["Done", "c"]]],
+       ["VarId", "_", "Fail"],
+       ["ConId", "_", "Fail"],
+       ["Let", "Fail"],
+       ["In", "Fail"],
+       ["Cased", "Fail"],
+       ["Casei", "Fail"],
+       ["Casec", "Fail"],
+       ["Of", "Fail"],
+       ["Data", "Fail"],
+       ["Equals", "Fail"],
+       ["Arrow", "Fail"],
+       ["LParen", "Fail"],
+       ["RParen", "Fail"],
+       ["LBrace", "Fail"],
+       ["RBrace", "Fail"],
+       ["Semicolon", "Fail"],
+       ["Pipe", "Fail"]]}}
+
+  , {"comment": "fExp :: Parser Token Exp",
+     "func": ["fExp"], "=": ["pMap", "FExp", ["pMany", ["aExp"]]]}
+
+  , {"comments":
+      ["data AExp = AChar Char\n",
+       "          | AInt Int\n",
+       "          | AVar String\n",
+       "          | ACon String\n",
+       "          | ASub Exp"],
+     "data": "AExp", "=":
+     [["AChar", 1],
+      ["AInt", 1],
+      ["AVar", 1],
+      ["ACon", 1],
+      ["ASub", 1]]}
+
+  , {"comment": "aExp :: Parser Token AExp",
+     "func": ["aExp"], "=": ["More", "BadEof", "aExpPeek"]}
+
+  , {"comment": "aExpPeek :: Token -> Peeked Token AExp",
+     "func": ["aExpPeek", "token"], "=":
+    {"cased": "token", "of":
+      [["IntLiteral", "n", ["Consume", ["Done", ["AInt", "n"]]]],
+       ["CharLiteral", "c", ["Consume", ["Done", ["AChar", "c"]]]],
+       ["VarId", "s", ["Consume", ["Done", ["AVar", "s"]]]],
+       ["ConId", "s", ["Consume", ["Done", ["ACon", "s"]]]],
+       ["Let", "Fail"],
+       ["In", "Fail"],
+       ["Cased", "Fail"],
+       ["Casei", "Fail"],
+       ["Casec", "Fail"],
+       ["Of", "Fail"],
+       ["Data", "Fail"],
+       ["Equals", "Fail"],
+       ["Arrow", "Fail"],
+       ["LParen", ["Consume",
+          ["pMap", "ASub",
+            ["pLeft", ["exp"], ["require", ["tokenEq", "RParen"]]]]]],
+       ["RParen", "Fail"],
+       ["LBrace", "Fail"],
+       ["RBrace", "Fail"],
+       ["Semicolon", "Fail"],
+       ["Pipe", "Fail"]]}}
 
   ]
 }
