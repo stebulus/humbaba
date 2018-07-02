@@ -383,12 +383,16 @@
       ["Cons", {"str": "l"},
       "Nil"]]]]], "Casel"],
     ["Cons", ["Tuple2",
+      ["Cons", {"str": "o"},
+      ["Cons", {"str": "f"},
+      "Nil"]], "Of"],
+    ["Cons", ["Tuple2",
       ["Cons", {"str": "d"},
       ["Cons", {"str": "a"},
       ["Cons", {"str": "t"},
       ["Cons", {"str": "a"},
       "Nil"]]]], "Data"],
-    "Nil"]]]]]}
+    "Nil"]]]]]]}
 
   , {"comment": "fixupReserved :: String -> Token",
      "func": ["fixupReserved", "ident"], "=":
