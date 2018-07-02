@@ -80,7 +80,7 @@ function Stream(program) {
             rt.evaluate(char);
             char = rt.smashIndirects(char);
             process.nextTick(function (c) {
-              debugIO('putchar %j', char.fields[0]);
+              debugIO('putchar %j', c);
               s.okToEmit = s.push(c);
             }, char.fields[0]);
             moreToDo = intermediateResult(rt.Unit);
