@@ -1,16 +1,21 @@
-var test = require('./test.js');
+var test = require('./test');
 
-exports.tests = {};
+var tests = {};
 
 function addTests(name) {
-  var tests = require(name).tests;
-  for (var k in tests)
-    exports.tests[name + ':' + k] = tests[k];
+  var t = require(name).tests;
+  for (var k in t)
+    tests[name + ':' + k] = t[k];
 }
 
-addTests('./test_runtime.js')
-addTests('./test_test.js')
-addTests('./test_lolo.js')
+addTests('./test_test.js');
+addTests('./test_runtime.js');
+addTests('./test_lolo.js');
+addTests('./test_runtime_stream.js');
+addTests('./test_runtime_stream_cat.js');
+addTests('./test_lolo_stream.js');
+addTests('./test_lolo_parse.js');
+addTests('./test_lolo_parse_e2e.js');
 
 if (require.main === module)
-  process.exit(test.runTests(exports.tests));
+  test.main(tests);

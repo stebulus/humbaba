@@ -1,18 +1,18 @@
-var test = require('./test.js');
-var rt = require('./runtime.js');
-var lolo = require('./lolo.js');
+var test = require('./test');
+var rt = require('./runtime');
+var lolo = require('./lolo');
 
 function expr(code) {
   var s = '';
   function chunk(text) { s += text; }
-  lolo.exprToExpr(code, chunk);
+  lolo.expr(code, chunk);
   return eval(s);
 }
 
 function exprOver(code) {
   var s = '(function () { var o = new rt.Empty(); ';
   function chunk(text) { s += text; }
-  lolo.exprOverwrite(code, 'o', chunk);
+  lolo.expr(code, chunk, 'o');
   s += 'return o; })()';
   return eval(s);
 }
@@ -26,13 +26,15 @@ function assertExprValue(expected, expression) {
   test.assertSame(expected, rt.smashIndirects(ex));
 }
 
+function programValue(program) {
+  var expr = eval(lolo.programToJavaScript(program, 'test'));
+  rt.evaluateDeep(expr);
+  return rt.smashIndirects(expr);
+}
+exports.programValue = programValue;
+
 function assertProgramValue(expected, program) {
-  var s = '';
-  function chunk(text) { s += text; }
-  lolo.program(program, 'test', chunk);
-  var expr = eval(s);
-  rt.evaluate(expr);
-  test.assertSame(expected, rt.smashIndirects(expr));
+  test.assertSame(expected, programValue(program));
 }
 
 tests = {
@@ -81,24 +83,24 @@ tests = {
 
   caseNumber1() {
     assertExprValue(new rt.Box(3),
-      {"case": 2, "of": [[2, 3], [3, 2], ["n", 8]]});
+      {"casei": 2, "of": [[2, 3], [3, 2], ["n", 8]]});
   },
 
   caseNumber2() {
     assertExprValue(new rt.Box(3),
-      {"case": 2, "of": [[3, 2], [2, 3], ["n", 8]]});
+      {"casei": 2, "of": [[3, 2], [2, 3], ["n", 8]]});
   },
 
   caseNumberDefault() {
     assertExprValue(new rt.Box(8),
-      {"case": 17, "of": [[3, 2], [2, 3], ["n", 8]]});
+      {"casei": 17, "of": [[3, 2], [2, 3], ["n", 8]]});
   },
 
   caseNumberVariable() {
     assertProgramValue(new rt.Box(2), {"declarations": [
       {"func": ["identity", "x"], "=": "x"},
       {"func": ["test"],
-       "=": {"case": 2, "of": [["n", ["identity", "n"]]]}}
+       "=": {"casei": 2, "of": [["n", ["identity", "n"]]]}}
     ]});
   },
 
@@ -106,18 +108,81 @@ tests = {
     assertProgramValue(new rt.Box(3), {"declarations": [
       {"func": ["identity", "x"], "=": "x"},
       {"func": ["test"],
-       "=": {"case": ["identity", 2], "of": [[3, 2], [2, 3], ["n", 8]]}}
+       "=": {"casei": ["identity", 2], "of": [[3, 2], [2, 3], ["n", 8]]}}
     ]});
   },
 
-  caseBoolean1() {
-    assertExprValue(new rt.Box(3),
-      {"case": true, "of": [[true, 3], [false, 2]]});
+  caseChar1() {
+    assertExprValue(new rt.Box("t"),
+      {"casec": {"str": "f"},
+       "of": [[{"str": "f"}, {"str": "t"}], ["x", "x"]]});
   },
 
-  caseBoolean2() {
-    assertExprValue(new rt.Box(3),
-      {"case": true, "of": [[false, 2], [true, 3]]});
+  caseChar2() {
+    assertExprValue(new rt.Box("g"),
+      {"casec": {"str": "g"},
+       "of": [[{"str": "f"}, {"str": "t"}], ["x", "x"]]});
+  },
+
+  caseData1() {
+    assertProgramValue(new rt.Box(4), {"declarations": [
+      {"data": "List",
+       "=": [["Cons", 2], ["Nil", 0]]},
+      {"func": ["test"],
+       "=": {"cased": "Nil", "of": [["Nil", 4], ["Cons", "x", "y", 5]]}}
+    ]});
+  },
+
+  caseData2() {
+    assertProgramValue(new rt.Box(4), {"declarations": [
+      {"data": "List",
+       "=": [["Cons", 2], ["Nil", 0]]},
+      {"func": ["test"],
+       "=": {"cased": "Nil", "of": [["Cons", "x", "y", 5], ["Nil", 4]]}}
+    ]});
+  },
+
+  caseDataEvaluate() {
+    assertProgramValue(new rt.Box(4), {"declarations": [
+      {"data": "List",
+       "=": [["Cons", 2], ["Nil", 0]]},
+      {"func": ["identity", "x"], "=": "x"},
+      {"func": ["test"],
+       "=": {"cased": ["identity", "Nil"], "of": [["Cons", "x", "y", 5], ["Nil", 4]]}}
+    ]});
+  },
+
+  caseDataVariables1() {
+    assertProgramValue(new rt.Box(3), {"declarations": [
+      {"data": "List",
+       "=": [["Cons", 2], ["Nil", 0]]},
+      {"func": ["test"],
+       "=": {"cased": ["Cons", 3, "Nil"],
+             "of": [["Cons", "x", "y", "x"], ["Nil", 4]]}}
+    ]});
+  },
+
+  caseDataVariables2() {
+    assertProgramValue(new rt.Box(2), {"declarations": [
+      {"data": "List",
+       "=": [["Cons", 2], ["Nil", 0]]},
+      {"func": ["test"],
+       "=": {"cased": ["Cons", 3, ["Cons", 2, "Nil"]],
+             "of": [["Cons", "x", "y",
+                     {"cased": "y",
+                      "of": [["Cons", "h", "t", "h"], ["Nil", 7]]}],
+                    ["Nil", 4]]}}
+    ]});
+  },
+
+  caseWithNestedEvaluand() {
+    assertProgramValue(rt.False, {"declarations": [
+      {"data": "Bool", "=": [["True", 0], ["False", 0]]},
+      {"func": ["id", "x"], "=": "x"},
+      {"func": ["test"], "=":
+        {"cased": ["charEq", 1, ["id", 0]],
+         "of": [["True", "True"], ["False", "False"]]}}
+    ]});
   },
 
 };
@@ -125,4 +190,4 @@ tests = {
 exports.tests = tests;
 
 if (require.main === module)
-  process.exit(test.runTests(exports.tests));
+  test.main(tests);

@@ -1,5 +1,5 @@
-var test = require('./test.js');
-var rt = require('./runtime.js');
+var test = require('./test');
+var rt = require('./runtime');
 
 var CONS = 1;
 var NIL = 2;
@@ -170,4 +170,4 @@ tests = {
 exports.tests = tests;
 
 if (require.main === module)
-  process.exit(test.runTests(exports.tests));
+  test.main(tests);

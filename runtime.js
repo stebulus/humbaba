@@ -3,6 +3,22 @@ var PARTIAL_APPLY = 2;
 var INDIRECT = 3;
 var THUNK = 4;
 
+function nodeType(node) {
+  switch (node.type) {
+    case DATA:
+      return 'data(' + node.tag.toString() + ')';
+    case PARTIAL_APPLY:
+      return 'pap(' + node.func.name + ',' + node.args.length + ')';
+    case INDIRECT:
+      return '*' + nodeType(node.target);
+    case THUNK:
+      return 'thunk';
+    default:
+      return 'unknown';
+  }
+}
+exports.nodeType = nodeType
+
 var Node = {};
 exports.Node = Node;
 
@@ -10,9 +26,10 @@ function Empty() {}
 Empty.prototype = Node;
 exports.Empty = Empty;
 
-function Data(tag) {
+function Data(tag, fields) {
   this.type = DATA;
   this.tag = tag;
+  this.fields = fields;
 }
 Data.prototype = Node;
 exports.Data = Data;
@@ -47,20 +64,19 @@ Apply.prototype = Node;
 exports.Apply = Apply;
 
 function Box(value) {
-  Data.call(this, 1);
-  this.$value = value;
+  Data.call(this, 1, [value]);
 }
 Box.prototype = Node;
 exports.Box = Box;
 
 function applyTo(args) {
-  return function(func) {
+  return function actuallyApply(func) {
     var allArgs;
     var unboxedFunc;
     switch (func.type) {
       case DATA:
         allArgs = args;
-        unboxedFunc = func.$value;
+        unboxedFunc = func.fields[0];
         break;
       case PARTIAL_APPLY:
         allArgs = func.args.concat(args);
@@ -112,7 +128,7 @@ function evaluate(expr) {
       case PARTIAL_APPLY:
         if (stack.length === 0)
           return;
-        oldexpr = smashIndirects(stack.pop());
+        var oldexpr = smashIndirects(stack.pop());
         continuation = stack.pop();
         continuation.call(oldexpr, expr);
         expr = smashIndirects(oldexpr);
@@ -143,3 +159,65 @@ function evaluate(expr) {
   }
 }
 exports.evaluate = evaluate;
+
+function evaluateDeep(expr) {
+  evaluate(expr);
+  expr = smashIndirects(expr);
+  if (expr.type === DATA) {
+    for (var i = 0; i < expr.fields.length; i++) {
+      if (expr.fields[i].type) {
+        evaluateDeep(expr.fields[i]);
+        expr.fields[i] = smashIndirects(expr.fields[i]);
+      }
+    }
+  }
+}
+exports.evaluateDeep = evaluateDeep;
+
+var IOPURE = 1;
+exports.IOPURE = IOPURE;
+var IOBIND = 2;
+exports.IOBIND = IOBIND;
+var PUTCHAR = 3;
+exports.PUTCHAR = PUTCHAR;
+var GETCHAR = 4;
+exports.GETCHAR = GETCHAR;
+var ISEOF = 5;
+exports.ISEOF = ISEOF;
+
+function IoPure(value) {
+  Data.call(this, IOPURE, [value]);
+}
+IoPure.prototype = Node;
+exports.IoPure = IoPure;
+
+function IoBind(x, f) {
+  Data.call(this, IOBIND, [x, f]);
+}
+IoBind.prototype = Node;
+exports.IoBind = IoBind;
+
+function PutChar(char) {
+  Data.call(this, PUTCHAR, [char]);
+}
+PutChar.prototype = Node;
+exports.PutChar = PutChar;
+
+GetChar = new Data(GETCHAR, []);
+exports.GetChar = GetChar;
+
+IsEOF = new Data(ISEOF, []);
+exports.IsEOF = IsEOF;
+
+var TRUE = 1;
+exports.TRUE = TRUE;
+var FALSE = 2;
+exports.FALSE = FALSE;
+
+True = new Data(TRUE, []);
+exports.True = True;
+False = new Data(FALSE, []);
+exports.False = False;
+
+Unit = new Data(1, []);
+exports.Unit = Unit;

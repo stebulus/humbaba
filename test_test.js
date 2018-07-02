@@ -1,4 +1,4 @@
-var test = require('./test.js');
+var test = require('./test');
 
 tests = {
 
@@ -6,29 +6,39 @@ tests = {
     test.assertSame(0, 0);
   },
 
-  sameNumbersThrow() {
-    var ok = false;
-    try {
-      test.assertNotSame(0, 0);
-    } catch (e) {
-      ok = true;
-    }
-    if (!ok) throw new Error("no exception thrown");
+  sameNumbersCallback(callback) {
+    process.nextTick(function () {
+      try {
+        test.assertSame(0, 0);
+        callback(null);
+      } catch (e) {
+        callback(e);
+      }
+    });
   },
+
+  sameNumbersThrow: test.expectFailure(function () {
+    test.assertNotSame(0, 0);
+  }),
 
   differentNumbers() {
     test.assertNotSame(0, 1);
   },
 
-  differentNumbersThrow() {
-    var ok = false;
-    try {
-      test.assertSame(0, 1);
-    } catch (e) {
-      ok = true;
-    }
-    if (!ok) throw new Error("no exception thrown");
-  },
+  differentNumbersThrow: test.expectFailure(function () {
+    test.assertSame(0, 1);
+  }),
+
+  errorCallback: test.expectFailure(function (callback) {
+    process.nextTick(function () {
+      try {
+        test.assertSame(0, 1);
+        callback(null);
+      } catch (e) {
+        callback(e);
+      }
+    });
+  }),
 
   differentTypes() {
     test.assertNotSame(1, '1');
@@ -86,9 +96,20 @@ tests = {
     test.assertNotSame({a: [1,2,3], b: [4,5,6]}, {a: [1,2,3], b: [4,5,7]});
   },
 
+  noCallbackCall(callback) {
+    test.runTest(function (callback) {
+      // neglecting to call callback
+    }, function (err) {
+      if (err)
+        callback(null);
+      else
+        callback(new Error("expected error, got success"));
+    }, test.TEST_TIMEOUT/10);
+  },
+
 };
 
 exports.tests = tests;
 
 if (require.main === module)
-  process.exit(test.runTests(exports.tests));
+  test.main(tests);
