@@ -138,7 +138,7 @@ function caseThunkArgs(caseExpr, chunk) {
       chunk(' = new rt.Box(x.$value);');
     } else {
       chunk('case ');
-      chunk(alts[i][0]);
+      chunk(alts[i][0].toString());
       chunk(': ');
     }
     exprOverwrite(alts[i][1], 'this', chunk);
