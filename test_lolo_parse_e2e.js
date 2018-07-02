@@ -26,6 +26,16 @@ tests = {
     );
   },
 
+  dataDecl(callback) {
+    expectParsed(
+      {"declarations": [
+        {"data": "List", "=": [["Cons", 2], ["Nil", 0]]}
+      ]},
+      "data List = Cons 2 | Nil 0",
+      callback
+    );
+  },
+
 };
 
 exports.tests = tests;

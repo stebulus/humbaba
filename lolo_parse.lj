@@ -71,6 +71,11 @@
             [["Cons", "_", "_", "False"],
              ["Nil", "True"]]}]]}}
 
+  , {"func": ["intAbs", "n"], "=":
+    {"cased": ["intLe", 0, "n"], "of":
+      [["True", "n"],
+       ["False", ["intMul", -1, "n"]]]}}
+
   , {"func": ["charLe", "a", "b"], "=":
     ["intLe", ["charOrd", "a"], ["charOrd", "b"]]}
 
@@ -1423,6 +1428,15 @@
           ["ioThen", ["emitExpr", "expr"],
                      ["putChar", {"str": "}"}]]]]]]]]]]]]]]]]]]}}
 
+  , {"func": ["emitConDecl", "decl"], "=":
+    {"cased": "decl", "of":
+      [["ConDecl", "name", "arity",
+          ["ioThen", ["putChar", {"str": "["}],
+          ["ioThen", ["emitStr", "name"],
+          ["ioThen", ["putChar", {"str": ","}],
+          ["ioThen", ["emitInt", "arity"],
+                     ["putChar", {"str": "]"}]]]]]]]}}
+
   , {"func": ["emitExpr", "expr"], "=":
     {"cased": "expr", "of":
       [["LetExp", "bindings", "subexpr", ["putChar", {"str": "0"}]],
@@ -1445,12 +1459,46 @@
           ["ioThen", ["emitStrChar", "c"],
           ["ioThen", ["putChar", {"str": "\""}],
                      ["putChar", {"str": "}"}]]]]]]]]]]]],
-       ["AInt", "n",
-          ["ioThen", ["emitOptSign", "n"],
-                     ["mapM_", "putChar", ["digits", ["intAbs", "n"]]]]],
+       ["AInt", "n", ["emitInt", "n"]],
        ["AVar", "s", ["emitStr", "s"]],
        ["ACon", "s", ["emitStr", "s"]],
        ["ASub", "subexpr", ["emitExpr", "subexpr"]]]}}
+
+  , {"func": ["emitInt", "n"], "=":
+    ["ioThen", ["emitOptSign", "n"],
+               ["mapM_", "putChar", ["digits", ["intAbs", "n"]]]]}
+
+  , {"func": ["emitOptSign", "n"], "=":
+    {"cased": ["intLe", 0, "n"], "of":
+      [["True", ["ioPure", "Unit"]],
+       ["False", ["putChar", {"str": "-"}]]]}}
+
+  , {"func": ["digits", "n"], "=":
+    {"casei": "n", "of":
+      [[0, ["Cons", {"str": "0"}, "Nil"]],
+       ["_", ["reverse", ["digitsHelper", "n"]]]]}}
+
+  , {"func": ["digitsHelper", "n"], "=":
+    {"casei": "n", "of":
+      [[0, "Nil"],
+       ["_",
+          ["Cons",
+            ["digit1", ["intRem", "n", 10]],
+            ["digitsHelper", ["intQuot", "n", 10]]]]]}}
+
+  , {"func": ["digit1", "n"], "=":
+    {"casei": "n", "of":
+      [[0, {"str": "0"}],
+       [1, {"str": "1"}],
+       [2, {"str": "2"}],
+       [3, {"str": "3"}],
+       [4, {"str": "4"}],
+       [5, {"str": "5"}],
+       [6, {"str": "6"}],
+       [7, {"str": "7"}],
+       [8, {"str": "8"}],
+       [9, {"str": "9"}],
+       ["_", {"str": "?"}]]}}
 
   , {"func": ["checkParseResult", "result"], "=":
     {"cased": "result", "of":
