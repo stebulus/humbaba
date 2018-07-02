@@ -13,27 +13,37 @@ function collect(arr) {
   });
 }
 
-function expectOutput(expected, stream, callback) {
+function getOutput(stream, callback) {
   var actualOutput = []
   stream.pipe(collect(actualOutput))
     .on('finish', function () {
-      test.runTest(function () {
-        for (var i = 0; i < actualOutput.length; i++)
-          actualOutput[i] = actualOutput[i].toString();
-        test.assertSame(expected, actualOutput);
-      }, callback);
+      callback(actualOutput);
     });
+}
+exports.getOutput = getOutput;
+
+function getOutputString(stream, callback) {
+  getOutput(stream, function (chunks) { callback(chunks.join('')); });
+}
+exports.getOutputString = getOutputString;
+
+function expectOutput(expected, stream, callback) {
+  getOutput(stream, function (actualOutput) {
+    test.runTest(function () {
+      for (var i = 0; i < actualOutput.length; i++)
+        actualOutput[i] = actualOutput[i].toString();
+      test.assertSame(expected, actualOutput);
+    }, callback);
+  });
 }
 exports.expectOutput = expectOutput;
 
 function expectOutputString(expected, stream, callback) {
-  var actualOutput = []
-  stream.pipe(collect(actualOutput))
-    .on('finish', function () {
-      test.runTest(function () {
-        test.assertSame(expected, actualOutput.join(''));
-      }, callback);
-    });
+  getOutputString(stream, function (actualOutput) {
+    test.runTest(function () {
+      test.assertSame(expected, actualOutput);
+    }, callback);
+  });
 }
 exports.expectOutputString = expectOutputString;
 

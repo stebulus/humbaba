@@ -4,8 +4,7 @@ var path = require('path');
 var rt = require('./runtime');
 var rts = require('./runtime_stream');
 var test = require('./test');
-var lltest = require('./test_lolo');
-var test_rts = require('./test_runtime_stream');
+var test_lolo = require('./test_lolo');
 
 var llparse = (function () {
   var here = path.dirname(module.filename)
@@ -20,19 +19,20 @@ function charList(s) {
   return list;
 }
 
-function withLoloProgram(expr) {
+function withLoloParseProgram(expr) {
   return {"declarations": llparse['declarations'].concat([
     {"func": ["test"], "=": expr}
   ])};
 }
+exports.withLoloParseProgram = withLoloParseProgram;
 
-function withLolo(expr) {
-  return lltest.programValue(withLoloProgram(expr));
+function withLoloParse(expr) {
+  return test_lolo.programValue(withLoloParseProgram(expr));
 }
 
 function assertParseResult(expected, parser, input) {
-  var expectedValue = withLolo(expected);
-  var actualValue = withLolo(["parseList", parser, input]);
+  var expectedValue = withLoloParse(expected);
+  var actualValue = withLoloParse(["parseList", parser, input]);
   test.assertSame(expectedValue, actualValue);
 }
 
@@ -51,7 +51,8 @@ function assertParseFail(parser, input) {
 tests = {
 
   charOrd() {
-    test.assertSame(new rt.Box(97), withLolo(["charOrd", {"str": "a"}]));
+    test.assertSame(new rt.Box(97),
+      withLoloParse(["charOrd", {"str": "a"}]));
   },
 
   parseChar() {
@@ -130,12 +131,12 @@ tests = {
 
   digit2int() {
     test.assertSame(new rt.Box(2),
-      withLolo(["digit2int", {"str": "2"}]));
+      withLoloParse(["digit2int", {"str": "2"}]));
   },
 
   digits2int() {
     test.assertSame(new rt.Box(374),
-      withLolo(["digits2int",
+      withLoloParse(["digits2int",
         ["Cons", {"str": "3"},
         ["Cons", {"str": "7"},
         ["Cons", {"str": "4"}, "Nil"]]]]));
@@ -143,27 +144,27 @@ tests = {
 
   charLeAA() {
     test.assertSame(rt.True,
-      withLolo(["charLe", {"str": "a"}, {"str": "a"}]));
+      withLoloParse(["charLe", {"str": "a"}, {"str": "a"}]));
   },
 
   charLeAB() {
     test.assertSame(rt.True,
-      withLolo(["charLe", {"str": "a"}, {"str": "b"}]));
+      withLoloParse(["charLe", {"str": "a"}, {"str": "b"}]));
   },
 
   charLeBA() {
     test.assertSame(rt.False,
-      withLolo(["charLe", {"str": "b"}, {"str": "a"}]));
+      withLoloParse(["charLe", {"str": "b"}, {"str": "a"}]));
   },
 
   charBetweenABC() {
     test.assertSame(rt.False,
-      withLolo(["charBetween", {"str": "a"}, {"str": "b"}, {"str": "c"}]));
+      withLoloParse(["charBetween", {"str": "a"}, {"str": "b"}, {"str": "c"}]));
   },
 
   charBetweenACB() {
     test.assertSame(rt.True,
-      withLolo(["charBetween", {"str": "a"}, {"str": "c"}, {"str": "b"}]));
+      withLoloParse(["charBetween", {"str": "a"}, {"str": "c"}, {"str": "b"}]));
   },
 
   varid() {
@@ -377,18 +378,6 @@ tests = {
       ["Cons", "Equals",
       ["Cons", ["VarId", charList("first")],
        "Nil"]]]]]
-    );
-  },
-
-  through(callback) {
-    var strm = new rts.Stream(withLoloProgram(["main"]));
-    strm.end("main = putChar 'x'");
-    test_rts.expectOutput(
-      JSON.stringify({"declarations":
-        [{"func":["main"], "=": ["putChar", {"str": "x"}]}]
-      }),
-      strm,
-      callback
     );
   },
 

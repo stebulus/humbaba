@@ -15,6 +15,7 @@ addTests('./test_runtime_stream.js');
 addTests('./test_runtime_stream_cat.js');
 addTests('./test_lolo_stream.js');
 addTests('./test_lolo_parse.js');
+addTests('./test_lolo_parse_e2e.js');
 
 if (require.main === module)
   test.main(tests);

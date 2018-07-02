@@ -3,7 +3,7 @@ var rts = require('./runtime_stream');
 var test = require('./test');
 var test_rts = require('./test_runtime_stream');
 
-function expectOutput(expected, input, program, callback) {
+function stdout(input, program) {
   var code =
     "var rt = require('./runtime');" +
     lolo.ioDeclsJavaScript +
@@ -14,7 +14,16 @@ function expectOutput(expected, input, program, callback) {
     strm.end();
   else
     strm.end(input);
-  test_rts.expectOutputString(expected, strm, callback);
+  return strm;
+}
+
+function getOutput(input, program, callback) {
+  test_rts.getOutputString(stdout(input, program), callback);
+}
+exports.getOutput = getOutput;
+
+function expectOutput(expected, input, program, callback) {
+  test_rts.expectOutputString(expected, stdout(input, program), callback);
 }
 exports.expectOutput = expectOutput;
 
