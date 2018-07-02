@@ -33,8 +33,11 @@ function expr(code, chunk, target) {
       } else if ('let' in code) {
         letExpr(code, chunk, target);
         break;
-      } else if ('casel' in code) {
-        caseLiteral(code, chunk, target);
+      } else if ('casei' in code) {
+        caseLiteral(code, 'casei', chunk, target);
+        break;
+      } else if ('casec' in code) {
+        caseLiteral(code, 'casec', chunk, target);
         break;
       } else if ('cased' in code) {
         caseData(code, chunk, target);
@@ -112,7 +115,7 @@ function letExpr(code, chunk, target) {
   chunk('})();');
 }
 
-function caseLiteral(code, chunk, target) {
+function caseLiteral(code, exprKey, chunk, target) {
   if (target) {
     chunk('rt.Thunk.call(');
     chunk(target);
@@ -120,25 +123,25 @@ function caseLiteral(code, chunk, target) {
   } else {
     chunk('new rt.Thunk(');
   }
-  expr(code['casel'], chunk, null);
+  expr(code[exprKey], chunk, null);
   chunk(', function (x) {');
   chunk('switch (x.fields[0]) {');
   var alts = code['of'];
   for (var i = 0; i < alts.length; i++) {
     if (typeof alts[i][0] === 'string') {
-      chunk('default: var $');
+      chunk('\ndefault: var $');
       chunk(alts[i][0]);
       chunk(' = new rt.Box(x.fields[0]);');
     } else if (typeof alts[i][0] === 'object') {
       if ('str' in alts[i][0]) {
-        chunk('case ');
+        chunk('\ncase ');
         chunk(JSON.stringify(alts[i][0]['str']));
         chunk(': ');
       } else {
         weirdCode(alts[i][0]);
       }
     } else {
-      chunk('case ');
+      chunk('\ncase ');
       chunk(alts[i][0].toString());
       chunk(': ');
     }
@@ -164,7 +167,7 @@ function caseData(code, chunk, target) {
     var con = alts[i][0];
     var args = alts[i].slice(1, -1);
     var rhs = alts[i][alts[i].length-1];
-    chunk('case ');
+    chunk('\ncase ');
     chunk('tag$');
     chunk(con);
     chunk(': ');
@@ -178,7 +181,7 @@ function caseData(code, chunk, target) {
     expr(rhs, chunk, 'this');
     chunk('break;');
   }
-  chunk('default: throw new Error("failure to match in cased: " + JSON.stringify(x));');
+  chunk('\ndefault: throw new Error("failure to match in cased: " + JSON.stringify(x) + ", in code: " + ' + JSON.stringify(JSON.stringify(code)) + ');');
   chunk('};})');
   if (target) chunk(';');
 }
@@ -187,8 +190,21 @@ function program(program, entry, chunk) {
   chunk('(function () {');
   chunk('function charEq(a, b) { rt.evaluate(a); a = rt.smashIndirects(a); rt.evaluate(b); b = rt.smashIndirects(b); var eq = a.fields[0] === b.fields[0] ? rt.True : rt.False; rt.Indirect.call(this, eq); }');
   chunk('var $charEq = new rt.Box(charEq);');
+  chunk('function charOrd(a) { rt.evaluate(a); a = rt.smashIndirects(a); var ord = a.fields[0].charCodeAt(0); rt.Box.call(this, ord); }');
+  chunk('var $charOrd = new rt.Box(charOrd);');
+  chunk('function intAdd(a, b) { rt.evaluate(a); a = rt.smashIndirects(a); rt.evaluate(b); b = rt.smashIndirects(b); var sum = a.fields[0] + b.fields[0]; rt.Box.call(this, sum); }');
+  chunk('var $intAdd = new rt.Box(intAdd);');
+  chunk('function intMul(a, b) { rt.evaluate(a); a = rt.smashIndirects(a); rt.evaluate(b); b = rt.smashIndirects(b); var prod = a.fields[0] * b.fields[0]; rt.Box.call(this, prod); }');
+  chunk('var $intMul = new rt.Box(intMul);');
+  chunk('function intQuot(a, b) { rt.evaluate(a); a = rt.smashIndirects(a); rt.evaluate(b); b = rt.smashIndirects(b); var prod = Math.trunc(a.fields[0] / b.fields[0]); rt.Box.call(this, prod); }');
+  chunk('var $intQuot = new rt.Box(intQuot);');
+  chunk('function intRem(a, b) { rt.evaluate(a); a = rt.smashIndirects(a); rt.evaluate(b); b = rt.smashIndirects(b); var prod = a.fields[0] % b.fields[0]; rt.Box.call(this, prod); }');
+  chunk('var $intRem = new rt.Box(intRem);');
+  chunk('function intLe(a, b) { rt.evaluate(a); a = rt.smashIndirects(a); rt.evaluate(b); b = rt.smashIndirects(b); var cmp = a.fields[0] <= b.fields[0] ? rt.True : rt.False; rt.Indirect.call(this, cmp); }');
+  chunk('var $intLe = new rt.Box(intLe);');
   var decls = program['declarations'];
   for (var i = 0; i < decls.length; i++) {
+    chunk('\n');
     if ('func' in decls[i]) {
       functionDeclaration(decls[i], chunk);
     } else if ('data' in decls[i]) {
@@ -202,6 +218,14 @@ function program(program, entry, chunk) {
   chunk(', []);})()');
 }
 exports.program = program;
+
+function programToJavaScript(prog, entry) {
+  var chunks = [];
+  function chunk(text) { chunks.push(text); }
+  program(prog, entry, chunk);
+  return chunks.join('');
+}
+exports.programToJavaScript = programToJavaScript;
 
 function functionDeclaration(decl, chunk) {
   var lhs = decl['func'];
@@ -287,3 +311,15 @@ function declareBoxedConstructor(name, chunk) {
   chunk(name);
   chunk(');');
 }
+
+exports.ioDeclsJavaScript =
+  'var $ioPure = new rt.Box(rt.IoPure);' +
+  'var $ioBind = new rt.Box(rt.IoBind);' +
+  'var $getChar = rt.GetChar;' +
+  'var $putChar = new rt.Box(rt.PutChar);' +
+  'var $isEOF = rt.IsEOF;';
+
+exports.preludeLolo = [
+  {"data": "Bool", "=": [["True"], ["False"]]},
+  {"data": "Unit", "=": [["Unit"]]},
+];
