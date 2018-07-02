@@ -115,7 +115,7 @@ function Stream(program) {
           }
           break;
         default:
-          throw new Error('weird tag ' + s.expr.tag);
+          throw new Error('weird tag in: ' + JSON.stringify(s.expr));
       }
     } while (moreToDo);
     s.advancing = false;
