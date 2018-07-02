@@ -142,7 +142,7 @@ function caseLiteral(code, exprKey, chunk, target) {
       }
     } else {
       chunk('\ncase ');
-      chunk(alts[i][0]);
+      chunk(alts[i][0].toString());
       chunk(': ');
     }
     expr(alts[i][1], chunk, 'this');
