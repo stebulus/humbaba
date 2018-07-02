@@ -129,19 +129,19 @@ function caseLiteral(code, exprKey, chunk, target) {
   var alts = code['of'];
   for (var i = 0; i < alts.length; i++) {
     if (typeof alts[i][0] === 'string') {
-      chunk('default: var $');
+      chunk('\ndefault: var $');
       chunk(alts[i][0]);
       chunk(' = new rt.Box(x.fields[0]);');
     } else if (typeof alts[i][0] === 'object') {
       if ('str' in alts[i][0]) {
-        chunk('case ');
+        chunk('\ncase ');
         chunk(JSON.stringify(alts[i][0]['str']));
         chunk(': ');
       } else {
         weirdCode(alts[i][0]);
       }
     } else {
-      chunk('case ');
+      chunk('\ncase ');
       chunk(alts[i][0]);
       chunk(': ');
     }
@@ -167,7 +167,7 @@ function caseData(code, chunk, target) {
     var con = alts[i][0];
     var args = alts[i].slice(1, -1);
     var rhs = alts[i][alts[i].length-1];
-    chunk('case ');
+    chunk('\ncase ');
     chunk('tag$');
     chunk(con);
     chunk(': ');
@@ -181,7 +181,7 @@ function caseData(code, chunk, target) {
     expr(rhs, chunk, 'this');
     chunk('break;');
   }
-  chunk('default: throw new Error("failure to match in cased: " + JSON.stringify(x) + ", in code: " + ' + JSON.stringify(JSON.stringify(code)) + ');');
+  chunk('\ndefault: throw new Error("failure to match in cased: " + JSON.stringify(x) + ", in code: " + ' + JSON.stringify(JSON.stringify(code)) + ');');
   chunk('};})');
   if (target) chunk(';');
 }
@@ -200,6 +200,7 @@ function program(program, entry, chunk) {
   chunk('var $intLe = new rt.Box(intLe);');
   var decls = program['declarations'];
   for (var i = 0; i < decls.length; i++) {
+    chunk('\n');
     if ('func' in decls[i]) {
       functionDeclaration(decls[i], chunk);
     } else if ('data' in decls[i]) {
