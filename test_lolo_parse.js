@@ -55,6 +55,18 @@ tests = {
       withLoloParse(["charOrd", {"str": "a"}]));
   },
 
+  hex4odd() {
+    test.assertSame(
+      withLoloParse(charList("350B")),
+      withLoloParse(["hex4", 13579]));
+  },
+
+  hex4even() {
+    test.assertSame(
+      withLoloParse(charList("09A4")),
+      withLoloParse(["hex4", 2468]));
+  },
+
   parseChar() {
     assertParsed({"str": "x"}, ["char", {"str": "x"}], "x");
   },

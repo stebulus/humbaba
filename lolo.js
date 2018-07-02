@@ -196,6 +196,10 @@ function program(program, entry, chunk) {
   chunk('var $intAdd = new rt.Box(intAdd);');
   chunk('function intMul(a, b) { rt.evaluate(a); a = rt.smashIndirects(a); rt.evaluate(b); b = rt.smashIndirects(b); var prod = a.fields[0] * b.fields[0]; rt.Box.call(this, prod); }');
   chunk('var $intMul = new rt.Box(intMul);');
+  chunk('function intQuot(a, b) { rt.evaluate(a); a = rt.smashIndirects(a); rt.evaluate(b); b = rt.smashIndirects(b); var prod = Math.trunc(a.fields[0] / b.fields[0]); rt.Box.call(this, prod); }');
+  chunk('var $intQuot = new rt.Box(intQuot);');
+  chunk('function intRem(a, b) { rt.evaluate(a); a = rt.smashIndirects(a); rt.evaluate(b); b = rt.smashIndirects(b); var prod = a.fields[0] % b.fields[0]; rt.Box.call(this, prod); }');
+  chunk('var $intRem = new rt.Box(intRem);');
   chunk('function intLe(a, b) { rt.evaluate(a); a = rt.smashIndirects(a); rt.evaluate(b); b = rt.smashIndirects(b); var cmp = a.fields[0] <= b.fields[0] ? rt.True : rt.False; rt.Indirect.call(this, cmp); }');
   chunk('var $intLe = new rt.Box(intLe);');
   var decls = program['declarations'];

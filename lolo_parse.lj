@@ -29,6 +29,12 @@
 
   , {"func": ["const", "x", "y"], "=": "x"}
 
+  , {"func": ["map", "f", "xs"], "=":
+    {"cased": "xs", "of":
+      [["Nil", "Nil"],
+       ["Cons", "x", "rest",
+          ["Cons", ["f", "x"], ["map", "f", "rest"]]]]}}
+
   , {"func": ["lookup", "eq", "tuples", "x"], "=":
     {"cased": "tuples", "of":
       [["Nil", "Nothing"],
@@ -48,6 +54,8 @@
     {"cased": "xs", "of":
       [["Cons", "x", "rest", ["foldl", "f", ["f", "z", "x"], "rest"]],
        ["Nil", "z"]]}}
+
+  , {"func": ["reverse"], "=": ["foldl", ["flip", "Cons"], "Nil"]}
 
   , {"func": ["listEq", "eq", "xs", "ys"], "=":
     {"cased": "xs", "of":
@@ -70,6 +78,12 @@
 
   , {"func": ["ioThen", "ioa", "iob"], "=":
     ["ioBind", "ioa", ["const", "iob"]]}
+
+  , {"func": ["sequence_", "ios"], "=":
+    ["foldr", "ioThen", ["ioPure", "Unit"], "ios"]}
+
+  , {"func": ["mapM_", "f", "xs"], "=":
+    ["sequence_", ["map", "f", "xs"]]}
 
   , {"func": ["digits2int", "digits"], "=":
     ["foldl", "digits2intStep", 0, "digits"]}
@@ -1291,6 +1305,66 @@
           ["ioThen", ["emit", "item"],
                      ["emitMoreItems", "emit", "rest"]]]]]}}
 
+  , {"func": ["emitStr", "s"], "=":
+    ["ioThen", ["putChar", {"str": "\""}],
+    ["ioThen", ["mapM_", "emitStrChar", "s"],
+               ["putChar", {"str": "\""}]]]}
+
+  , {"func": ["emitStrChar", "c"], "=":
+    {"casec": "c", "of":
+      [[{"str": "\""}, ["emitBackslashChar", "c"]],
+       [{"str": "\\"}, ["emitBackslashChar", "c"]],
+       [{"str": "\b"}, ["emitBackslashChar", {"str": "b"}]],
+       [{"str": "\f"}, ["emitBackslashChar", {"str": "f"}]],
+       [{"str": "\n"}, ["emitBackslashChar", {"str": "n"}]],
+       [{"str": "\r"}, ["emitBackslashChar", {"str": "r"}]],
+       [{"str": "\t"}, ["emitBackslashChar", {"str": "t"}]],
+       ["_", {"cased": ["printableAscii", "c"], "of":
+          [["True", ["putChar", "c"]],
+           ["False", ["emitUnicodeEscape", "c"]]]}]]}}
+
+  , {"func": ["printableAscii", "c"], "=":
+    ["charBetween", {"str": "\u0020"}, {"str": "\u007e"}, "c"]}
+
+  , {"func": ["emitBackslashChar", "c"], "=":
+    ["ioThen", ["putChar", {"str": "\\"}], ["putChar", "c"]]}
+
+  , {"func": ["emitUnicodeEscape", "c"], "=":
+    ["ioThen", ["putChar", {"str": "\\"}],
+    ["ioThen", ["putChar", {"str": "u"}],
+               ["mapM_", "putChar", ["hex4", ["charOrd", "c"]]]]]}
+
+  , {"func": ["hex4", "n"], "=":
+    ["map", "hex1", ["reverse", ["hexits", 4, "n"]]]}
+
+  , {"func": ["hex1", "n"], "=":
+    {"casei": "n", "of":
+      [[0, {"str": "0"}],
+       [1, {"str": "1"}],
+       [2, {"str": "2"}],
+       [3, {"str": "3"}],
+       [4, {"str": "4"}],
+       [5, {"str": "5"}],
+       [6, {"str": "6"}],
+       [7, {"str": "7"}],
+       [8, {"str": "8"}],
+       [9, {"str": "9"}],
+       [10, {"str": "A"}],
+       [11, {"str": "B"}],
+       [12, {"str": "C"}],
+       [13, {"str": "D"}],
+       [14, {"str": "E"}],
+       [15, {"str": "F"}],
+       ["_", {"str": "?"}]]}}
+
+  , {"func": ["hexits", "d", "n"], "=":
+    {"casei": "d", "of":
+      [[0, "Nil"],
+       ["_",
+          ["Cons",
+            ["intRem", "n", 16],
+            ["hexits", ["intAdd", -1, "d"], ["intQuot", "n", 16]]]]]}}
+
   , {"func": ["emitDecls", "decls"], "=":
     ["ioThen", ["putChar", {"str": "{"}],
     ["ioThen", ["putChar", {"str": "\""}],
@@ -1312,7 +1386,71 @@
                ["putChar", {"str": "}"}]]]]]]]]]]]]]]]]]]}
 
   , {"func": ["emitDecl", "decl"], "=":
-    ["putChar", {"str": "!"}]}
+    {"cased": "decl", "of":
+      [["DataDecl", "name", "condecls",
+          ["ioThen", ["putChar", {"str": "{"}],
+          ["ioThen", ["putChar", {"str": "\""}],
+          ["ioThen", ["putChar", {"str": "d"}],
+          ["ioThen", ["putChar", {"str": "a"}],
+          ["ioThen", ["putChar", {"str": "t"}],
+          ["ioThen", ["putChar", {"str": "a"}],
+          ["ioThen", ["putChar", {"str": "\""}],
+          ["ioThen", ["putChar", {"str": ":"}],
+          ["ioThen", ["emitStr", "name"],
+          ["ioThen", ["putChar", {"str": ","}],
+          ["ioThen", ["putChar", {"str": "\""}],
+          ["ioThen", ["putChar", {"str": "="}],
+          ["ioThen", ["putChar", {"str": "\""}],
+          ["ioThen", ["putChar", {"str": ":"}],
+          ["ioThen", ["emitArray", "emitConDecl", "condecls"],
+                     ["putChar", {"str": "}"}]]]]]]]]]]]]]]]]],
+       ["FuncDecl", "name", "argnames", "expr",
+          ["ioThen", ["putChar", {"str": "{"}],
+          ["ioThen", ["putChar", {"str": "\""}],
+          ["ioThen", ["putChar", {"str": "f"}],
+          ["ioThen", ["putChar", {"str": "u"}],
+          ["ioThen", ["putChar", {"str": "n"}],
+          ["ioThen", ["putChar", {"str": "c"}],
+          ["ioThen", ["putChar", {"str": "\""}],
+          ["ioThen", ["putChar", {"str": ":"}],
+          ["ioThen", ["emitArray", "emitStr",
+            ["Cons", "name", "argnames"]],
+          ["ioThen", ["putChar", {"str": ","}],
+          ["ioThen", ["putChar", {"str": "\""}],
+          ["ioThen", ["putChar", {"str": "="}],
+          ["ioThen", ["putChar", {"str": "\""}],
+          ["ioThen", ["putChar", {"str": ":"}],
+          ["ioThen", ["emitExpr", "expr"],
+                     ["putChar", {"str": "}"}]]]]]]]]]]]]]]]]]]}}
+
+  , {"func": ["emitExpr", "expr"], "=":
+    {"cased": "expr", "of":
+      [["LetExp", "bindings", "subexpr", ["putChar", {"str": "0"}]],
+       ["CasedExp", "evaluand", "dalts", ["putChar", {"str": "0"}]],
+       ["CaseiExp", "evaluand", "ialts", ["putChar", {"str": "0"}]],
+       ["CasecExp", "evaluand", "calts", ["putChar", {"str": "0"}]],
+       ["FExp", "aexps", ["emitArray", "emitAExp", "aexps"]]]}}
+
+  , {"func": ["emitAExp", "aexpr"], "=":
+    {"cased": "aexpr", "of":
+      [["AChar", "c",
+          ["ioThen", ["putChar", {"str": "{"}],
+          ["ioThen", ["putChar", {"str": "\""}],
+          ["ioThen", ["putChar", {"str": "s"}],
+          ["ioThen", ["putChar", {"str": "t"}],
+          ["ioThen", ["putChar", {"str": "r"}],
+          ["ioThen", ["putChar", {"str": "\""}],
+          ["ioThen", ["putChar", {"str": ":"}],
+          ["ioThen", ["putChar", {"str": "\""}],
+          ["ioThen", ["emitStrChar", "c"],
+          ["ioThen", ["putChar", {"str": "\""}],
+                     ["putChar", {"str": "}"}]]]]]]]]]]]],
+       ["AInt", "n",
+          ["ioThen", ["emitOptSign", "n"],
+                     ["mapM_", "putChar", ["digits", ["intAbs", "n"]]]]],
+       ["AVar", "s", ["emitStr", "s"]],
+       ["ACon", "s", ["emitStr", "s"]],
+       ["ASub", "subexpr", ["emitExpr", "subexpr"]]]}}
 
   , {"func": ["checkParseResult", "result"], "=":
     {"cased": "result", "of":
