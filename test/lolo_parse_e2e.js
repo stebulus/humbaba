@@ -1,7 +1,7 @@
-var lolo = require('./lolo');
-var test = require('./test');
-var test_llp = require('./test_lolo_parse');
-var test_lls = require('./test_lolo_stream');
+var lolo = require('../lolo');
+var test = require('./lib/test');
+var test_llp = require('./lolo_parse');
+var test_lls = require('./lolo_stream');
 
 var lolo_parse = test_llp.withLoloParseProgram(["main"])
 lolo_parse['declarations'] = lolo.preludeLolo

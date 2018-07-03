@@ -1,8 +1,8 @@
 var stream = require('stream');
 
-var test = require('./test');
-var rt = require('./runtime');
-var rts = require('./runtime_stream');
+var test = require('./lib/test');
+var rt = require('../runtime');
+var rts = require('../runtime_stream');
 
 function collect(arr) {
   return new stream.Writable({

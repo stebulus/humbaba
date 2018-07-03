@@ -1,5 +1,5 @@
-var test = require('./test');
-var rt = require('./runtime');
+var test = require('./lib/test');
+var rt = require('../runtime');
 
 var CONS = 1;
 var NIL = 2;

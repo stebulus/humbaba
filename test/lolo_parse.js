@@ -1,14 +1,14 @@
 var fs = require('fs');
 var path = require('path');
 
-var rt = require('./runtime');
-var rts = require('./runtime_stream');
-var test = require('./test');
-var test_lolo = require('./test_lolo');
+var rt = require('../runtime');
+var rts = require('../runtime_stream');
+var test = require('./lib/test');
+var test_lolo = require('./lolo');
 
 var llparse = (function () {
   var here = path.dirname(module.filename)
-  var llparseSource = path.join(here, 'lolo_parse.lj');
+  var llparseSource = path.join(here, '..', 'lolo_parse.lj');
   return JSON.parse(fs.readFileSync(llparseSource));
 })();
 
