@@ -8,7 +8,7 @@ var test_codegen = require('./lolo_codegen');
 
 var llparse = (function () {
   var here = path.dirname(module.filename)
-  var llparseSource = path.join(here, '..', 'lolo_parse.lj');
+  var llparseSource = path.join(here, '..', 'lib', 'lolo_parse.lj');
   return JSON.parse(fs.readFileSync(llparseSource));
 })();
 
