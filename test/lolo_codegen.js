@@ -1,40 +1,40 @@
 var test = require('./lib/test');
 var rt = require('humbaba/runtime');
-var lolo = require('humbaba/lolo');
+var codegen = require('humbaba/lolo_codegen');
 
-function expr(code) {
+function expr(astNode) {
   var s = '';
   function chunk(text) { s += text; }
-  lolo.expr(code, chunk);
+  codegen.expr(astNode, chunk);
   return eval(s);
 }
 
-function exprOver(code) {
+function exprOver(astNode) {
   var s = '(function () { var o = new rt.Empty(); ';
   function chunk(text) { s += text; }
-  lolo.expr(code, chunk, 'o');
+  codegen.expr(astNode, chunk, 'o');
   s += 'return o; })()';
   return eval(s);
 }
 
-function assertExprValue(expected, expression) {
-  var ex = expr(expression);
+function assertExprValue(expected, astNode) {
+  var ex = expr(astNode);
   rt.evaluate(ex);
   test.assertSame(expected, rt.smashIndirects(ex));
-  ex = exprOver(expression);
+  ex = exprOver(astNode);
   rt.evaluate(ex);
   test.assertSame(expected, rt.smashIndirects(ex));
 }
 
-function programValue(program) {
-  var expr = eval(lolo.programToJavaScript(program, 'test'));
+function programValue(ast) {
+  var expr = eval(codegen.programToJavaScript(ast, 'test'));
   rt.evaluateDeep(expr);
   return rt.smashIndirects(expr);
 }
 exports.programValue = programValue;
 
-function assertProgramValue(expected, program) {
-  test.assertSame(expected, programValue(program));
+function assertProgramValue(expected, ast) {
+  test.assertSame(expected, programValue(ast));
 }
 
 tests = {

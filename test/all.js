@@ -10,7 +10,7 @@ function addTests(name) {
 
 addTests('./test.js');
 addTests('./runtime.js');
-addTests('./lolo.js');
+addTests('./lolo_codegen.js');
 addTests('./runtime_stream.js');
 addTests('./runtime_stream_cat.js');
 addTests('./lolo_stream.js');

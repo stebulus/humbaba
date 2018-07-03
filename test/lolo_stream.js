@@ -1,4 +1,4 @@
-var lolo = require('humbaba/lolo');
+var codegen = require('humbaba/lolo_codegen');
 var rts = require('humbaba/runtime_stream');
 var test = require('./lib/test');
 var test_rts = require('./runtime_stream');
@@ -6,8 +6,8 @@ var test_rts = require('./runtime_stream');
 function stdout(input, program) {
   var code =
     "var rt = require('humbaba/runtime');" +
-    lolo.ioDeclsJavaScript +
-    lolo.programToJavaScript(program, 'test');
+    codegen.ioDeclsJavaScript +
+    codegen.programToJavaScript(program, 'test');
   var expr = eval(code);
   var strm = new rts.Stream(expr);
   if (input === null)
@@ -32,13 +32,13 @@ tests = {
   nullProgram(callback) {
     expectOutput("", null, {"declarations": [
       {"func": ["test"], "=": ["ioPure", "Unit"]}
-    ].concat(lolo.preludeLolo)}, callback);
+    ].concat(codegen.preludeLolo)}, callback);
   },
 
   emitOneChar(callback) {
     expectOutput("x", null, {"declarations": [
       {"func": ["test"], "=": ["putChar", {"str": "x"}]}
-    ].concat(lolo.preludeLolo)}, callback);
+    ].concat(codegen.preludeLolo)}, callback);
   },
 
   emitSeveralChars(callback) {
@@ -50,14 +50,14 @@ tests = {
         ["ioThen", ["putChar", {"str": "x"}],
         ["ioThen", ["putChar", {"str": "y"}],
                    ["putChar", {"str": "z"}]]]}
-    ].concat(lolo.preludeLolo)}, callback);
+    ].concat(codegen.preludeLolo)}, callback);
   },
 
   copyOneChar(callback) {
     expectOutput("x", "x", {"declarations": [
       {"func": ["test"], "=":
         ["ioBind", "getChar", "putChar"]}
-    ].concat(lolo.preludeLolo)}, callback);
+    ].concat(codegen.preludeLolo)}, callback);
   },
 
 };

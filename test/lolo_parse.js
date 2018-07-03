@@ -4,7 +4,7 @@ var path = require('path');
 var rt = require('humbaba/runtime');
 var rts = require('humbaba/runtime_stream');
 var test = require('./lib/test');
-var test_lolo = require('./lolo');
+var test_codegen = require('./lolo_codegen');
 
 var llparse = (function () {
   var here = path.dirname(module.filename)
@@ -27,7 +27,7 @@ function withLoloParseProgram(expr) {
 exports.withLoloParseProgram = withLoloParseProgram;
 
 function withLoloParse(expr) {
-  return test_lolo.programValue(withLoloParseProgram(expr));
+  return test_codegen.programValue(withLoloParseProgram(expr));
 }
 
 function assertParseResult(expected, parser, input) {
