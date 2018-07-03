@@ -24,8 +24,8 @@ if (require.main === module) {
     process.exit(1);
   }
   var code = JSON.parse(fs.readFileSync(process.argv[2]));
-  for (var i = 0; i < lolo.preludeLolo.length; i++)
-    code['declarations'].push(lolo.preludeLolo[i]);
+  code['declarations'] = lolo.preludeLolo
+    .concat(code['declarations']);
   out("var process = require('process');");
   out("var rt = require('./runtime');");
   out("var rts = require('./runtime_stream');");
