@@ -1,4 +1,4 @@
-var lolo = require('../lolo');
+var lolo = require('humbaba/lolo');
 var test = require('./lib/test');
 var test_llp = require('./lolo_parse');
 var test_lls = require('./lolo_stream');

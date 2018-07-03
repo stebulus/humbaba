@@ -1,6 +1,6 @@
 var test = require('./lib/test');
-var rt = require('../runtime');
-var lolo = require('../lolo');
+var rt = require('humbaba/runtime');
+var lolo = require('humbaba/lolo');
 
 function expr(code) {
   var s = '';

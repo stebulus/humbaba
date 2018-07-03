@@ -1,11 +1,11 @@
-var lolo = require('../lolo');
-var rts = require('../runtime_stream');
+var lolo = require('humbaba/lolo');
+var rts = require('humbaba/runtime_stream');
 var test = require('./lib/test');
 var test_rts = require('./runtime_stream');
 
 function stdout(input, program) {
   var code =
-    "var rt = require('../runtime');" +
+    "var rt = require('humbaba/runtime');" +
     lolo.ioDeclsJavaScript +
     lolo.programToJavaScript(program, 'test');
   var expr = eval(code);
