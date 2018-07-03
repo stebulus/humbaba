@@ -4,7 +4,7 @@
 var fs = require('fs');
 var process = require('process');
 
-var codegen = require('humbaba/lolo_codegen');
+var codegen = require('./lolo_codegen');
 
 function err(s) {
   process.stderr.write(s);
