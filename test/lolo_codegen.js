@@ -1,6 +1,6 @@
 var test = require('./lib/test');
-var rt = require('humbaba/runtime');
-var codegen = require('humbaba/lolo_codegen');
+var rt = require('../runtime');
+var codegen = require('../lolo_codegen');
 
 function expr(astNode) {
   var s = '';

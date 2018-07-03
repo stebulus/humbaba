@@ -1,5 +1,5 @@
 var test = require('./lib/test');
-var rt = require('humbaba/runtime');
+var rt = require('../runtime');
 
 var CONS = 1;
 var NIL = 2;

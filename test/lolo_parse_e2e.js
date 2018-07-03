@@ -1,4 +1,4 @@
-var codegen = require('humbaba/lolo_codegen');
+var codegen = require('../lolo_codegen');
 var test = require('./lib/test');
 var test_llp = require('./lolo_parse');
 var test_lls = require('./lolo_stream');

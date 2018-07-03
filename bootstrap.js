@@ -39,11 +39,11 @@ function run(command, args, stdout, callback) {
 }
 
 function ljc(input, output, callback) {
-  run('node', ['lib/ljc.js', input], output, callback);
+  run('node', ['ljc.js', input], output, callback);
 }
 
 function bootstrap(callback) {
-  ljc('lib/lolo_parse.lj', 'lib/lolo_parse.js', callback);
+  ljc('lolo_parse.lj', 'lolo_parse.js', callback);
 }
 exports.bootstrap = bootstrap;
 

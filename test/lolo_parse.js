@@ -1,14 +1,14 @@
 var fs = require('fs');
 var path = require('path');
 
-var rt = require('humbaba/runtime');
-var rts = require('humbaba/runtime_stream');
+var rt = require('../runtime');
+var rts = require('../runtime_stream');
 var test = require('./lib/test');
 var test_codegen = require('./lolo_codegen');
 
 var llparse = (function () {
   var here = path.dirname(module.filename)
-  var llparseSource = path.join(here, '..', 'lib', 'lolo_parse.lj');
+  var llparseSource = path.join(here, '..', 'lolo_parse.lj');
   return JSON.parse(fs.readFileSync(llparseSource));
 })();
 
