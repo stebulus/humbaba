@@ -1,0 +1,14 @@
+{
+  "name": "humbaba",
+  "version": "0.1.0",
+  "homepage": "https://github.com/stebulus/humbaba",
+  "license": "GPL-3.0",
+  "author": "Steven Taschuk <steven@amotlpaa.org>",
+  "repository": "github:stebulus/humbaba",
+  "dependencies": {
+    "debug": "~3.1.0"
+  },
+  "scripts": {
+    "test": "node test/all.js"
+  }
+}
