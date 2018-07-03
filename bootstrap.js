@@ -20,7 +20,14 @@ function run(command, args, callback) {
 }
 
 function ljc(input, output, callback) {
-  run('node', ['ljc.js', '-o', output, input], callback);
+  run('node',
+    ['ljc.js',
+     '-o', output,
+     '--runtime', './runtime',
+     '--runtime-stream', './runtime_stream',
+     input
+    ],
+    callback);
 }
 
 function bootstrap(callback) {
