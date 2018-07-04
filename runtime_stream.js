@@ -1,17 +1,25 @@
-/*
-  Realize a humbaba graph as a duplex stream.
-
-  Strings written into the stream are available to the program via
-  runtime.GetChar; dually, the program's emissions via runtime.PutChar
-  can be read out of the stream.
-*/
 var debugRT = require('debug')('humbaba:runtime');
 var debugIO = require('debug')('humbaba:io');
 var stream = require('stream');
 
 var rt = require('./runtime');
 
-function Stream(program) {
+/*
+  Realize a humbaba graph as a duplex stream.
+
+  Strings written into the stream are available to the program via
+  runtime.GetChar; dually, the program's emissions via runtime.PutChar
+  can be read out of the stream.
+
+  If you want to use a stream.Readable as a humbaba program's stdin,
+  don't do readable.pipe(Stream(program)).  Instead, do Stream(program,
+  readable).  Rationale: readable.pipe reads data from the readable
+  whether or not the humbaba program actually consumes it, which can
+  result in loss of data.  When a readable stream is passed as the
+  second argument to Stream, it will start piping only if and when
+  the program actually tries to read from stdin.
+*/
+function Stream(program, stdin) {
   var s = new stream.Duplex({ read, write, final });
   s.expr = program;
   s.stack = [];
@@ -22,6 +30,8 @@ function Stream(program) {
   s.noMoreChunks = false;
   s.finalCallback = null;
   s.advancing = false;
+  s.stdin = stdin;
+  s.stdinActive = false;
   return s;
 
   function intermediateResult(result) {
@@ -46,6 +56,13 @@ function Stream(program) {
       moreToDo = false;
     }
     return moreToDo;
+  }
+
+  function ensureStdinActive() {
+    if (!s.stdinActive && s.stdin) {
+      s.stdinActive = true;
+      s.stdin.pipe(s);
+    }
   }
 
   function advance() {
@@ -89,6 +106,7 @@ function Stream(program) {
         case rt.GETCHAR:
           if (!s.pendingChunk) {
             debugIO('getchar stall');
+            ensureStdinActive();
             moreToDo = false;
           } else {
             var char = s.pendingChunk.charAt(s.pendingChunkIndex++);
@@ -111,6 +129,7 @@ function Stream(program) {
             moreToDo = intermediateResult(rt.True);
           } else {
             debugIO('iseof stall');
+            ensureStdinActive();
             moreToDo = false;
           }
           break;

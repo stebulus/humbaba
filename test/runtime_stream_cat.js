@@ -57,8 +57,7 @@ function testWriting(chunks) {
 
 function testPiping(chunks) {
   return function (callback) {
-    var copy = new rts.Stream(program);
-    new ChunkReadable(chunks).pipe(copy);
+    var copy = new rts.Stream(program, new ChunkReadable(chunks));
     test_rts.expectOutput(chunks.join('').split(''), copy, callback);
   };
 }

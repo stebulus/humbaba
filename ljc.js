@@ -26,12 +26,9 @@ function compile(ast, out, options) {
   out(JSON.stringify(options.runtimeStream));
   out(");");
   out(codegen.ioDeclsJavaScript);
-  out("process.stdin.pipe(new rts.Stream(");
+  out("new rts.Stream(");
   codegen.program(ast, 'main', out);
-  out(")).pipe(process.stdout);");
-  // forget ref to stdin, so process exits when program finishes
-  // despite theoretically waiting for data from stdin
-  out("process.stdin.unref();");
+  out(", process.stdin).pipe(process.stdout);");
 }
 exports.compile = compile;
 

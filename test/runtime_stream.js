@@ -54,6 +54,17 @@ tests = {
     expectOutput([], new rts.Stream(program), callback);
   },
 
+  nullProgramStdin(callback) {
+    var stdin = new stream.Readable({
+      read() {
+        throw new Error('stdin was unexpectedly read');
+      }
+    });
+    var program = new rt.IoPure(rt.Unit);
+    var strm = new rts.Stream(program, stdin);
+    expectOutput([], strm, callback);
+  },
+
   emitOneChar(callback) {
     var program = new rt.PutChar(new rt.Box('x'));
     expectOutput(['x'], new rts.Stream(program), callback);
@@ -74,7 +85,7 @@ tests = {
     expectOutput(['x', 'y', 'z'], new rts.Stream(program), callback);
   },
 
-  copyOneChar(callback) {
+  copyOneCharWriting(callback) {
     var program = new rt.IoBind(
       rt.GetChar,
       new rt.Box(function (char) {
@@ -84,6 +95,23 @@ tests = {
     var stream = new rts.Stream(program);
     stream.end('x');
     expectOutput(['x'], stream, callback);
+  },
+
+  copyOneCharPiping(callback) {
+    var stdin = new stream.Readable({
+      read() {
+        this.push('x');
+        this.destroy();
+      }
+    });
+    var program = new rt.IoBind(
+      rt.GetChar,
+      new rt.Box(function (char) {
+        rt.PutChar.call(this, char);
+      })
+    );
+    var strm = new rts.Stream(program, stdin);
+    expectOutput(['x'], strm, callback);
   },
 
 };
