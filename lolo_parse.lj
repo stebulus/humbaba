@@ -728,9 +728,16 @@
       [["True", ["Consume", ["Done", "a"]]],
        ["False", "Fail"]]}}
 
+  , {"comment": "ignore :: Parser i r -> Parser i Unit",
+     "func": ["ignore", "p"], "=": ["pRight", "p", ["Done", "Unit"]]}
+
   , {"comment": "ignoreSome :: Parser i r -> Parser i Unit",
      "func": ["ignoreSome", "p"], "=":
     ["pAlt", ["pRight", "p", ["ignoreSome", "p"]], ["Done", "Unit"]]}
+
+  , {"comment": "ignoreUntil :: Parser i r -> Parser i r",
+     "func": ["ignoreUntil", "p"], "=":
+    ["pAlt", "p", ["pRight", ["item"], ["ignoreUntil", "p"]]]}
 
   , {"comment": "charBetween :: Char -> Char -> Char -> Bool",
      "func": ["charBetween", "lo", "hi", "c"], "=":
@@ -827,6 +834,16 @@
     ["pAlt", ["newline"],
              ["char", {"str": "\u000B"}]]]]}
 
+  , {"comment": "comment :: Parser Char Unit",
+     "func": ["comment"], "=":
+     ["pRight",
+       ["require", ["charEq", {"str": "#"}]],
+       ["ignoreUntil", ["newline"]]]}
+
+  , {"comment": "whitestuff :: Parser Char Unit",
+     "func": ["whitestuff"], "=":
+    ["pAlt", ["ignore", ["whitechar"]], ["comment"]]}
+
   , {"comment": "identChar :: Parser Char Char",
      "func": ["identChar"], "=":
     ["pAlt", ["small"], ["pAlt", ["large"], ["digit"]]]}
@@ -909,7 +926,7 @@
 
   , {"comment": "ignoreWhitespace :: Parser Char Unit",
      "func": ["ignoreWhitespace"], "=":
-    ["ignoreSome", ["whitechar"]]}
+    ["ignoreSome", ["whitestuff"]]}
 
   , {"comment": "tokenInWhitespace :: Parser Char Token",
      "func": ["tokenInWhitespace"], "=":

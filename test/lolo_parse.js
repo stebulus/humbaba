@@ -194,6 +194,23 @@ tests = {
     assertParsed("LParen", ["token"], "(");
   },
 
+  comment() {
+    assertParsed("Unit", ["comment"], "#fnord\n");
+  },
+
+  whitestuff() {
+    assertParsed("Unit", ["ignoreSome", ["whitestuff"]], "  #fnord\n \n");
+  },
+
+  commentInStuff() {
+    assertParsed(
+      ["Cons", ["VarId", charList("foo")],
+      ["Cons", ["VarId", charList("bar")],
+        "Nil"]],
+      ["pMany", ["tokenInWhitespace"]],
+      "  foo  #comment! \nbar");
+  },
+
   letExp1() {
     var bindings = ["Cons",
       ["Binding",
