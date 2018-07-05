@@ -213,9 +213,9 @@ function program(ast, entry, chunk) {
       }
     }
   }
-  chunk('return new rt.Apply($');
+  chunk('return $');
   chunk(entry);
-  chunk(', []);})()');
+  chunk(';})()');
 }
 exports.program = program;
 
@@ -241,11 +241,21 @@ function functionDeclaration(astNode, chunk) {
   chunk(') {');
   expr(astNode['='], chunk, 'this');
   chunk('}');
-  chunk('var $');
-  chunk(name);
-  chunk(' = new rt.Box(func$');
-  chunk(name);
-  chunk(');');
+  if (lhs.length === 1) {
+    // "function" with zero arguments; let name refer to thunk
+    chunk('var $');
+    chunk(name);
+    chunk(' = new rt.Thunk(new rt.Data(1, []), func$');
+    chunk(name);
+    chunk(');');
+  } else {
+    // actual function; put it in a box
+    chunk('var $');
+    chunk(name);
+    chunk(' = new rt.Box(func$');
+    chunk(name);
+    chunk(');');
+  }
 }
 
 function dataDeclaration(astNode, chunk) {

@@ -389,7 +389,7 @@
 
   , {"comment": "ignoreUntil :: Parser i r -> Parser i r",
      "func": ["ignoreUntil", "p"], "=":
-    ["pAlt", "p", ["pRight", ["item"], ["ignoreUntil", "p"]]]}
+    ["pAlt", "p", ["pRight", "item", ["ignoreUntil", "p"]]]}
 
   , {"comment": "delimitedList :: Parser i d -> Parser i a -> Parser i (List a)",
      "func": ["delimitedList", "delimiter", "p"], "=":
@@ -873,7 +873,7 @@
         ["pPure", "True"]]]}
 
   , {"comment": "digit :: Parser Char Char",
-     "func": ["digit"], "=": ["ascDigit"]}
+     "func": ["digit"], "=": "ascDigit"}
 
   , {"comment": "ascDigit :: Parser Char Char",
      "func": ["ascDigit"], "=":
@@ -881,11 +881,11 @@
 
   , {"comment": "natLiteral :: Parser Char Int",
      "func": ["natLiteral"], "=":
-    ["pMap", "readInt", ["pMany", ["digit"]]]}
+    ["pMap", "readInt", ["pMany", "digit"]]}
 
   , {"comment": "intLiteral :: Parser Char Int",
      "func": ["intLiteral"], "=":
-    ["pApply", ["pMap", "makeIntLiteral", ["optsign"]], ["natLiteral"]]}
+    ["pApply", ["pMap", "makeIntLiteral", "optsign"], "natLiteral"]}
 
   , {"comment": "makeIntLiteral :: Bool -> Int -> Token",
      "func": ["makeIntLiteral", "sign", "n"], "=":
@@ -899,7 +899,7 @@
     ["pLeft",
       ["pRight",
         ["char", {"str": "'"}],
-        ["pMap", "CharLiteral", ["item"]]],
+        ["pMap", "CharLiteral", "item"]],
       ["char", {"str": "'"}]]}
 
   , {"comment": "ascSmall :: Parser Char Char",
@@ -912,7 +912,7 @@
 
   , {"comment": "small :: Parser Char Char",
      "func": ["small"], "=":
-    ["pAlt", ["ascSmall"], ["char", {"str": "_"}]]}
+    ["pAlt", "ascSmall", ["char", {"str": "_"}]]}
 
   , {"comment": "ascLarge :: Parser Char Char",
      "func": ["ascLarge"], "=":
@@ -923,7 +923,7 @@
     ["charBetween", {"str": "A"}, {"str": "Z"}]}
 
   , {"comment": "large :: Parser Char Char",
-     "func": ["large"], "=": ["ascLarge"]}
+     "func": ["large"], "=": "ascLarge"}
 
   , {"comment": "newline :: Parser Char Unit",
      "func": ["newline"], "=":
@@ -938,33 +938,33 @@
       ["Done", "Unit"]]}
 
   , {"comment": "whitechar :: Parser Char Char",
-     "func": ["whitechar"], "=": ["ascWhitechar"]}
+     "func": ["whitechar"], "=": "ascWhitechar"}
 
   , {"comment": "ascWhitechar :: Parser Char Char",
      "func": ["ascWhitechar"], "=":
     ["pAlt", ["char", {"str": " "}],
     ["pAlt", ["char", {"str": "\t"}],
-    ["pAlt", ["newline"],
+    ["pAlt", "newline",
              ["char", {"str": "\u000B"}]]]]}
 
   , {"comment": "comment :: Parser Char Unit",
      "func": ["comment"], "=":
      ["pRight",
        ["require", ["charEq", {"str": "#"}]],
-       ["ignoreUntil", ["newline"]]]}
+       ["ignoreUntil", "newline"]]}
 
   , {"comment": "whitestuff :: Parser Char Unit",
      "func": ["whitestuff"], "=":
-    ["pAlt", ["ignore", ["whitechar"]], ["comment"]]}
+    ["pAlt", ["ignore", "whitechar"], "comment"]}
 
   , {"comment": "identChar :: Parser Char Char",
      "func": ["identChar"], "=":
-    ["pAlt", ["small"], ["pAlt", ["large"], ["digit"]]]}
+    ["pAlt", "small", ["pAlt", "large", "digit"]]}
 
   , {"comment": "varidOrReserved :: Parser Char Token",
      "func": ["varidOrReserved"], "=":
     ["pMap", "fixupReserved",
-      ["pApply", ["pMap", "Cons", ["small"]], ["pSome", ["identChar"]]]]}
+      ["pApply", ["pMap", "Cons", "small"], ["pSome", "identChar"]]]}
 
   , {"comment": "reservedWords :: List (Tuple2 String Token)",
      "func": ["reservedWords"], "=":
@@ -1012,14 +1012,14 @@
 
   , {"comment": "fixupReserved :: String -> Token",
      "func": ["fixupReserved", "ident"], "=":
-    {"cased": ["lookup", "stringEq", ["reservedWords"], "ident"], "of":
+    {"cased": ["lookup", "stringEq", "reservedWords", "ident"], "of":
       [["Nothing", ["VarId", "ident"]],
        ["Just", "x", "x"]]}}
 
   , {"comment": "conid :: Parser Char Token",
      "func": ["conid"], "=":
     ["pMap", "ConId",
-      ["pApply", ["pMap", "Cons", ["large"]], ["pSome", ["identChar"]]]]}
+      ["pApply", ["pMap", "Cons", "large"], ["pSome", "identChar"]]]}
 
   , {"comments":
       [ "token :: Parser Char Token\n"
@@ -1027,10 +1027,10 @@
       , "in Lolo, '-' can only be the start of an integer literal."
       ],
      "func": ["token"], "=":
-    ["pAlt", ["varidOrReserved"],
-    ["pAlt", ["conid"],
-    ["pAlt", ["intLiteral"],
-    ["pAlt", ["charLiteral"],
+    ["pAlt", "varidOrReserved",
+    ["pAlt", "conid",
+    ["pAlt", "intLiteral",
+    ["pAlt", "charLiteral",
     ["pAlt", ["pRight", ["char", {"str": "="}], ["pPure", "Equals"]],
     ["pAlt", ["pRight", ["char", {"str": ">"}], ["pPure", "Arrow"]],
     ["pAlt", ["pRight", ["char", {"str": "("}], ["pPure", "LParen"]],
@@ -1042,14 +1042,13 @@
     ]]]]]]]]]]]}
 
   , {"comment": "ignoreWhitespace :: Parser Char Unit",
-     "func": ["ignoreWhitespace"], "=":
-    ["ignoreSome", ["whitestuff"]]}
+     "func": ["ignoreWhitespace"], "=": ["ignoreSome", "whitestuff"]}
 
   , {"comment": "tokenInWhitespace :: Parser Char Token",
      "func": ["tokenInWhitespace"], "=":
     ["pLeft",
-      ["pRight", ["ignoreWhitespace"], ["token"]],
-      ["ignoreWhitespace"]]}
+      ["pRight", "ignoreWhitespace", "token"],
+      "ignoreWhitespace"]}
 
   , {"comment":
 
@@ -1096,11 +1095,11 @@
 
   , {"comment": "exp :: Parser Token Exp",
      "func": ["exp"], "=":
-    ["pAlt", ["letExp"],
-    ["pAlt", ["casedExp"],
-    ["pAlt", ["caseiExp"],
-    ["pAlt", ["casecExp"],
-             ["fExp"]]]]]}
+    ["pAlt", "letExp",
+    ["pAlt", "casedExp",
+    ["pAlt", "caseiExp",
+    ["pAlt", "casecExp",
+             "fExp"]]]]}
 
   , {"comment": "data Binding = Binding String Exp",
      "data": "Binding", "=": [["Binding", 2]]}
@@ -1135,18 +1134,18 @@
   , {"comment": "binding :: Parser Token Binding",
      "func": ["binding"], "=":
     ["pApply",
-      ["pMap", "Binding", ["varidString"]],
-      ["pRight", ["require", ["tokenEq", "Equals"]], ["exp"]]]}
+      ["pMap", "Binding", "varidString"],
+      ["pRight", ["require", ["tokenEq", "Equals"]], "exp"]]}
 
   , {"comment": "letExp :: Parser Token Exp",
      "func": ["letExp"], "=":
     ["pApply",
       ["pApply",
         ["pRight", ["require", ["tokenEq", "Let"]], ["pPure", "LetExp"]],
-        ["bracedList", ["binding"]]],
+        ["bracedList", "binding"]],
       ["pRight",
         ["require", ["tokenEq", "In"]],
-        ["exp"]]]}
+        "exp"]]}
 
   , {"comment": "casedExp :: Parser Token Exp",
      "func": ["casedExp"], "=":
@@ -1155,10 +1154,10 @@
         ["pRight",
           ["require", ["tokenEq", "Cased"]],
           ["pPure", "CasedExp"]],
-        ["exp"]],
+        "exp"],
       ["pRight",
         ["require", ["tokenEq", "Of"]],
-        ["bracedList", ["dalt"]]]]}
+        ["bracedList", "dalt"]]]}
 
   , {"comment": "data DAlt = DAlt String (List String) Exp",
      "data": "DAlt", "=": [["DAlt", 3]]}
@@ -1167,10 +1166,10 @@
      "func": ["dalt"], "=":
     ["pApply",
       ["pApply",
-        ["pMap", "DAlt", ["conidString"]],
-        ["pSome", ["varidString"]]],
+        ["pMap", "DAlt", "conidString"],
+        ["pSome", "varidString"]],
       ["pRight", ["require", ["tokenEq", "Arrow"]],
-        ["exp"]]]}
+        "exp"]]}
 
   , {"comment": "conidString :: Parser Token String",
      "func": ["conidString"], "=":
@@ -1206,28 +1205,28 @@
         ["pRight",
           ["require", ["tokenEq", "Casei"]],
           ["pPure", "CaseiExp"]],
-        ["exp"]],
+        "exp"],
       ["pRight",
         ["require", ["tokenEq", "Of"]],
-        ["bracedList", ["ialt"]]]]}
+        ["bracedList", "ialt"]]]}
 
   , {"comment": "data IAlt = IAltInt Int Exp | IAltVar String Exp",
      "data": "IAlt", "=": [["IAltInt", 2], ["IAltVar", 2]]}
 
   , {"comment": "ialt :: Parser Token IAlt",
-     "func": ["ialt"], "=": ["pAlt", ["ialtInt"], ["ialtVar"]]}
+     "func": ["ialt"], "=": ["pAlt", "ialtInt", "ialtVar"]}
 
   , {"comment": "ialtInt :: Parser Token IAlt",
      "func": ["ialtInt"], "=":
     ["pApply",
-      ["pMap", "IAltInt", ["intFromLiteral"]],
-      ["pRight", ["require", ["tokenEq", "Arrow"]], ["exp"]]]}
+      ["pMap", "IAltInt", "intFromLiteral"],
+      ["pRight", ["require", ["tokenEq", "Arrow"]], "exp"]]}
 
   , {"comment": "ialtVar :: Parser Token IAlt",
      "func": ["ialtVar"], "=":
     ["pApply",
-      ["pMap", "IAltVar", ["varidString"]],
-      ["pRight", ["require", ["tokenEq", "Arrow"]], ["exp"]]]}
+      ["pMap", "IAltVar", "varidString"],
+      ["pRight", ["require", ["tokenEq", "Arrow"]], "exp"]]}
 
   , {"comment": "intFromLiteral :: Parser Token Int",
      "func": ["intFromLiteral"], "=":
@@ -1263,28 +1262,28 @@
         ["pRight",
           ["require", ["tokenEq", "Casec"]],
           ["pPure", "CasecExp"]],
-        ["exp"]],
+        "exp"],
       ["pRight",
         ["require", ["tokenEq", "Of"]],
-        ["bracedList", ["calt"]]]]}
+        ["bracedList", "calt"]]]}
 
   , {"comment": "data CAlt = CAltChar Char Exp | CAltVar String Exp",
      "data": "CAlt", "=": [["CAltChar", 2], ["CAltVar", 2]]}
 
   , {"comment": "calt :: Parser Token CAlt",
-     "func": ["calt"], "=": ["pAlt", ["caltChar"], ["caltVar"]]}
+     "func": ["calt"], "=": ["pAlt", "caltChar", "caltVar"]}
 
   , {"comment": "caltChar :: Parser Token CAlt",
      "func": ["caltChar"], "=":
     ["pApply",
-      ["pMap", "CAltChar", ["charFromLiteral"]],
-      ["pRight", ["require", ["tokenEq", "Arrow"]], ["exp"]]]}
+      ["pMap", "CAltChar", "charFromLiteral"],
+      ["pRight", ["require", ["tokenEq", "Arrow"]], "exp"]]}
 
   , {"comment": "caltVar :: Parser Token CAlt",
      "func": ["caltVar"], "=":
     ["pApply",
-      ["pMap", "CAltVar", ["varidString"]],
-      ["pRight", ["require", ["tokenEq", "Arrow"]], ["exp"]]]}
+      ["pMap", "CAltVar", "varidString"],
+      ["pRight", ["require", ["tokenEq", "Arrow"]], "exp"]]}
 
   , {"comment": "charFromLiteral :: Parser Token Char",
      "func": ["charFromLiteral"], "=":
@@ -1314,7 +1313,7 @@
        ["Pipe", "Fail"]]}}
 
   , {"comment": "fExp :: Parser Token Exp",
-     "func": ["fExp"], "=": ["pMap", "FExp", ["pMany", ["aExp"]]]}
+     "func": ["fExp"], "=": ["pMap", "FExp", ["pMany", "aExp"]]}
 
   , {"comments":
       ["data AExp = AChar Char\n",
@@ -1350,7 +1349,7 @@
        ["Arrow", "Fail"],
        ["LParen", ["Consume",
           ["pMap", "ASub",
-            ["pLeft", ["exp"], ["require", ["tokenEq", "RParen"]]]]]],
+            ["pLeft", "exp", ["require", ["tokenEq", "RParen"]]]]]],
        ["RParen", "Fail"],
        ["LBrace", "Fail"],
        ["RBrace", "Fail"],
@@ -1374,7 +1373,7 @@
 
   , {"comment": "decl :: Parser Token Decl",
      "func": ["decl"], "=":
-    ["pAlt", ["dataDecl"], ["funcDecl"]]}
+    ["pAlt", "dataDecl", "funcDecl"]}
 
   , {"comment": "dataDecl :: Parser Token Decl",
      "func": ["dataDecl"], "=":
@@ -1383,12 +1382,12 @@
         ["pRight",
           ["require", ["tokenEq", "Data"]],
           ["pPure", "DataDecl"]],
-        ["conidString"]],
+        "conidString"],
       ["pRight",
         ["require", ["tokenEq", "Equals"]],
         ["delimitedList",
           ["require", ["tokenEq", "Pipe"]],
-          ["conDecl"]]]]}
+          "conDecl"]]]}
 
   , {"comment": "data ConDecl = ConDecl String Int",
      "data": "ConDecl", "=": [["ConDecl", 2]]}
@@ -1396,21 +1395,21 @@
   , {"comment": "conDecl :: Parser Token ConDecl",
      "func": ["conDecl"], "=":
     ["pApply",
-      ["pMap", "ConDecl", ["conidString"]],
-      ["intFromLiteral"]]}
+      ["pMap", "ConDecl", "conidString"],
+      "intFromLiteral"]}
 
   , {"comment": "funcDecl :: Parser Token Decl",
      "func": ["funcDecl"], "=":
     ["pApply",
       ["pApply",
-        ["pMap", "FuncDecl", ["varidString"]],
-        ["pSome", ["varidString"]]],
+        ["pMap", "FuncDecl", "varidString"],
+        ["pSome", "varidString"]],
       ["pRight",
         ["require", ["tokenEq", "Equals"]],
-        ["exp"]]]}
+        "exp"]]}
 
   , {"comment": "program :: Parser Token (List Decl)",
-     "func": ["program"], "=": ["bracedList", ["decl"]]}
+     "func": ["program"], "=": ["bracedList", "decl"]}
 
   , {"comment":
 
@@ -1424,7 +1423,7 @@
 
   , {"comment": "parseStdin :: IO (Either Char (List Decl))",
      "func": ["parseStdin"], "=":
-    ["parseStdinHelper", ["tokenInWhitespace"], ["program"]]}
+    ["parseStdinHelper", "tokenInWhitespace", "program"]}
 
   , {"comment": "parseStdinHelper :: Parser Char Token -> Parser Token a -> IO (Either Char a)",
      "func": ["parseStdinHelper", "charstate", "tokenstate"], "=":
@@ -1456,7 +1455,7 @@
        ["Pushback", "token",
           {"cased": ["feed", "token", "tokenstate"], "of":
             [["Consume", "tokenstate2",
-                ["parseStdinLoopChar", ["tokenInWhitespace"],
+                ["parseStdinLoopChar", "tokenInWhitespace",
                   "tokenstate2", "c"]],
              ["Pushback", "_", ["ioPure", ["Left", {"str": "p"}]]],
              ["Fail", ["ioPure", ["Left", {"str": "f"}]]]]}],
@@ -1751,7 +1750,7 @@
        ["Right", "decls", ["emitDecls", "decls"]]]}}
 
   , {"func": ["main"], "=":
-    ["ioBind", ["parseStdin"], "checkParseResult"]}
+    ["ioBind", "parseStdin", "checkParseResult"]}
 
   ]
 }

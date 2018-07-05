@@ -76,69 +76,69 @@ tests = {
   },
 
   parseSignPlus() {
-    assertParsed("True", ["optsign"], "+");
+    assertParsed("True", "optsign", "+");
   },
 
   parseSignMinus() {
-    assertParsed("False", ["optsign"], "-");
+    assertParsed("False", "optsign", "-");
   },
 
   parseSignAbsent() {
-    assertParsed("True", ["optsign"], "");
+    assertParsed("True", "optsign", "");
   },
 
   parseDigit() {
-    assertParsed({"str": "3"}, ["digit"], "3");
+    assertParsed({"str": "3"}, "digit", "3");
   },
 
   parseDigitFail() {
-    assertParseFail(["digit"], "a");
+    assertParseFail("digit", "a");
   },
 
   parseDigitMany() {
     assertParsed(
       ["Cons", {"str": "3"}, ["Cons", {"str": "4"}, "Nil"]],
-      ["pMany", ["digit"]],
+      ["pMany", "digit"],
       "34");
   },
 
   parseDigitManyFail() {
-    assertParseFail(["pMany", ["digit"]], "!");
+    assertParseFail(["pMany", "digit"], "!");
   },
 
   parseDigitSome() {
     assertParsed(
       ["Cons", {"str": "3"}, ["Cons", {"str": "4"}, "Nil"]],
-      ["pSome", ["digit"]],
+      ["pSome", "digit"],
       "34");
   },
 
   parseDigitSomeNil() {
-    assertParsed("Nil", ["pSome", ["digit"]], "");
+    assertParsed("Nil", ["pSome", "digit"], "");
   },
 
   parseIntLiteral() {
-    assertParsed(["IntLiteral", 5], ["intLiteral"], "5");
+    assertParsed(["IntLiteral", 5], "intLiteral", "5");
   },
 
   parseIntLiteralSigned() {
-    assertParsed(["IntLiteral", 5], ["intLiteral"], "+5");
+    assertParsed(["IntLiteral", 5], "intLiteral", "+5");
   },
 
   parseIntLiteralNegative() {
-    assertParsed(["IntLiteral", -5], ["intLiteral"], "-5");
+    assertParsed(["IntLiteral", -5], "intLiteral", "-5");
   },
 
   parseIntLiteralMultidigit() {
-    assertParsed(["IntLiteral", 5732], ["intLiteral"], "5732");
+    assertParsed(["IntLiteral", 5732], "intLiteral", "5732");
   },
 
   parseAnyChar() {
-    assertParsed({"str": "b"}, ["item"], "b");
+    assertParsed({"str": "b"}, "item", "b");
   },
 
   parseCharLiteral() {
-    assertParsed(["CharLiteral", {"str": "b"}], ["charLiteral"], "'b'");
+    assertParsed(["CharLiteral", {"str": "b"}], "charLiteral", "'b'");
   },
 
   digit2int() {
@@ -182,24 +182,24 @@ tests = {
   varid() {
     assertParsed(
       ["VarId", ["Cons", {"str": "x"}, ["Cons", {"str": "Y"}, "Nil"]]],
-      ["varidOrReserved"],
+      "varidOrReserved",
       "xY");
   },
 
   reserved() {
-    assertParsed("Let", ["varidOrReserved"], "let");
+    assertParsed("Let", "varidOrReserved", "let");
   },
 
   symbol() {
-    assertParsed("LParen", ["token"], "(");
+    assertParsed("LParen", "token", "(");
   },
 
   comment() {
-    assertParsed("Unit", ["comment"], "#fnord\n");
+    assertParsed("Unit", "comment", "#fnord\n");
   },
 
   whitestuff() {
-    assertParsed("Unit", ["ignoreSome", ["whitestuff"]], "  #fnord\n \n");
+    assertParsed("Unit", ["ignoreSome", "whitestuff"], "  #fnord\n \n");
   },
 
   commentInStuff() {
@@ -207,7 +207,7 @@ tests = {
       ["Cons", ["VarId", charList("foo")],
       ["Cons", ["VarId", charList("bar")],
         "Nil"]],
-      ["pMany", ["tokenInWhitespace"]],
+      ["pMany", "tokenInWhitespace"],
       "  foo  #comment! \nbar");
   },
 
@@ -222,7 +222,7 @@ tests = {
       ["Cons", ["AVar", charList("x")],
        "Nil"]]];
     assertParsedTokens(["LetExp", bindings, exp],
-      ["exp"],
+      "exp",
       ["Cons", "Let",
       ["Cons", "LBrace",
       ["Cons", ["VarId", charList("x")],
@@ -249,7 +249,7 @@ tests = {
       ["Cons", ["AVar", charList("y")],
        "Nil"]]];
     assertParsedTokens(["LetExp", bindings, exp],
-      ["exp"],
+      "exp",
       ["Cons", "Let",
       ["Cons", "LBrace",
       ["Cons", ["VarId", charList("x")],
@@ -284,7 +284,7 @@ tests = {
             "Nil",
             ["FExp", ["Cons", ["AInt", 0], "Nil"]]],
           "Nil"]]],
-      ["exp"],
+      "exp",
       ["Cons", "Cased",
       ["Cons", ["VarId", charList("f")],
       ["Cons", ["VarId", charList("x")],
@@ -320,7 +320,7 @@ tests = {
             charList("foo"),
             ["FExp", ["Cons", ["AInt", 0], "Nil"]]],
           "Nil"]]],
-      ["exp"],
+      "exp",
       ["Cons", "Casei",
       ["Cons", ["VarId", charList("f")],
       ["Cons", ["VarId", charList("x")],
@@ -354,7 +354,7 @@ tests = {
             charList("foo"),
             ["FExp", ["Cons", ["AInt", 0], "Nil"]]],
           "Nil"]]],
-      ["exp"],
+      "exp",
       ["Cons", "Casec",
       ["Cons", ["VarId", charList("f")],
       ["Cons", ["VarId", charList("x")],
@@ -379,7 +379,7 @@ tests = {
         ["Cons", ["ConDecl", charList("Cons"), 2],
         ["Cons", ["ConDecl", charList("Nil"), 0],
          "Nil"]]],
-      ["decl"],
+      "decl",
       ["Cons", "Data",
       ["Cons", ["ConId", charList("List")],
       ["Cons", "Equals",
@@ -400,7 +400,7 @@ tests = {
         ["Cons", charList("second"),
          "Nil"]],
         ["FExp", ["Cons", ["AVar", charList("first")], "Nil"]]],
-      ["decl"],
+      "decl",
       ["Cons", ["VarId", charList("const")],
       ["Cons", ["VarId", charList("first")],
       ["Cons", ["VarId", charList("second")],

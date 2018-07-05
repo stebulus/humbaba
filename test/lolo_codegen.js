@@ -81,6 +81,13 @@ tests = {
     ]});
   },
 
+  zeroArgFunc() {
+    assertProgramValue(new rt.Box(2), {"declarations": [
+      {"func": ["two"], "=": 2},
+      {"func": ["test"], "=": "two"}
+    ]});
+  },
+
   caseNumber1() {
     assertExprValue(new rt.Box(3),
       {"casei": 2, "of": [[2, 3], [3, 2], ["n", 8]]});
