@@ -907,10 +907,8 @@
     ["require", "isAscSmall"]}
 
   , {"comment": "isAscSmall :: Char -> Bool",
-     "func": ["isAscSmall", "c"], "=":
-    ["boolAnd",
-      ["charLe", {"str": "a"}, "c"],
-      ["charLe", "c", {"str": "z"}]]}
+     "func": ["isAscSmall"], "=":
+    ["charBetween", {"str": "a"}, {"str": "z"}]}
 
   , {"comment": "small :: Parser Char Char",
      "func": ["small"], "=":
@@ -921,10 +919,8 @@
     ["require", "isAscLarge"]}
 
   , {"comment": "isAscLarge :: Char -> Bool",
-     "func": ["isAscLarge", "c"], "=":
-    ["boolAnd",
-      ["charLe", {"str": "A"}, "c"],
-      ["charLe", "c", {"str": "Z"}]]}
+     "func": ["isAscLarge"], "=":
+    ["charBetween", {"str": "A"}, {"str": "Z"}]}
 
   , {"comment": "large :: Parser Char Char",
      "func": ["large"], "=": ["ascLarge"]}
