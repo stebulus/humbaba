@@ -47,6 +47,17 @@ tests = {
     );
   },
 
+  funcWithCasec(callback) {
+    expectParsed(
+      {"declarations": [
+        {"func": ["main"], "=":
+          {"casec": "x", "of": [[{"str": "?"}, "Unit"], ["_", "Unit"]]}}
+      ]},
+      "{ main = casec x of { '?' > Unit ; _ > Unit } }",
+      callback
+    );
+  },
+
 };
 
 exports.tests = tests;

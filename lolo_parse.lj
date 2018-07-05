@@ -1670,6 +1670,19 @@
                 ["map", "emitStr", "vars"],
                 ["Cons", ["emitExpr", "expr"], "Nil"]]]]]]}}
 
+  , {"func": ["emitCAlt", "calt"], "=":
+    {"cased": "calt", "of":
+      [["CAltChar", "c", "expr",
+          ["emitArray",
+            ["Cons", ["emitChar", "c"],
+            ["Cons", ["emitExpr", "expr"],
+              "Nil"]]]],
+       ["CAltVar", "var", "expr",
+          ["emitArray",
+            ["Cons", ["emitStr", "var"],
+            ["Cons", ["emitExpr", "expr"],
+              "Nil"]]]]]}}
+
   , {"func": ["emitAExp", "aexpr"], "=":
     {"cased": "aexpr", "of":
       [["AChar", "c",
@@ -1691,6 +1704,19 @@
 
   , {"func": ["emitInt", "n"], "=":
     ["putStr", ["showInt", "n"]]}
+
+  , {"func": ["emitChar", "c"], "=":
+    ["ioThen", ["putChar", {"str": "{"}],
+    ["ioThen", ["putChar", {"str": "\""}],
+    ["ioThen", ["putChar", {"str": "s"}],
+    ["ioThen", ["putChar", {"str": "t"}],
+    ["ioThen", ["putChar", {"str": "r"}],
+    ["ioThen", ["putChar", {"str": "\""}],
+    ["ioThen", ["putChar", {"str": ":"}],
+    ["ioThen", ["putChar", {"str": "\""}],
+    ["ioThen", ["putChar", "c"],
+    ["ioThen", ["putChar", {"str": "\""}],
+               ["putChar", {"str": "}"}]]]]]]]]]]]}
 
   , {"comment":
 
