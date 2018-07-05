@@ -68,8 +68,11 @@
 
   , {"func": ["reverse"], "=": ["foldl", ["flip", "Cons"], "Nil"]}
 
-  , {"func": ["concat", "xs", "ys"], "=":
+  , {"func": ["listJoin", "xs", "ys"], "=":
     ["foldr", "Cons", "ys", "xs"]}
+
+  , {"func": ["concat", "xss"], "=":
+    ["foldr", "listJoin", "Nil", "xss"]}
 
   , {"func": ["listEq", "eq", "xs", "ys"], "=":
     {"cased": "xs", "of":
@@ -116,7 +119,7 @@
       ["intMul", -1, ["charOrd", {"str": "0"}]]]}
 
   , {"func": ["showInt", "n"], "=":
-    ["concat",
+    ["listJoin",
       ["showIntOptSign", "n"],
       ["showIntDigits", ["intAbs", "n"]]]}
 
