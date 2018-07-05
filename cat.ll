@@ -1,3 +1,5 @@
+# cat: copy stdin to stdout
+# An example of a Lolo program.
 { main = ioBind isEOF loop
 ; loop eof = cased eof of
   { True > ioPure Unit
