@@ -152,6 +152,8 @@
        [9, {"str": "9"}],
        ["_", {"str": "?"}]]}}
 
+  , {"func": ["putStr", "s"], "=": ["mapM_", "putChar", "s"]}
+
   , {"comments":
 
 
@@ -1501,7 +1503,7 @@
   , {"func": ["emitUnicodeEscape", "c"], "=":
     ["ioThen", ["putChar", {"str": "\\"}],
     ["ioThen", ["putChar", {"str": "u"}],
-               ["mapM_", "putChar", ["hex4", ["charOrd", "c"]]]]]}
+               ["putStr", ["hex4", ["charOrd", "c"]]]]]}
 
   , {"func": ["hex4", "n"], "=":
     ["map", "hex1", ["reverse", ["hexits", 4, "n"]]]}
@@ -1629,7 +1631,7 @@
        ["ASub", "subexpr", ["emitExpr", "subexpr"]]]}}
 
   , {"func": ["emitInt", "n"], "=":
-    ["mapM_", "putChar", ["showInt", "n"]]}
+    ["putStr", ["showInt", "n"]]}
 
   , {"comment":
 
