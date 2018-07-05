@@ -1,0 +1,37 @@
+Lolo is a small lazy functional programming language, the first step
+after JavaScript in the bootstrap of the Humbaba compiler.
+
+The main syntax of Lolo resembles Haskell, but with all pleasant
+features removed.  (See files named *.ll for examples.)  Parsing this
+syntax yields an AST, which is represented by plain JavaScript objects,
+arrays, numbers, and strings, so that it can be serialized as JSON,
+which is the secondary syntax of Lolo.
+
+For example, the Lolo program cat.ll includes this function:
+
+    loop eof = cased eof of
+      { True > ioPure Unit
+      ; False > ioThen (ioBind getChar putChar) main
+      }
+
+The AST for this declaration is, in JSON,
+
+    {"func": ["loop", "eof"],
+     "=": {"cased": "eof",
+           "of": [["True", ["ioPure", "Unit"]],
+                  ["False", ["ioThen",
+                    ["ioBind", "getChar", "putChar"],
+                    "main"]]]}}
+
+The JSON syntax is much less user-friendly, but is convenient
+for bootstrapping, since it can be parsed using the built-in JSON
+facilities of the JavaScript environment.  Indeed, the parser for
+the main syntax is written in the JSON syntax.  (See lolo_parse.lj.)
+
+Further reading:
+  lolo_codegen.js
+      - generating JavaScript code from a Lolo AST
+  ljc.js
+      - compiling Lolo JSON to JavaScript
+  lolo_parse.lj
+      - parsing Lolo and emitting the AST as JSON

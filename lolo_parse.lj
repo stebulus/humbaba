@@ -1,6 +1,17 @@
 { "comment": "Parse lolo code on stdin and emit lolo-json code on stdout",
   "declarations":
-  [ {"data": "Unit", "=": [["Unit", 0]]}
+
+  [ {"comment":
+
+
+
+    "### Standard data types and functions ###"
+
+
+
+    }
+
+  , {"data": "Unit", "=": [["Unit", 0]]}
 
   , {"data": "Bool", "=": [["True", 0], ["False", 0]]}
 
@@ -57,6 +68,9 @@
 
   , {"func": ["reverse"], "=": ["foldl", ["flip", "Cons"], "Nil"]}
 
+  , {"func": ["concat", "xs", "ys"], "=":
+    ["foldr", "Cons", "ys", "xs"]}
+
   , {"func": ["listEq", "eq", "xs", "ys"], "=":
     {"cased": "xs", "of":
       [["Cons", "x", "xrest",
@@ -90,16 +104,301 @@
   , {"func": ["mapM_", "f", "xs"], "=":
     ["sequence_", ["map", "f", "xs"]]}
 
-  , {"func": ["digits2int", "digits"], "=":
-    ["foldl", "digits2intStep", 0, "digits"]}
+  , {"func": ["readInt", "digits"], "=":
+    ["foldl", "readIntStep", 0, "digits"]}
 
-  , {"func": ["digits2intStep", "acc", "digit"], "=":
-    ["intAdd", ["intMul", 10, "acc"], ["digit2int", "digit"]]}
+  , {"func": ["readIntStep", "acc", "digit"], "=":
+    ["intAdd", ["intMul", 10, "acc"], ["digitToInt", "digit"]]}
 
-  , {"func": ["digit2int", "c"], "=":
+  , {"func": ["digitToInt", "c"], "=":
     ["intAdd",
       ["charOrd", "c"],
       ["intMul", -1, ["charOrd", {"str": "0"}]]]}
+
+  , {"func": ["showInt", "n"], "=":
+    ["concat",
+      ["showIntOptSign", "n"],
+      ["showIntDigits", ["intAbs", "n"]]]}
+
+  , {"func": ["showIntOptSign", "n"], "=":
+    {"cased": ["intLe", 0, "n"], "of":
+      [["True", "Nil"],
+       ["False", ["Cons", {"str": "-"}, "Nil"]]]}}
+
+  , {"func": ["showIntDigits", "n"], "=":
+    {"casei": "n", "of":
+      [[0, ["Cons", {"str": "0"}, "Nil"]],
+       ["_", ["reverse", ["showIntDigitsHelper", "n"]]]]}}
+
+  , {"func": ["showIntDigitsHelper", "n"], "=":
+    {"casei": "n", "of":
+      [[0, "Nil"],
+       ["_",
+          ["Cons",
+            ["intToDigit", ["intRem", "n", 10]],
+            ["showIntDigitsHelper", ["intQuot", "n", 10]]]]]}}
+
+  , {"func": ["intToDigit", "n"], "=":
+    {"casei": "n", "of":
+      [[0, {"str": "0"}],
+       [1, {"str": "1"}],
+       [2, {"str": "2"}],
+       [3, {"str": "3"}],
+       [4, {"str": "4"}],
+       [5, {"str": "5"}],
+       [6, {"str": "6"}],
+       [7, {"str": "7"}],
+       [8, {"str": "8"}],
+       [9, {"str": "9"}],
+       ["_", {"str": "?"}]]}}
+
+  , {"comments":
+
+
+
+    [ "### Parsing types ###"
+
+
+
+    , "This is standard applicative parsing, except for two things:"
+    , "First, we assume only one item of lookahead."
+    , "Second, the parser works like an iteratee,"
+    , "having data fed to it by the caller."
+    ]}
+
+  , {"comments":
+      ["data Parser i r = Done r | More (Eofed r) (i -> Peeked i r)\n",
+       "Represents the state of a parser with input items of type i",
+       "and eventual result of type r.",
+       "Done means the parser doesn't want any more input.",
+       "More means it wants to look ahead:",
+       "the Eofed field is the result if there's no more input;",
+       "the function field computes the result if there is more input.\n",
+       "There's no failure state here; parsers can only fail in",
+       "reaction to input.  (See pEmpty, for example.)",
+       "(Rationale: If there were, say, an Error state here,",
+       "then we could represent a parser that requires a character",
+       "but then inevitably fails after it receives it:",
+       "grumpy = More BadEof (const (Consume Error)).",
+       "I don't see a use for grumpy, and it complicates the",
+       "intuitive notion of 'accepting' a character, so let's omit it.)",
+       "(Counter: grumpy is algebraically nice -- it's a left zero",
+       "for <|> -- which suggests it deserves more scrutiny.)"],
+     "data": "Parser", "=": [["Done", 1], ["More", 2]]}
+
+  , {"comment": "feed :: i -> Parser i r -> Peeked i r",
+     "func": ["feed", "i", "parser"], "=":
+    {"cased": "parser", "of":
+      [["Done", "r", ["Pushback", "r"]],
+       ["More", "onEof", "onInput", ["onInput", "i"]]]}}
+
+  , {"comment": "feedEof :: Parser i r -> Eofed r",
+     "func": ["feedEof", "parser"], "=":
+    {"cased": "parser", "of":
+      [["Done", "r", ["GoodEof", "r"]],
+       ["More", "onEof", "_", "onEof"]]}}
+
+  , {"comment": "parseList :: Parser i r -> List i -> Either Char r",
+     "func": ["parseList", "parser", "s"], "=":
+    {"cased": "s", "of":
+      [["Nil", {"cased": ["feedEof", "parser"], "of":
+         [["GoodEof", "r", ["Right", "r"]],
+          ["BadEof", ["Left", {"str": "e"}]]]}],
+       ["Cons", "i", "is", {"cased": ["feed", "i", "parser"], "of":
+         [["Consume", "p", ["parseList", "p", "is"]],
+          ["Pushback", "r", ["Left", {"str": "p"}]],
+          ["Fail", ["Left", {"str": "f"}]]]}]]}}
+
+  , {"comments":
+      ["data Eofed r = GoodEof r | BadEof\n",
+       "Result when (Parser i r) sees end of input.",
+       "GoodEof means the end of input is accepted;",
+       "BadEof means the parse failed."],
+     "data": "Eofed", "=": [["GoodEof", 1], ["BadEof", 0]]}
+
+  , {"comments":
+      ["data Peeked i r = Consume (Parser i r) | Pushback r | Fail\n",
+       "Result when (Parser i r) sees an input item.",
+       "Consume p means it consumes the input item",
+       "and the next state of the parser is p.",
+       "Pushback r means it doesn't consume the input item",
+       "but completes its work, producing result r;",
+       "the caller should arrange for the input item to be presented",
+       "to the 'next' parser, whatever that means.  (See pApply.)",
+       "Fail means the input item is unexpected."],
+     "data": "Peeked", "=": [["Consume", 1], ["Pushback", 1], ["Fail", 0]]}
+
+  , {"comment": "<$> for Eofed instance of Functor",
+     "func": ["eofedMap", "f", "eof"], "=":
+    {"cased": "eof", "of":
+      [["GoodEof", "x", ["GoodEof", ["f", "x"]]],
+       ["BadEof", "eof"]]}}
+
+  , {"comment": "<*> for Eofed instance of Applicative",
+     "func": ["eofedApply", "ef", "ex"], "=":
+    {"cased": "ef", "of":
+      [["GoodEof", "f",
+          {"cased": "ex", "of":
+            [["GoodEof", "x", ["GoodEof", ["f", "x"]]],
+             ["BadEof", "BadEof"]]}],
+       ["BadEof", "BadEof"]]}}
+
+  , {"comment": "<|> for Eofed instance of Alternative",
+     "func": ["eofedAlt", "left", "right"], "=":
+    {"cased": "left", "of":
+      [["GoodEof", "_", "left"],
+       ["BadEof", "right"]]}}
+
+  , {"comment": "<$> for Peeked instance of Functor",
+     "func": ["peekedMap", "f", "peeked"], "=":
+    {"cased": "peeked", "of":
+      [["Consume", "p", ["Consume", ["pMap", "f", "p"]]],
+       ["Pushback", "a", ["Pushback", ["f", "a"]]],
+       ["Fail", "Fail"]]}}
+
+  , {"comment": "<|> for Peeked instance of Alternative",
+     "func": ["peekedAlt", "left", "right"], "=":
+    {"cased": "left", "of":
+      [["Fail", "right"],
+       ["Consume", "_", "left"],
+       ["Pushback", "_", "left"]]}}
+
+  , {"comment": "<$> for Parser instance of Functor",
+     "func": ["pMap", "f", "px"], "=":
+    {"cased": "px", "of":
+      [["Done", "x", ["Done", ["f", "x"]]],
+       ["More", "onEof", "onChar",
+          ["More",
+            ["eofedMap", "f", "onEof"],
+            ["compose", ["peekedMap", "f"], "onChar"]]]]}}
+
+  , {"comment": "pure for Parser instance of Applicative",
+     "func": ["pPure", "x"], "=": ["Done", "x"]}
+
+  , {"comment": "<*> for Parser instance of Applicative",
+     "func": ["pApply", "pf", "px"], "=":
+    {"cased": "pf", "of":
+      [["Done", "f", ["pMap", "f", "px"]],
+       ["More", "onEof", "onChar",
+          ["More",
+            ["eofedApply", "onEof", ["feedEof", "px"]],
+            ["ppFeedApply", "onChar", "px"]]]]}}
+
+  , {"comment": "ppFeedApply :: (i -> Peeked i (a->b)) -> Parser i a -> i -> Peeked i b",
+     "func": ["ppFeedApply", "i2peekedf", "parserx", "i"], "=":
+    {"cased": ["i2peekedf", "i"], "of":
+      [["Consume", "parserf", ["Consume", ["pApply", "parserf", "parserx"]]],
+       ["Pushback", "f", ["peekedMap", "f", ["feed", "i", "parserx"]]],
+       ["Fail", "Fail"]]}}
+
+  , {"comment": "empty for Parser instance of Applicative",
+    "func": ["pEmpty"], "=":
+    ["More", "BadEof", ["const", "Fail"]]}
+
+  , {"comments":
+      ["<|> for Parser instance of Alternative.",
+       "p <|> q is the same as p, unless p fails on the next input item,",
+       "in which case it's the same as q.",
+       "There's only 1 input item of lookahead (see comments on Peeked);",
+       "if p accepts the first input item and fails later,",
+       "then p <|> q will fail; it won't backtrack."],
+     "func": ["pAlt", "left", "right"], "=":
+    {"cased": "left", "of":
+      [["Done", "a", "left"],
+       ["More", "onEof", "onInput",
+          ["More",
+            ["eofedAlt", "onEof", ["feedEof", "right"]],
+            ["ppFeedAlt", "onInput", "right"]]]]}}
+
+  , {"comment": "ppFeedAlt :: (i -> Peeked i a) -> Parser i a -> i -> Peeked i a",
+     "func": ["ppFeedAlt", "i2peeked1", "fallback", "i"], "=":
+    ["peekedAlt", ["i2peeked1", "i"], ["feed", "i", "fallback"]]}
+
+  , {"comment": "*> for Parser instance of Applicative",
+     "func": ["pRight", "left", "right"], "=":
+    ["pApply", ["pMap", ["flip", "const"], "left"], "right"]}
+
+  , {"comment": "<* for Parser instance of Applicative",
+     "func": ["pLeft", "left", "right"], "=":
+    ["pApply", ["pMap", "const", "left"], "right"]}
+
+  , {"comment": "some for Parser instance of Applicative",
+     "func": ["pSome", "p"], "=":
+    ["pAlt", ["pMany", "p"], ["Done", "Nil"]]}
+
+  , {"comment": "many for Parser instance of Applicative",
+     "func": ["pMany", "p"], "=":
+    ["pApply", ["pMap", "Cons", "p"], ["pSome", "p"]]}
+
+  , {"comment":
+
+
+
+    "### Parsing combinators ###"
+
+
+
+    }
+
+  , {"comment": "item :: Parser a a",
+     "func": ["item"], "=":
+    ["More", "BadEof", ["compose", "Consume", "Done"]]}
+
+  , {"comment": "optional :: Parser i a -> Parser i (Maybe a)",
+     "func": ["optional", "p"], "=":
+    ["pAlt", ["pMap", "Just", "p"], ["pPure", "Nothing"]]}
+
+  , {"comment": "require :: (a -> Bool) -> Parser a a",
+     "func": ["require", "pred"], "=":
+    ["More", "BadEof", ["requirePeek", "pred"]]}
+
+  , {"comment": "requirePeek :: (a -> Bool) -> a -> Peeked a a",
+     "func": ["requirePeek", "pred", "a"], "=":
+    {"cased": ["pred", "a"], "of":
+      [["True", ["Consume", ["Done", "a"]]],
+       ["False", "Fail"]]}}
+
+  , {"comment": "ignore :: Parser i r -> Parser i Unit",
+     "func": ["ignore", "p"], "=": ["pRight", "p", ["Done", "Unit"]]}
+
+  , {"comment": "ignoreSome :: Parser i r -> Parser i Unit",
+     "func": ["ignoreSome", "p"], "=":
+    ["pAlt", ["pRight", "p", ["ignoreSome", "p"]], ["Done", "Unit"]]}
+
+  , {"comment": "ignoreUntil :: Parser i r -> Parser i r",
+     "func": ["ignoreUntil", "p"], "=":
+    ["pAlt", "p", ["pRight", ["item"], ["ignoreUntil", "p"]]]}
+
+  , {"comment": "delimitedList :: Parser i d -> Parser i a -> Parser i (List a)",
+     "func": ["delimitedList", "delimiter", "item"], "=":
+    ["pApply",
+      ["pMap", "Cons", "item"],
+      ["pSome", ["pRight", "delimiter", "item"]]]}
+
+  , {"comment": "char :: Char -> Parser Char Char",
+     "func": ["char", "c"], "=": ["require", ["charEq", "c"]]}
+
+  , {"comment": "charBetween :: Char -> Char -> Char -> Bool",
+     "func": ["charBetween", "lo", "hi", "c"], "=":
+    ["boolAnd", ["charLe", "lo", "c"], ["charLe", "c", "hi"]]}
+
+  , {"comment": "charRange :: Char -> Char -> Parser Char Char",
+     "func": ["charRange", "lo", "hi"], "=":
+    ["require", ["charBetween", "lo", "hi"]]}
+
+  , {"comments":
+
+
+
+    [ "### Lexical structure ###"
+
+
+
+    , "Since there's only one item of lookahead,"
+    , "we parse in two layers:"
+    , "scanning with (Parser Char a), in this section,"
+    , "and parsing proper with (Parser Token a), later."
+    ]}
 
   , {"data": "Token", "=":
     [["IntLiteral", 1],
@@ -543,210 +842,6 @@
              ["Pipe", "True"]]}
           ]]}}
 
-  , {"comments":
-      ["data Parser i r = Done r | More (Eofed r) (i -> Peeked i r)\n",
-       "Represents the state of a parser with input items of type i",
-       "and eventual result of type r.",
-       "Done means the parser doesn't want any more input.",
-       "More means it wants to look ahead:",
-       "the Eofed field is the result if there's no more input;",
-       "the function field computes the result if there is more input.\n",
-       "There's no failure state here; parsers can only fail in",
-       "reaction to input.  (See pEmpty, for example.)",
-       "(Rationale: If there were, say, an Error state here,",
-       "then we could represent a parser that requires a character",
-       "but then inevitably fails after it receives it:",
-       "grumpy = More BadEof (const (Consume Error)).",
-       "I don't see a use for grumpy, and it complicates the",
-       "intuitive notion of 'accepting' a character, so let's omit it.)",
-       "(Counter: grumpy is algebraically nice -- it's a left zero",
-       "for <|> -- which suggests it deserves more scrutiny.)"],
-     "data": "Parser", "=": [["Done", 1], ["More", 2]]}
-
-  , {"comment": "feed :: i -> Parser i r -> Peeked i r",
-     "func": ["feed", "i", "parser"], "=":
-    {"cased": "parser", "of":
-      [["Done", "r", ["Pushback", "r"]],
-       ["More", "onEof", "onInput", ["onInput", "i"]]]}}
-
-  , {"comment": "feedEof :: Parser i r -> Eofed r",
-     "func": ["feedEof", "parser"], "=":
-    {"cased": "parser", "of":
-      [["Done", "r", ["GoodEof", "r"]],
-       ["More", "onEof", "_", "onEof"]]}}
-
-  , {"comment": "parseList :: Parser i r -> List i -> Either Char r",
-     "func": ["parseList", "parser", "s"], "=":
-    {"cased": "s", "of":
-      [["Nil", {"cased": ["feedEof", "parser"], "of":
-         [["GoodEof", "r", ["Right", "r"]],
-          ["BadEof", ["Left", {"str": "e"}]]]}],
-       ["Cons", "i", "is", {"cased": ["feed", "i", "parser"], "of":
-         [["Consume", "p", ["parseList", "p", "is"]],
-          ["Pushback", "r", ["Left", {"str": "p"}]],
-          ["Fail", ["Left", {"str": "f"}]]]}]]}}
-
-  , {"comments":
-      ["data Eofed r = GoodEof r | BadEof\n",
-       "Result when (Parser i r) sees end of input.",
-       "GoodEof means the end of input is accepted;",
-       "BadEof means the parse failed."],
-     "data": "Eofed", "=": [["GoodEof", 1], ["BadEof", 0]]}
-
-  , {"comments":
-      ["data Peeked i r = Consume (Parser i r) | Pushback r | Fail\n",
-       "Result when (Parser i r) sees an input item.",
-       "Consume p means it consumes the input item",
-       "and the next state of the parser is p.",
-       "Pushback r means it doesn't consume the input item",
-       "but completes its work, producing result r;",
-       "the caller should arrange for the input item to be presented",
-       "to the 'next' parser, whatever that means.  (See pApply.)",
-       "Fail means the input item is unexpected."],
-     "data": "Peeked", "=": [["Consume", 1], ["Pushback", 1], ["Fail", 0]]}
-
-  , {"comment": "<$> for Eofed instance of Functor",
-     "func": ["eofedMap", "f", "eof"], "=":
-    {"cased": "eof", "of":
-      [["GoodEof", "x", ["GoodEof", ["f", "x"]]],
-       ["BadEof", "eof"]]}}
-
-  , {"comment": "<*> for Eofed instance of Applicative",
-     "func": ["eofedApply", "ef", "ex"], "=":
-    {"cased": "ef", "of":
-      [["GoodEof", "f",
-          {"cased": "ex", "of":
-            [["GoodEof", "x", ["GoodEof", ["f", "x"]]],
-             ["BadEof", "BadEof"]]}],
-       ["BadEof", "BadEof"]]}}
-
-  , {"comment": "<|> for Eofed instance of Alternative",
-     "func": ["eofedAlt", "left", "right"], "=":
-    {"cased": "left", "of":
-      [["GoodEof", "_", "left"],
-       ["BadEof", "right"]]}}
-
-  , {"comment": "<$> for Peeked instance of Functor",
-     "func": ["peekedMap", "f", "peeked"], "=":
-    {"cased": "peeked", "of":
-      [["Consume", "p", ["Consume", ["pMap", "f", "p"]]],
-       ["Pushback", "a", ["Pushback", ["f", "a"]]],
-       ["Fail", "Fail"]]}}
-
-  , {"comment": "<|> for Peeked instance of Alternative",
-     "func": ["peekedAlt", "left", "right"], "=":
-    {"cased": "left", "of":
-      [["Fail", "right"],
-       ["Consume", "_", "left"],
-       ["Pushback", "_", "left"]]}}
-
-  , {"comment": "<$> for Parser instance of Functor",
-     "func": ["pMap", "f", "px"], "=":
-    {"cased": "px", "of":
-      [["Done", "x", ["Done", ["f", "x"]]],
-       ["More", "onEof", "onChar",
-          ["More",
-            ["eofedMap", "f", "onEof"],
-            ["compose", ["peekedMap", "f"], "onChar"]]]]}}
-
-  , {"comment": "pure for Parser instance of Applicative",
-     "func": ["pPure", "x"], "=": ["Done", "x"]}
-
-  , {"comment": "<*> for Parser instance of Applicative",
-     "func": ["pApply", "pf", "px"], "=":
-    {"cased": "pf", "of":
-      [["Done", "f", ["pMap", "f", "px"]],
-       ["More", "onEof", "onChar",
-          ["More",
-            ["eofedApply", "onEof", ["feedEof", "px"]],
-            ["ppFeedApply", "onChar", "px"]]]]}}
-
-  , {"comment": "ppFeedApply :: (i -> Peeked i (a->b)) -> Parser i a -> i -> Peeked i b",
-     "func": ["ppFeedApply", "i2peekedf", "parserx", "i"], "=":
-    {"cased": ["i2peekedf", "i"], "of":
-      [["Consume", "parserf", ["Consume", ["pApply", "parserf", "parserx"]]],
-       ["Pushback", "f", ["peekedMap", "f", ["feed", "i", "parserx"]]],
-       ["Fail", "Fail"]]}}
-
-  , {"comment": "empty for Parser instance of Applicative",
-    "func": ["pEmpty"], "=":
-    ["More", "BadEof", ["const", "Fail"]]}
-
-  , {"comments":
-      ["<|> for Parser instance of Alternative.",
-       "p <|> q is the same as p, unless p fails on the next input item,",
-       "in which case it's the same as q.",
-       "There's only 1 input item of lookahead (see comments on Peeked);",
-       "if p accepts the first input item and fails later,",
-       "then p <|> q will fail; it won't backtrack."],
-     "func": ["pAlt", "left", "right"], "=":
-    {"cased": "left", "of":
-      [["Done", "a", "left"],
-       ["More", "onEof", "onInput",
-          ["More",
-            ["eofedAlt", "onEof", ["feedEof", "right"]],
-            ["ppFeedAlt", "onInput", "right"]]]]}}
-
-  , {"comment": "ppFeedAlt :: (i -> Peeked i a) -> Parser i a -> i -> Peeked i a",
-     "func": ["ppFeedAlt", "i2peeked1", "fallback", "i"], "=":
-    ["peekedAlt", ["i2peeked1", "i"], ["feed", "i", "fallback"]]}
-
-  , {"comment": "*> for Parser instance of Applicative",
-     "func": ["pRight", "left", "right"], "=":
-    ["pApply", ["pMap", ["flip", "const"], "left"], "right"]}
-
-  , {"comment": "<* for Parser instance of Applicative",
-     "func": ["pLeft", "left", "right"], "=":
-    ["pApply", ["pMap", "const", "left"], "right"]}
-
-  , {"comment": "some for Parser instance of Applicative",
-     "func": ["pSome", "p"], "=":
-    ["pAlt", ["pMany", "p"], ["Done", "Nil"]]}
-
-  , {"comment": "many for Parser instance of Applicative",
-     "func": ["pMany", "p"], "=":
-    ["pApply", ["pMap", "Cons", "p"], ["pSome", "p"]]}
-
-  , {"comment": "optional :: Parser i a -> Parser i (Maybe a)",
-     "func": ["optional", "p"], "=":
-    ["pAlt", ["pMap", "Just", "p"], ["pPure", "Nothing"]]}
-
-  , {"comment": "char :: Char -> Parser Char Char",
-     "func": ["char", "c"], "=": ["require", ["charEq", "c"]]}
-
-  , {"comment": "item :: Parser a a",
-     "func": ["item"], "=":
-    ["More", "BadEof", ["compose", "Consume", "Done"]]}
-
-  , {"comment": "require :: (a -> Bool) -> Parser a a",
-     "func": ["require", "pred"], "=":
-    ["More", "BadEof", ["requirePeek", "pred"]]}
-
-  , {"comment": "requirePeek :: (a -> Bool) -> a -> Peeked a a",
-     "func": ["requirePeek", "pred", "a"], "=":
-    {"cased": ["pred", "a"], "of":
-      [["True", ["Consume", ["Done", "a"]]],
-       ["False", "Fail"]]}}
-
-  , {"comment": "ignore :: Parser i r -> Parser i Unit",
-     "func": ["ignore", "p"], "=": ["pRight", "p", ["Done", "Unit"]]}
-
-  , {"comment": "ignoreSome :: Parser i r -> Parser i Unit",
-     "func": ["ignoreSome", "p"], "=":
-    ["pAlt", ["pRight", "p", ["ignoreSome", "p"]], ["Done", "Unit"]]}
-
-  , {"comment": "ignoreUntil :: Parser i r -> Parser i r",
-     "func": ["ignoreUntil", "p"], "=":
-    ["pAlt", "p", ["pRight", ["item"], ["ignoreUntil", "p"]]]}
-
-  , {"comment": "charBetween :: Char -> Char -> Char -> Bool",
-     "func": ["charBetween", "lo", "hi", "c"], "=":
-    ["boolAnd", ["charLe", "lo", "c"], ["charLe", "c", "hi"]]}
-
-  , {"comment": "charRange :: Char -> Char -> Parser Char Char",
-     "func": ["charRange", "lo", "hi"], "=":
-    ["require", ["charBetween", "lo", "hi"]]}
-
   , {"comment": "optsign :: Parser Char Bool",
      "func": ["optsign"], "=":
     ["pAlt",
@@ -764,7 +859,7 @@
 
   , {"comment": "natLiteral :: Parser Char Int",
      "func": ["natLiteral"], "=":
-    ["pMap", "digits2int", ["pMany", ["digit"]]]}
+    ["pMap", "readInt", ["pMany", ["digit"]]]}
 
   , {"comment": "intLiteral :: Parser Char Int",
      "func": ["intLiteral"], "=":
@@ -908,7 +1003,11 @@
     ["pMap", "ConId",
       ["pApply", ["pMap", "Cons", ["large"]], ["pSome", ["identChar"]]]]}
 
-  , {"comment": "token :: Parser Char Token",
+  , {"comments":
+      [ "token :: Parser Char Token\n"
+      , "Haskell '->' is here reduced to '>', to avoid ambiguity:"
+      , "in Lolo, '-' can only be the start of an integer literal."
+      ],
      "func": ["token"], "=":
     ["pAlt", ["varidOrReserved"],
     ["pAlt", ["conid"],
@@ -933,6 +1032,36 @@
     ["pLeft",
       ["pRight", ["ignoreWhitespace"], ["token"]],
       ["ignoreWhitespace"]]}
+
+  , {"comment":
+
+
+
+    "### Common syntactical constructions ###"
+
+
+
+    }
+
+  , {"comment": "inBraces :: Parser Token a -> Parser Token a",
+     "func": ["inBraces", "p"], "=":
+    ["pRight", ["require", ["tokenEq", "LBrace"]],
+      ["pLeft", "p", ["require", ["tokenEq", "RBrace"]]]]}
+
+  , {"comment": "bracedList :: Parser Token a -> Parser Token (List a)",
+     "func": ["bracedList", "p"], "=":
+    ["inBraces",
+      ["delimitedList", ["require", ["tokenEq", "Semicolon"]], "p"]]}
+
+  , {"comment":
+
+
+
+    "### Expressions ###"
+
+
+
+    }
 
   , {"comments":
       ["data Exp = LetExp (List Binding) Exp\n",
@@ -990,22 +1119,6 @@
     ["pApply",
       ["pMap", "Binding", ["varidString"]],
       ["pRight", ["require", ["tokenEq", "Equals"]], ["exp"]]]}
-
-  , {"comment": "delimitedList :: Parser i d -> Parser i a -> Parser i (List a)",
-     "func": ["delimitedList", "delimiter", "item"], "=":
-    ["pApply",
-      ["pMap", "Cons", "item"],
-      ["pSome", ["pRight", "delimiter", "item"]]]}
-
-  , {"comment": "inBraces :: Parser Token a -> Parser Token a",
-     "func": ["inBraces", "p"], "=":
-    ["pRight", ["require", ["tokenEq", "LBrace"]],
-      ["pLeft", "p", ["require", ["tokenEq", "RBrace"]]]]}
-
-  , {"comment": "bracedList :: Parser Token a -> Parser Token (List a)",
-     "func": ["bracedList", "p"], "=":
-    ["inBraces",
-      ["delimitedList", ["require", ["tokenEq", "Semicolon"]], "p"]]}
 
   , {"comment": "letExp :: Parser Token Exp",
      "func": ["letExp"], "=":
@@ -1226,6 +1339,16 @@
        ["Semicolon", "Fail"],
        ["Pipe", "Fail"]]}}
 
+  , {"comment":
+
+
+
+    "### Declarations ###"
+
+
+
+    }
+
   , {"comments":
       ["data Decl = DataDecl String (List ConDecl) \n",
        "          | FuncDecl String (List String) Exp\n"],
@@ -1271,6 +1394,16 @@
   , {"comment": "program :: Parser Token (List Decl)",
      "func": ["program"], "=": ["bracedList", ["decl"]]}
 
+  , {"comment":
+
+
+
+    "### Parsing stdin ###"
+
+
+
+    }
+
   , {"comment": "parseStdin :: IO (Either Char (List Decl))",
      "func": ["parseStdin"], "=":
     ["parseStdinHelper", ["tokenInWhitespace"], ["program"]]}
@@ -1310,6 +1443,16 @@
              ["Pushback", "_", ["ioPure", ["Left", {"str": "p"}]]],
              ["Fail", ["ioPure", ["Left", {"str": "f"}]]]]}],
        ["Fail", ["ioPure", ["Left", {"str": "f"}]]]]}}
+
+  , {"comment":
+
+
+
+    "### Emitting JSON representation ###"
+
+
+
+    }
 
   , {"func": ["emitArray", "emit", "items"], "=":
     ["ioThen",
@@ -1486,40 +1629,17 @@
        ["ASub", "subexpr", ["emitExpr", "subexpr"]]]}}
 
   , {"func": ["emitInt", "n"], "=":
-    ["ioThen", ["emitOptSign", "n"],
-               ["mapM_", "putChar", ["digits", ["intAbs", "n"]]]]}
+    ["mapM_", "putChar", ["showInt", "n"]]}
 
-  , {"func": ["emitOptSign", "n"], "=":
-    {"cased": ["intLe", 0, "n"], "of":
-      [["True", ["ioPure", "Unit"]],
-       ["False", ["putChar", {"str": "-"}]]]}}
+  , {"comment":
 
-  , {"func": ["digits", "n"], "=":
-    {"casei": "n", "of":
-      [[0, ["Cons", {"str": "0"}, "Nil"]],
-       ["_", ["reverse", ["digitsHelper", "n"]]]]}}
 
-  , {"func": ["digitsHelper", "n"], "=":
-    {"casei": "n", "of":
-      [[0, "Nil"],
-       ["_",
-          ["Cons",
-            ["digit1", ["intRem", "n", 10]],
-            ["digitsHelper", ["intQuot", "n", 10]]]]]}}
 
-  , {"func": ["digit1", "n"], "=":
-    {"casei": "n", "of":
-      [[0, {"str": "0"}],
-       [1, {"str": "1"}],
-       [2, {"str": "2"}],
-       [3, {"str": "3"}],
-       [4, {"str": "4"}],
-       [5, {"str": "5"}],
-       [6, {"str": "6"}],
-       [7, {"str": "7"}],
-       [8, {"str": "8"}],
-       [9, {"str": "9"}],
-       ["_", {"str": "?"}]]}}
+    "### Entry point ###"
+
+
+
+    }
 
   , {"func": ["checkParseResult", "result"], "=":
     {"cased": "result", "of":

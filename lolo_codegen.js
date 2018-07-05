@@ -206,7 +206,11 @@ function program(ast, entry, chunk) {
     } else if ('data' in decls[i]) {
       dataDeclaration(decls[i], chunk);
     } else {
-      weirdCode(decls[i]);
+      for (var k in decls[i]) {
+        if (k !== 'comment' && k !== 'comments') {
+          weirdCode(decls[i]);
+        }
+      }
     }
   }
   chunk('return new rt.Apply($');

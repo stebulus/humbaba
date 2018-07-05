@@ -143,12 +143,12 @@ tests = {
 
   digit2int() {
     test.assertSame(new rt.Box(2),
-      withLoloParse(["digit2int", {"str": "2"}]));
+      withLoloParse(["digitToInt", {"str": "2"}]));
   },
 
   digits2int() {
     test.assertSame(new rt.Box(374),
-      withLoloParse(["digits2int",
+      withLoloParse(["readInt",
         ["Cons", {"str": "3"},
         ["Cons", {"str": "7"},
         ["Cons", {"str": "4"}, "Nil"]]]]));
