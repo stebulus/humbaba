@@ -1670,6 +1670,19 @@
                 ["map", "emitStr", "vars"],
                 ["Cons", ["emitExpr", "expr"], "Nil"]]]]]]}}
 
+  , {"func": ["emitIAlt", "ialt"], "=":
+    {"cased": "ialt", "of":
+      [["IAltInt", "n", "expr",
+          ["emitArray",
+            ["Cons", ["emitInt", "n"],
+            ["Cons", ["emitExpr", "expr"],
+              "Nil"]]]],
+       ["IAltVar", "var", "expr",
+          ["emitArray",
+            ["Cons", ["emitStr", "var"],
+            ["Cons", ["emitExpr", "expr"],
+              "Nil"]]]]]}}
+
   , {"func": ["emitCAlt", "calt"], "=":
     {"cased": "calt", "of":
       [["CAltChar", "c", "expr",

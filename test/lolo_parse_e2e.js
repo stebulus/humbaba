@@ -58,6 +58,17 @@ tests = {
     );
   },
 
+  funcWithCasei(callback) {
+    expectParsed(
+      {"declarations": [
+        {"func": ["main"], "=":
+          {"casei": "x", "of": [[3, "Unit"], ["_", "Unit"]]}}
+      ]},
+      "{ main = casei x of { 3 > Unit ; _ > Unit } }",
+      callback
+    );
+  },
+
 };
 
 exports.tests = tests;
