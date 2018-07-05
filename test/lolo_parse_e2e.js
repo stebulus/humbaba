@@ -36,6 +36,50 @@ tests = {
     );
   },
 
+  funcWithCased(callback) {
+    expectParsed(
+      {"declarations": [
+        {"func": ["main"], "=":
+          {"cased": "x", "of": [["True", "Unit"], ["False", "Unit"]]}}
+      ]},
+      "{ main = cased x of { True > Unit ; False > Unit } }",
+      callback
+    );
+  },
+
+  funcWithCasec(callback) {
+    expectParsed(
+      {"declarations": [
+        {"func": ["main"], "=":
+          {"casec": "x", "of": [[{"str": "?"}, "Unit"], ["_", "Unit"]]}}
+      ]},
+      "{ main = casec x of { '?' > Unit ; _ > Unit } }",
+      callback
+    );
+  },
+
+  funcWithCasei(callback) {
+    expectParsed(
+      {"declarations": [
+        {"func": ["main"], "=":
+          {"casei": "x", "of": [[3, "Unit"], ["_", "Unit"]]}}
+      ]},
+      "{ main = casei x of { 3 > Unit ; _ > Unit } }",
+      callback
+    );
+  },
+
+  funcWithLet(callback) {
+    expectParsed(
+      {"declarations": [
+        {"func": ["main"], "=":
+          {"let": [["x", 3], ["y", "x"]], "in": "y"}}
+      ]},
+      "{ main = let { x = 3 ; y = x } in y }",
+      callback
+    );
+  },
+
 };
 
 exports.tests = tests;
