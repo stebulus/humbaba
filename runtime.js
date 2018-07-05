@@ -1,3 +1,30 @@
+/*
+  Runtime support for Humbaba programs.
+
+  A lazy evaluator using graph reduction.  There are four types of node:
+  - DATA, representing values of algebraic data types;
+  - PARTIAL_APPLY, a function with some arguments but not yet enough
+    to actually call it;
+  - INDIRECT, a pointer to another node;
+  - THUNK, which contains an expression to be evaluated (to WHNF)
+    and a continuation function which takes the result as an argument.
+
+  When a THUNK is evaluated, it's overwritten with the result, which
+  (usually) causes its type to change.  (This is why INDIRECT nodes
+  are needed: to evaluate a THUNK to an existing node, we overwrite
+  the THUNK with an INDIRECT to that existing node.)
+
+  Calling convention:
+  When a user-supplied JavaScript function is called to update
+  the graph, it receives its arguments in the usual way, and its
+  'this' refers to a graph node to be overwritten with the result.
+  Any return value is ignored.
+
+  We use the eval/apply method described in
+    Peyton Jones, Simon.  How to make a fast curry: push/enter vs
+    eval/apply.  2004.
+    https://www.microsoft.com/en-us/research/publication/make-fast-curry-pushenter-vs-evalapply/
+*/
 var DATA = 1;
 var PARTIAL_APPLY = 2;
 var INDIRECT = 3;
@@ -26,6 +53,12 @@ function Empty() {}
 Empty.prototype = Node;
 exports.Empty = Empty;
 
+/*
+  A graph node representing a value of an algebraic data type.
+
+  tag is an integer representing which constructor is used.
+  fields is an array (possibly empty) of expressions.
+*/
 function Data(tag, fields) {
   this.type = DATA;
   this.tag = tag;
@@ -34,6 +67,14 @@ function Data(tag, fields) {
 Data.prototype = Node;
 exports.Data = Data;
 
+/*
+  A graph node representing a function applied to some arguments
+  (but not enough to actually call the function yet).
+
+  func is a JavaScript function.  See "Calling convention" above.
+
+  args is an array of arguments.  args.length < func.length.
+*/
 function PartialApply(func, args) {
   this.type = PARTIAL_APPLY;
   this.func = func;
@@ -42,6 +83,9 @@ function PartialApply(func, args) {
 PartialApply.prototype = Node;
 exports.PartialApply = PartialApply;
 
+/*
+  A graph node pointing to another graph node.
+*/
 function Indirect(target) {
   this.type = INDIRECT;
   this.target = target;
@@ -49,6 +93,14 @@ function Indirect(target) {
 Indirect.prototype = Node;
 exports.Indirect = Indirect;
 
+/*
+  A graph node representing evaluation and inspection.
+
+  evaluand is a graph node to be evaluated (to WHNF).
+
+  continuation is a JavaScript function which takes the evaluated
+  evaluand as its sole argument.  See "Calling convention" above.
+*/
 function Thunk(evaluand, continuation) {
   this.type = THUNK;
   this.evaluand = evaluand;
@@ -57,18 +109,41 @@ function Thunk(evaluand, continuation) {
 Thunk.prototype = Node;
 exports.Thunk = Thunk;
 
+/*
+  A graph node representing a function applied to some arguments.
+
+  func is a node representing a function.  It will first be evaluated;
+  this must yield either a boxed function (that is, a DATA node with a
+  single field, the JavaScript function) a partially applied function
+  (that is, a PARTIAL_APPLY node), or an INDIRECT to one of those.
+
+  args is an array of argument expressions.
+
+  Implemented as a THUNK: we evaluate func and then apply it to
+  the arguments.
+*/
 function Apply(func, args) {
   Thunk.call(this, func, applyTo(args));
 }
 Apply.prototype = Node;
 exports.Apply = Apply;
 
+/*
+  A graph node representing a boxed JavaScript value.
+
+  Implemented as a DATA.
+*/
 function Box(value) {
   Data.call(this, 1, [value]);
 }
 Box.prototype = Node;
 exports.Box = Box;
 
+/*
+  The continuation for THUNKs representing function application.
+
+  args is an array of argument expressions.
+*/
 function applyTo(args) {
   return function actuallyApply(func) {
     var allArgs;
@@ -101,6 +176,20 @@ function applyTo(args) {
   }
 }
 
+/*
+  Simplify chains of INDIRECT nodes.
+
+  When passed the node INDIRECT 1, this function rewrites chains like
+    INDIRECT 1 -> INDIRECT 2 -> INDIRECT 3 -> node
+  to look like
+    INDIRECT 1 -> node
+    INDIRECT 2 -> node
+    INDIRECT 3 -> node
+  and returns node (so that the caller can update its own reference
+  to INDIRECT 1).
+
+  expr is a graph node.
+*/
 function smashIndirects(expr) {
   var indirects = [];
   var target;
@@ -116,10 +205,16 @@ function smashIndirects(expr) {
 }
 exports.smashIndirects = smashIndirects;
 
+/*
+  Continuation for completing the evaluation of INDIRECT nodes.
+*/
 function setTarget(target) {
   this.target = target;
 }
 
+/*
+  Evaluate expr to WHNF.
+*/
 function evaluate(expr) {
   var stack = [];
   while (true) {
@@ -174,6 +269,9 @@ function evaluateDeep(expr) {
 }
 exports.evaluateDeep = evaluateDeep;
 
+/*
+  Algebraic data type representing IO actions.
+*/
 var IOPURE = 1;
 exports.IOPURE = IOPURE;
 var IOBIND = 2;
