@@ -36,6 +36,17 @@ tests = {
     );
   },
 
+  funcWithCased(callback) {
+    expectParsed(
+      {"declarations": [
+        {"func": ["main"], "=":
+          {"cased": "x", "of": [["True", "Unit"], ["False", "Unit"]]}}
+      ]},
+      "{ main = cased x of { True > Unit ; False > Unit } }",
+      callback
+    );
+  },
+
 };
 
 exports.tests = tests;

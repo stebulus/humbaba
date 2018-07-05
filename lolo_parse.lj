@@ -68,6 +68,9 @@
 
   , {"func": ["reverse"], "=": ["foldl", ["flip", "Cons"], "Nil"]}
 
+  , {"func": ["length", "xs"], "=":
+    ["intSum", ["map", ["const", 1], "xs"]]}
+
   , {"func": ["listJoin", "xs", "ys"], "=":
     ["foldr", "Cons", "ys", "xs"]}
 
@@ -87,6 +90,20 @@
           {"cased": "ys", "of":
             [["Cons", "_", "_", "False"],
              ["Nil", "True"]]}]]}}
+
+  , {"func": ["intersperse", "x", "ys"], "=":
+    {"cased": "ys", "of":
+      [["Nil", "Nil"],
+       ["Cons", "y", "rest",
+          {"cased": "rest", "of":
+            [["Nil", ["Cons", "y", "Nil"]],
+             ["Cons", "_", "_",
+                ["Cons", "y",
+                ["Cons", "x",
+                ["intersperse", "x", "rest"]]]]]}]]}}
+
+  , {"func": ["intSum", "ns"], "=":
+    ["foldr", "intAdd", 0, "ns"]}
 
   , {"func": ["intAbs", "n"], "=":
     {"cased": ["intLe", 0, "n"], "of":
@@ -1459,25 +1476,13 @@
 
     }
 
-  , {"func": ["emitArray", "emit", "items"], "=":
+  , {"func": ["emitArray", "itemEmitters"], "=":
     ["ioThen",
       ["putChar", {"str": "["}],
       ["ioThen",
-        {"cased": "items", "of":
-          [["Nil", ["ioPure", "Unit"]],
-           ["Cons", "item", "rest",
-              ["ioThen",
-                ["emit", "item"],
-                ["emitMoreItems", "emit", "rest"]]]]},
+        ["sequence_",
+          ["intersperse", ["putChar", {"str": ","}], "itemEmitters"]],
         ["putChar", {"str": "]"}]]]}
-
-  , {"func": ["emitMoreItems", "emit", "items"], "=":
-    {"cased": "items", "of":
-      [["Nil", ["ioPure", "Unit"]],
-       ["Cons", "item", "rest",
-          ["ioThen", ["putChar", {"str": ","}],
-          ["ioThen", ["emit", "item"],
-                     ["emitMoreItems", "emit", "rest"]]]]]}}
 
   , {"func": ["emitStr", "s"], "=":
     ["ioThen", ["putChar", {"str": "\""}],
@@ -1556,7 +1561,7 @@
     ["ioThen", ["putChar", {"str": "s"}],
     ["ioThen", ["putChar", {"str": "\""}],
     ["ioThen", ["putChar", {"str": ":"}],
-    ["ioThen", ["emitArray", "emitDecl", "decls"],
+    ["ioThen", ["emitArray", ["map", "emitDecl", "decls"]],
                ["putChar", {"str": "}"}]]]]]]]]]]]]]]]]]]}
 
   , {"func": ["emitDecl", "decl"], "=":
@@ -1576,7 +1581,7 @@
           ["ioThen", ["putChar", {"str": "="}],
           ["ioThen", ["putChar", {"str": "\""}],
           ["ioThen", ["putChar", {"str": ":"}],
-          ["ioThen", ["emitArray", "emitConDecl", "condecls"],
+          ["ioThen", ["emitArray", ["map", "emitConDecl", "condecls"]],
                      ["putChar", {"str": "}"}]]]]]]]]]]]]]]]]],
        ["FuncDecl", "name", "argnames", "expr",
           ["ioThen", ["putChar", {"str": "{"}],
@@ -1587,8 +1592,8 @@
           ["ioThen", ["putChar", {"str": "c"}],
           ["ioThen", ["putChar", {"str": "\""}],
           ["ioThen", ["putChar", {"str": ":"}],
-          ["ioThen", ["emitArray", "emitStr",
-            ["Cons", "name", "argnames"]],
+          ["ioThen", ["emitArray", ["map", "emitStr",
+            ["Cons", "name", "argnames"]]],
           ["ioThen", ["putChar", {"str": ","}],
           ["ioThen", ["putChar", {"str": "\""}],
           ["ioThen", ["putChar", {"str": "="}],
@@ -1608,11 +1613,62 @@
 
   , {"func": ["emitExpr", "expr"], "=":
     {"cased": "expr", "of":
-      [["LetExp", "bindings", "subexpr", ["putChar", {"str": "0"}]],
-       ["CasedExp", "evaluand", "dalts", ["putChar", {"str": "0"}]],
-       ["CaseiExp", "evaluand", "ialts", ["putChar", {"str": "0"}]],
-       ["CasecExp", "evaluand", "calts", ["putChar", {"str": "0"}]],
-       ["FExp", "aexps", ["emitArray", "emitAExp", "aexps"]]]}}
+      [["LetExp", "bindings", "subexpr",
+          ["ioThen", ["putChar", {"str": "{"}],
+          ["ioThen", ["putChar", {"str": "\""}],
+          ["ioThen", ["putChar", {"str": "l"}],
+          ["ioThen", ["putChar", {"str": "e"}],
+          ["ioThen", ["putChar", {"str": "t"}],
+          ["ioThen", ["putChar", {"str": "\""}],
+          ["ioThen", ["putChar", {"str": ":"}],
+          ["ioThen", ["emitArray", ["map", "emitBinding", "bindings"]],
+          ["ioThen", ["putChar", {"str": ","}],
+          ["ioThen", ["putChar", {"str": "\""}],
+          ["ioThen", ["putChar", {"str": "i"}],
+          ["ioThen", ["putChar", {"str": "n"}],
+          ["ioThen", ["putChar", {"str": "\""}],
+          ["ioThen", ["putChar", {"str": ":"}],
+          ["ioThen", ["emitExpr", "subexpr"],
+                     ["putChar", {"str": "}"}]]]]]]]]]]]]]]]]],
+       ["CasedExp", "evaluand", "dalts",
+          ["emitCaseExp", {"str": "d"}, "emitDAlt", "evaluand", "dalts"]],
+       ["CaseiExp", "evaluand", "ialts",
+          ["emitCaseExp", {"str": "i"}, "emitIAlt", "evaluand", "ialts"]],
+       ["CasecExp", "evaluand", "calts",
+          ["emitCaseExp", {"str": "c"}, "emitCAlt", "evaluand", "calts"]],
+       ["FExp", "aexps",
+          {"casei": ["length", "aexps"], "of":
+            [[1, ["mapM_", "emitAExp", "aexps"]],
+             ["_", ["emitArray", ["map", "emitAExp", "aexps"]]]]}]]}}
+
+  , {"func": ["emitCaseExp", "suffix", "emitAlt", "evaluand", "alts"], "=":
+      ["ioThen", ["putChar", {"str": "{"}],
+      ["ioThen", ["putChar", {"str": "\""}],
+      ["ioThen", ["putChar", {"str": "c"}],
+      ["ioThen", ["putChar", {"str": "a"}],
+      ["ioThen", ["putChar", {"str": "s"}],
+      ["ioThen", ["putChar", {"str": "e"}],
+      ["ioThen", ["putChar", "suffix"],
+      ["ioThen", ["putChar", {"str": "\""}],
+      ["ioThen", ["putChar", {"str": ":"}],
+      ["ioThen", ["emitExpr", "evaluand"],
+      ["ioThen", ["putChar", {"str": ","}],
+      ["ioThen", ["putChar", {"str": "\""}],
+      ["ioThen", ["putChar", {"str": "o"}],
+      ["ioThen", ["putChar", {"str": "f"}],
+      ["ioThen", ["putChar", {"str": "\""}],
+      ["ioThen", ["putChar", {"str": ":"}],
+      ["ioThen", ["emitArray", ["map", "emitAlt", "alts"]],
+                 ["putChar", {"str": "}"}]]]]]]]]]]]]]]]]]]}
+
+  , {"func": ["emitDAlt", "dalt"], "=":
+    {"cased": "dalt", "of":
+      [["DAlt", "con", "vars", "expr",
+          ["emitArray",
+            ["Cons", ["emitStr", "con"],
+              ["listJoin",
+                ["map", "emitStr", "vars"],
+                ["Cons", ["emitExpr", "expr"], "Nil"]]]]]]}}
 
   , {"func": ["emitAExp", "aexpr"], "=":
     {"cased": "aexpr", "of":
