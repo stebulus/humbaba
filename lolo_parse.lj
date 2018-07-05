@@ -1641,6 +1641,14 @@
             [[1, ["mapM_", "emitAExp", "aexps"]],
              ["_", ["emitArray", ["map", "emitAExp", "aexps"]]]]}]]}}
 
+  , {"func": ["emitBinding", "binding"], "=":
+    {"cased": "binding", "of":
+      [["Binding", "var", "expr",
+        ["emitArray",
+          ["Cons", ["emitStr", "var"],
+          ["Cons", ["emitExpr", "expr"],
+            "Nil"]]]]]}}
+
   , {"func": ["emitCaseExp", "suffix", "emitAlt", "evaluand", "alts"], "=":
       ["ioThen", ["putChar", {"str": "{"}],
       ["ioThen", ["putChar", {"str": "\""}],

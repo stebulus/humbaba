@@ -69,6 +69,17 @@ tests = {
     );
   },
 
+  funcWithLet(callback) {
+    expectParsed(
+      {"declarations": [
+        {"func": ["main"], "=":
+          {"let": [["x", 3], ["y", "x"]], "in": "y"}}
+      ]},
+      "{ main = let { x = 3 ; y = x } in y }",
+      callback
+    );
+  },
+
 };
 
 exports.tests = tests;
