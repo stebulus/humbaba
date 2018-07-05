@@ -392,10 +392,10 @@
     ["pAlt", "p", ["pRight", ["item"], ["ignoreUntil", "p"]]]}
 
   , {"comment": "delimitedList :: Parser i d -> Parser i a -> Parser i (List a)",
-     "func": ["delimitedList", "delimiter", "item"], "=":
+     "func": ["delimitedList", "delimiter", "p"], "=":
     ["pApply",
-      ["pMap", "Cons", "item"],
-      ["pSome", ["pRight", "delimiter", "item"]]]}
+      ["pMap", "Cons", "p"],
+      ["pSome", ["pRight", "delimiter", "p"]]]}
 
   , {"comment": "char :: Char -> Parser Char Char",
      "func": ["char", "c"], "=": ["require", ["charEq", "c"]]}
