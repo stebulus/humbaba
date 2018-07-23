@@ -26,15 +26,21 @@ function assertExprValue(expected, astNode) {
   test.assertSame(expected, rt.smashIndirects(ex));
 }
 
-function programValue(ast) {
-  var expr = eval(codegen.programToJavaScript(ast, 'test'));
+function programValue(ast, modules) {
+  var programFunc = eval(codegen.programToJavaScript(ast, 'test'));
+  var expr = programFunc(function (moduleName) {
+    var module = modules[moduleName];
+    if (module === undefined)
+      throw new Error('undefined module: ' + moduleName);
+    return module;
+  });
   rt.evaluateDeep(expr);
   return rt.smashIndirects(expr);
 }
 exports.programValue = programValue;
 
-function assertProgramValue(expected, ast) {
-  test.assertSame(expected, programValue(ast));
+function assertProgramValue(expected, ast, modules) {
+  test.assertSame(expected, programValue(ast, modules));
 }
 
 tests = {
@@ -190,6 +196,15 @@ tests = {
         {"cased": ["charEq", 1, ["id", 0]],
          "of": [["True", "True"], ["False", "False"]]}}
     ]});
+  },
+
+  importSomething() {
+    assertProgramValue(rt.True, {"declarations": [
+        {"import": "Lolo.Prelude"},
+        {"func": ["test"], "=": "Lolo.Prelude.True"}
+      ]},
+      {"Lolo/Prelude": {"$True": rt.True}}
+    );
   },
 
 };

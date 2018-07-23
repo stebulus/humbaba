@@ -27,7 +27,7 @@ function withLoloParseProgram(expr) {
 exports.withLoloParseProgram = withLoloParseProgram;
 
 function withLoloParse(expr) {
-  return test_codegen.programValue(withLoloParseProgram(expr));
+  return test_codegen.programValue(withLoloParseProgram(expr), {});
 }
 
 function assertParseResult(expected, parser, input) {

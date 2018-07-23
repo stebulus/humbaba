@@ -7,7 +7,8 @@ function stdout(input, program) {
   var code =
     "var rt = require('../runtime');" +
     codegen.ioDeclsJavaScript +
-    codegen.programToJavaScript(program, 'test');
+    codegen.programToJavaScript(program, 'test')
+    + '(function () { throw new Error("require"); })';
   var expr = eval(code);
   var strm = new rts.Stream(expr);
   if (input === null)
