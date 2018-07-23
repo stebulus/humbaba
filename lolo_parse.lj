@@ -949,9 +949,7 @@
 
   , {"comment": "comment :: Parser Char Unit",
      "func": ["comment"], "=":
-     ["pRight",
-       ["require", ["charEq", {"str": "#"}]],
-       ["ignoreUntil", "newline"]]}
+     ["pRight", ["char", {"str": "#"}], ["ignoreUntil", "newline"]]}
 
   , {"comment": "whitestuff :: Parser Char Unit",
      "func": ["whitestuff"], "=":
