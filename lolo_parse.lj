@@ -120,10 +120,10 @@
   , {"func": ["stringEq"], "=": ["listEq", "Prim.Char.eq"]}
 
   , {"func": ["ioThen", "ioa", "iob"], "=":
-    ["Prim.IO.ioBind", "ioa", ["const", "iob"]]}
+    ["Prim.IO.bind", "ioa", ["const", "iob"]]}
 
   , {"func": ["sequence_", "ios"], "=":
-    ["foldr", "ioThen", ["Prim.IO.ioPure", "Unit"], "ios"]}
+    ["foldr", "ioThen", ["Prim.IO.pure", "Unit"], "ios"]}
 
   , {"func": ["mapM_", "f", "xs"], "=":
     ["sequence_", ["map", "f", "xs"]]}
@@ -1430,7 +1430,7 @@
 
   , {"comment": "parseStdinHelper :: Parser Char Token -> Parser Token a -> IO (Either Char a)",
      "func": ["parseStdinHelper", "charstate", "tokenstate"], "=":
-    ["Prim.IO.ioBind", "Prim.IO.isEOF",
+    ["Prim.IO.bind", "Prim.IO.isEOF",
       ["parseStdinLoop", "charstate", "tokenstate"]]}
 
   , {"comment": "parseStdinLoop :: Parser Char Token -> Parser Token a -> Bool -> IO (Either Char a)",
@@ -1441,28 +1441,28 @@
           {"cased": ["feed", "token", "tokenstate"], "of":
             [["Consume", "tokenstate2",
               {"cased": ["feedEof", "tokenstate2"], "of":
-                [["GoodEof", "r", ["Prim.IO.ioPure", ["Right", "r"]]],
-                 ["BadEof", ["Prim.IO.ioPure", ["Left", {"str": "e"}]]]]}],
-             ["Pushback", "_", ["Prim.IO.ioPure", ["Left", {"str": "p"}]]],
-             ["Fail", ["Prim.IO.ioPure", ["Left", {"str": "f"}]]]]}],
-         ["BadEof", ["Prim.IO.ioPure", ["Left", {"str": "e"}]]]]}],
-       ["False", ["Prim.IO.ioBind", "Prim.IO.getChar",
+                [["GoodEof", "r", ["Prim.IO.pure", ["Right", "r"]]],
+                 ["BadEof", ["Prim.IO.pure", ["Left", {"str": "e"}]]]]}],
+             ["Pushback", "_", ["Prim.IO.pure", ["Left", {"str": "p"}]]],
+             ["Fail", ["Prim.IO.pure", ["Left", {"str": "f"}]]]]}],
+         ["BadEof", ["Prim.IO.pure", ["Left", {"str": "e"}]]]]}],
+       ["False", ["Prim.IO.bind", "Prim.IO.getChar",
         ["parseStdinLoopChar", "charstate", "tokenstate"]]]]}}
 
   , {"comment": "parseStdinLoopChar :: Parser Char Token -> Parser Token a -> Char -> IO (Either Char a)",
      "func": ["parseStdinLoopChar", "charstate", "tokenstate", "c"], "=":
     {"cased": ["feed", "c", "charstate"], "of":
       [["Consume", "charstate2",
-        ["Prim.IO.ioBind", "Prim.IO.isEOF",
+        ["Prim.IO.bind", "Prim.IO.isEOF",
           ["parseStdinLoop", "charstate2", "tokenstate"]]],
        ["Pushback", "token",
           {"cased": ["feed", "token", "tokenstate"], "of":
             [["Consume", "tokenstate2",
                 ["parseStdinLoopChar", "tokenInWhitespace",
                   "tokenstate2", "c"]],
-             ["Pushback", "_", ["Prim.IO.ioPure", ["Left", {"str": "p"}]]],
-             ["Fail", ["Prim.IO.ioPure", ["Left", {"str": "f"}]]]]}],
-       ["Fail", ["Prim.IO.ioPure", ["Left", {"str": "f"}]]]]}}
+             ["Pushback", "_", ["Prim.IO.pure", ["Left", {"str": "p"}]]],
+             ["Fail", ["Prim.IO.pure", ["Left", {"str": "f"}]]]]}],
+       ["Fail", ["Prim.IO.pure", ["Left", {"str": "f"}]]]]}}
 
   , {"comment":
 
@@ -1755,7 +1755,7 @@
        ["Right", "decls", ["emitDecls", "decls"]]]}}
 
   , {"func": ["main"], "=":
-    ["Prim.IO.ioBind", "parseStdin", "checkParseResult"]}
+    ["Prim.IO.bind", "parseStdin", "checkParseResult"]}
 
   ]
 }

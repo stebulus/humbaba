@@ -33,7 +33,7 @@ tests = {
   nullProgram(callback) {
     expectOutput("", null, {"declarations": [
       {"import": "Prim.IO"},
-      {"func": ["test"], "=": ["Prim.IO.ioPure", "Unit"]}
+      {"func": ["test"], "=": ["Prim.IO.pure", "Unit"]}
     ].concat(codegen.preludeLolo)}, callback);
   },
 
@@ -49,7 +49,7 @@ tests = {
       {"import": "Prim.IO"},
       {"func": ["const", "x", "y"], "=": "x"},
       {"func": ["ioThen", "ioa", "iob"], "=":
-        ["Prim.IO.ioBind", "ioa", ["const", "iob"]]},
+        ["Prim.IO.bind", "ioa", ["const", "iob"]]},
       {"func": ["test"], "=":
         ["ioThen", ["Prim.IO.putChar", {"str": "x"}],
         ["ioThen", ["Prim.IO.putChar", {"str": "y"}],
@@ -61,7 +61,7 @@ tests = {
     expectOutput("x", "x", {"declarations": [
       {"import": "Prim.IO"},
       {"func": ["test"], "=":
-        ["Prim.IO.ioBind", "Prim.IO.getChar", "Prim.IO.putChar"]}
+        ["Prim.IO.bind", "Prim.IO.getChar", "Prim.IO.putChar"]}
     ].concat(codegen.preludeLolo)}, callback);
   },
 
