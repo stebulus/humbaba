@@ -2,7 +2,7 @@ var test = require('./lib/test');
 var primmod = require('./lib/prim_modules');
 var rt = require('../runtime');
 var codegen = require('../lolo_codegen');
-var llmod = require('../lolo_module');
+var mod = require('../module');
 
 function expr(astNode) {
   var s = '';
@@ -30,8 +30,8 @@ function assertExprValue(expected, astNode) {
 
 function programValue(ast) {
   var moduleCode = codegen.moduleToJavaScript(ast);
-  var moduleFunc = eval(llmod.wrapModuleFunc(moduleCode));
-  var module = llmod.makeModule(primmod.require, moduleFunc);
+  var moduleFunc = eval(mod.wrapModuleFunc(moduleCode));
+  var module = mod.makeModule(primmod.require, moduleFunc);
   var expr = module.exports.$test;
   rt.evaluateDeep(expr);
   return rt.smashIndirects(expr);

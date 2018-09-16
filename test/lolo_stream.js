@@ -1,5 +1,5 @@
 var codegen = require('../lolo_codegen');
-var llmod = require('../lolo_module');
+var mod = require('../module');
 var primmod = require('./lib/prim_modules');
 var rts = require('../runtime_stream');
 var rt = require('../runtime');
@@ -8,8 +8,8 @@ var test_rts = require('./runtime_stream');
 
 function stdout(input, program) {
   var moduleCodeString = codegen.moduleToJavaScript(program);
-  var moduleFunc = eval(llmod.wrapModuleFunc(moduleCodeString));
-  var module = llmod.makeModule(primmod.require, moduleFunc);
+  var moduleFunc = eval(mod.wrapModuleFunc(moduleCodeString));
+  var module = mod.makeModule(primmod.require, moduleFunc);
   var strm = new rts.Stream(module.exports.$test);
   if (input === null)
     strm.end();

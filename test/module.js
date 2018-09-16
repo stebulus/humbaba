@@ -1,4 +1,4 @@
-var llmod = require('../lolo_module');
+var mod = require('../module');
 
 var test = require('./lib/test');
 
@@ -6,51 +6,51 @@ tests = {
 
   assignMemberOfExports() {
     var moduleCodeString = "exports.three = 3;"
-    var moduleFunc = eval(llmod.wrapModuleFunc(moduleCodeString));
+    var moduleFunc = eval(mod.wrapModuleFunc(moduleCodeString));
     function lookupModule(name) {
       throw new Error("attempted lookup of module " + name);
     }
-    var require = llmod.makeRequire(lookupModule);
-    var module = llmod.makeModule(require, moduleFunc);
+    var require = mod.makeRequire(lookupModule);
+    var module = mod.makeModule(require, moduleFunc);
     test.assertSame(3, module.exports.three);
   },
 
   assignToExports() {
     var moduleCodeString = "module.exports = 3;"
-    var moduleFunc = eval(llmod.wrapModuleFunc(moduleCodeString));
+    var moduleFunc = eval(mod.wrapModuleFunc(moduleCodeString));
     function lookupModule(name) {
       throw new Error("attempted lookup of module " + name);
     }
-    var require = llmod.makeRequire(lookupModule);
-    var module = llmod.makeModule(require, moduleFunc);
+    var require = mod.makeRequire(lookupModule);
+    var module = mod.makeModule(require, moduleFunc);
     test.assertSame(3, module.exports);
   },
 
   reexport() {
     var importeeCodeString = "exports.foo = 3;";
-    var importeeModuleFunc = eval(llmod.wrapModuleFunc(importeeCodeString));
-    var noRequire = llmod.makeRequire(function (name) {
+    var importeeModuleFunc = eval(mod.wrapModuleFunc(importeeCodeString));
+    var noRequire = mod.makeRequire(function (name) {
       throw new Error("attempted lookup of module " + name);
     });
-    var importee = llmod.makeModule(noRequire, importeeModuleFunc);
+    var importee = mod.makeModule(noRequire, importeeModuleFunc);
     var importerCodeString = "exports.bar = require('importee').foo;";
-    var importerModuleFunc = eval(llmod.wrapModuleFunc(importerCodeString));
-    var requireImportee = llmod.makeRequire(function (name) {
+    var importerModuleFunc = eval(mod.wrapModuleFunc(importerCodeString));
+    var requireImportee = mod.makeRequire(function (name) {
       if (name === 'importee')
         return importeeModuleFunc;
       else
         throw new Error("attempted lookup of module " + name);
     });
-    var importer = llmod.makeModule(requireImportee, importerModuleFunc);
+    var importer = mod.makeModule(requireImportee, importerModuleFunc);
     test.assertSame(3, importer.exports.bar);
   },
 
   circularRequire() {
     var moduleFuncs = {
-      one: eval(llmod.wrapModuleFunc("exports.foo = require('two').bar;")),
-      two: eval(llmod.wrapModuleFunc("exports.bar = require('one').foo;")),
+      one: eval(mod.wrapModuleFunc("exports.foo = require('two').bar;")),
+      two: eval(mod.wrapModuleFunc("exports.bar = require('one').foo;")),
     }
-    var require = llmod.makeRequire(function (name) {
+    var require = mod.makeRequire(function (name) {
       var moduleFunc = moduleFuncs[name];
       if (typeof moduleFunc === 'undefined')
         throw new Error('no module named ' + name);
@@ -58,7 +58,7 @@ tests = {
     });
     var message;
     try {
-      llmod.makeModule(require, moduleFuncs.one);
+      mod.makeModule(require, moduleFuncs.one);
       message = 'no exception';
     } catch (e) {
       message = e.message;

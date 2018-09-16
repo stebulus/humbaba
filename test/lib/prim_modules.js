@@ -1,7 +1,7 @@
 var fs = require('fs');
 var path = require('path');
 
-var llmod = require('../../lolo_module');
+var mod = require('../../module');
 var rt = require('../../runtime');
 
 var here = path.dirname(module.filename);
@@ -16,9 +16,9 @@ function lookupModuleFunc(name) {
   } else if (name.startsWith('Prim/')) {
     var source = path.join(here, '..', '..', name + '.js');
     var code = fs.readFileSync(source);
-    return eval(llmod.wrapModuleFunc(code));
+    return eval(mod.wrapModuleFunc(code));
   } else {
     throw new Error('unknown module: ' + name);
   }
 }
-exports.require = llmod.makeRequire(lookupModuleFunc);
+exports.require = mod.makeRequire(lookupModuleFunc);

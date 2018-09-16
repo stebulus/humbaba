@@ -16,7 +16,7 @@ addTests('./runtime_stream_cat.js');
 addTests('./lolo_stream.js');
 addTests('./lolo_parse.js');
 addTests('./lolo_parse_e2e.js');
-addTests('./lolo_module.js');
+addTests('./module.js');
 addTests('./prim_modules.js');
 
 if (require.main === module)
