@@ -30,7 +30,7 @@ function programValue(ast, modules) {
   var programFunc = eval(codegen.programToJavaScript(ast, 'test'));
   var expr = programFunc(function (moduleName) {
     var module = modules[moduleName];
-    if (module === undefined)
+    if (typeof module === 'undefined')
       throw new Error('undefined module: ' + moduleName);
     return module;
   });
