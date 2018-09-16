@@ -1,6 +1,8 @@
 var test = require('./lib/test');
+var primmod = require('./lib/prim_modules');
 var rt = require('../runtime');
 var codegen = require('../lolo_codegen');
+var llmod = require('../lolo_module');
 
 function expr(astNode) {
   var s = '';
@@ -26,21 +28,18 @@ function assertExprValue(expected, astNode) {
   test.assertSame(expected, rt.smashIndirects(ex));
 }
 
-function programValue(ast, modules) {
-  var programFunc = eval(codegen.programToJavaScript(ast, 'test'));
-  var expr = programFunc(function (moduleName) {
-    var module = modules[moduleName];
-    if (typeof module === 'undefined')
-      throw new Error('undefined module: ' + moduleName);
-    return module;
-  });
+function programValue(ast) {
+  var moduleCode = codegen.moduleToJavaScript(ast);
+  var moduleFunc = eval(llmod.wrapModuleFunc(moduleCode));
+  var module = llmod.makeModule(primmod.require, moduleFunc);
+  var expr = module.exports.$test;
   rt.evaluateDeep(expr);
   return rt.smashIndirects(expr);
 }
 exports.programValue = programValue;
 
-function assertProgramValue(expected, ast, modules) {
-  test.assertSame(expected, programValue(ast, modules));
+function assertProgramValue(expected, ast, require) {
+  test.assertSame(expected, programValue(ast, require));
 }
 
 tests = {
@@ -190,21 +189,13 @@ tests = {
 
   caseWithNestedEvaluand() {
     assertProgramValue(rt.False, {"declarations": [
+      {"import": "Prim.Char"},
       {"data": "Bool", "=": [["True", 0], ["False", 0]]},
       {"func": ["id", "x"], "=": "x"},
       {"func": ["test"], "=":
-        {"cased": ["charEq", 1, ["id", 0]],
+        {"cased": ["Prim.Char.eq", 1, ["id", 0]],
          "of": [["True", "True"], ["False", "False"]]}}
     ]});
-  },
-
-  importSomething() {
-    assertProgramValue(rt.True, {"declarations": [
-        {"import": "Lolo.Prelude"},
-        {"func": ["test"], "=": "Lolo.Prelude.True"}
-      ]},
-      {"Lolo/Prelude": {"$True": rt.True}}
-    );
   },
 
 };

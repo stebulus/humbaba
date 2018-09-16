@@ -27,7 +27,7 @@ function withLoloParseProgram(expr) {
 exports.withLoloParseProgram = withLoloParseProgram;
 
 function withLoloParse(expr) {
-  return test_codegen.programValue(withLoloParseProgram(expr), {});
+  return test_codegen.programValue(withLoloParseProgram(expr));
 }
 
 function assertParseResult(expected, parser, input) {
@@ -49,11 +49,6 @@ function assertParseFail(parser, input) {
 }
 
 tests = {
-
-  charOrd() {
-    test.assertSame(new rt.Box(97),
-      withLoloParse(["charOrd", {"str": "a"}]));
-  },
 
   hex4odd() {
     test.assertSame(

@@ -196,7 +196,7 @@ function caseData(astNode, chunk, target) {
 }
 
 function module(ast, chunk) {
-  chunk('(function (exports, require) {');
+  chunk("var rt = require('humbaba-runtime');\n");
   var decls = ast['declarations'];
   for (var i = 0; i < decls.length; i++) {
     chunk('\n');
@@ -214,41 +214,15 @@ function module(ast, chunk) {
       }
     }
   }
-  chunk('})');
 }
 
-function program(ast, entry, chunk) {
-  chunk('(function (require) {');
-  chunk('function charEq(a, b) { rt.evaluate(a); a = rt.smashIndirects(a); rt.evaluate(b); b = rt.smashIndirects(b); var eq = a.fields[0] === b.fields[0] ? rt.True : rt.False; rt.Indirect.call(this, eq); }');
-  chunk('var $charEq = new rt.Box(charEq);');
-  chunk('function charOrd(a) { rt.evaluate(a); a = rt.smashIndirects(a); var ord = a.fields[0].charCodeAt(0); rt.Box.call(this, ord); }');
-  chunk('var $charOrd = new rt.Box(charOrd);');
-  chunk('function intAdd(a, b) { rt.evaluate(a); a = rt.smashIndirects(a); rt.evaluate(b); b = rt.smashIndirects(b); var sum = a.fields[0] + b.fields[0]; rt.Box.call(this, sum); }');
-  chunk('var $intAdd = new rt.Box(intAdd);');
-  chunk('function intMul(a, b) { rt.evaluate(a); a = rt.smashIndirects(a); rt.evaluate(b); b = rt.smashIndirects(b); var prod = a.fields[0] * b.fields[0]; rt.Box.call(this, prod); }');
-  chunk('var $intMul = new rt.Box(intMul);');
-  chunk('function intQuot(a, b) { rt.evaluate(a); a = rt.smashIndirects(a); rt.evaluate(b); b = rt.smashIndirects(b); var prod = Math.trunc(a.fields[0] / b.fields[0]); rt.Box.call(this, prod); }');
-  chunk('var $intQuot = new rt.Box(intQuot);');
-  chunk('function intRem(a, b) { rt.evaluate(a); a = rt.smashIndirects(a); rt.evaluate(b); b = rt.smashIndirects(b); var prod = a.fields[0] % b.fields[0]; rt.Box.call(this, prod); }');
-  chunk('var $intRem = new rt.Box(intRem);');
-  chunk('function intLe(a, b) { rt.evaluate(a); a = rt.smashIndirects(a); rt.evaluate(b); b = rt.smashIndirects(b); var cmp = a.fields[0] <= b.fields[0] ? rt.True : rt.False; rt.Indirect.call(this, cmp); }');
-  chunk('var $intLe = new rt.Box(intLe);');
-  chunk('var moduleExports = {};');
-  module(ast, chunk);
-  chunk('(moduleExports, require);')
-  chunk('return moduleExports.$');
-  chunk(entry);
-  chunk(';})');
-}
-exports.program = program;
-
-function programToJavaScript(ast, entry) {
+function moduleToJavaScript(ast) {
   var chunks = [];
   function chunk(text) { chunks.push(text); }
-  program(ast, entry, chunk);
+  module(ast, chunk);
   return chunks.join('');
 }
-exports.programToJavaScript = programToJavaScript;
+exports.moduleToJavaScript = moduleToJavaScript;
 
 function exportName(name, chunk) {
   chunk('exports.');
@@ -370,13 +344,6 @@ function importModule(name, chunk) {
   chunk(JSON.stringify(nameParts.join('/')));
   chunk(');\n');
 }
-
-exports.ioDeclsJavaScript =
-  'var $ioPure = new rt.Box(rt.IoPure);' +
-  'var $ioBind = new rt.Box(rt.IoBind);' +
-  'var $getChar = rt.GetChar;' +
-  'var $putChar = new rt.Box(rt.PutChar);' +
-  'var $isEOF = rt.IsEOF;';
 
 exports.preludeLolo = [
   {"data": "Bool", "=": [["True"], ["False"]]},
