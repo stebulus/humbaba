@@ -1,4 +1,4 @@
-var rt = require('../runtime');
+var rt = require('../humbaba-runtime');
 var test = require('./lib/test');
 var test_codegen = require('./lolo_codegen');
 

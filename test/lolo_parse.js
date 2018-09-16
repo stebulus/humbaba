@@ -1,8 +1,8 @@
 var fs = require('fs');
 var path = require('path');
 
-var rt = require('../runtime');
-var rts = require('../runtime_stream');
+var rt = require('../humbaba-runtime');
+var rts = require('../humbaba-runtime-stream');
 var test = require('./lib/test');
 var test_codegen = require('./lolo_codegen');
 

@@ -1,6 +1,6 @@
 var test = require('./lib/test');
 var primmod = require('./lib/prim_modules');
-var rt = require('../runtime');
+var rt = require('../humbaba-runtime');
 var codegen = require('../lolo_codegen');
 var mod = require('../module');
 

@@ -215,6 +215,7 @@ function module(ast, chunk) {
     }
   }
 }
+exports.module = module;
 
 function moduleToJavaScript(ast) {
   var chunks = [];

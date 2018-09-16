@@ -1,8 +1,8 @@
 var codegen = require('../lolo_codegen');
 var mod = require('../module');
 var primmod = require('./lib/prim_modules');
-var rts = require('../runtime_stream');
-var rt = require('../runtime');
+var rts = require('../humbaba-runtime-stream');
+var rt = require('../humbaba-runtime');
 var test = require('./lib/test');
 var test_rts = require('./runtime_stream');
 
