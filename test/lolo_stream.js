@@ -33,15 +33,16 @@ tests = {
   nullProgram(callback) {
     expectOutput("", null, {"declarations": [
       {"import": "Prim.IO"},
-      {"func": ["test"], "=": ["Prim.IO.pure", "Unit"]}
-    ].concat(codegen.preludeLolo)}, callback);
+      {"import": "Prim.Unit"},
+      {"func": ["test"], "=": ["Prim.IO.pure", "Prim.Unit.Unit"]}
+    ]}, callback);
   },
 
   emitOneChar(callback) {
     expectOutput("x", null, {"declarations": [
       {"import": "Prim.IO"},
       {"func": ["test"], "=": ["Prim.IO.putChar", {"str": "x"}]}
-    ].concat(codegen.preludeLolo)}, callback);
+    ]}, callback);
   },
 
   emitSeveralChars(callback) {
@@ -54,7 +55,7 @@ tests = {
         ["ioThen", ["Prim.IO.putChar", {"str": "x"}],
         ["ioThen", ["Prim.IO.putChar", {"str": "y"}],
                    ["Prim.IO.putChar", {"str": "z"}]]]}
-    ].concat(codegen.preludeLolo)}, callback);
+    ]}, callback);
   },
 
   copyOneChar(callback) {
@@ -62,7 +63,7 @@ tests = {
       {"import": "Prim.IO"},
       {"func": ["test"], "=":
         ["Prim.IO.bind", "Prim.IO.getChar", "Prim.IO.putChar"]}
-    ].concat(codegen.preludeLolo)}, callback);
+    ]}, callback);
   },
 
 };

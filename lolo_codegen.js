@@ -344,8 +344,3 @@ function importModule(name, chunk) {
   chunk(JSON.stringify(nameParts.join('/')));
   chunk(');\n');
 }
-
-exports.preludeLolo = [
-  {"data": "Bool", "=": [["True"], ["False"]]},
-  {"data": "Unit", "=": [["Unit"]]},
-];

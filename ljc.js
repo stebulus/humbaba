@@ -11,12 +11,6 @@ function stdout(s) {
   process.stdout.write(s);
 }
 
-function addPrelude(ast) {
-  ast['declarations'] = codegen.preludeLolo
-    .concat(ast['declarations']);
-}
-exports.addPrelude = addPrelude;
-
 function compile(ast, out, options) {
   out("var process = require('process');");
   out("var rt = require(");
@@ -25,7 +19,6 @@ function compile(ast, out, options) {
   out("var rts = require(");
   out(JSON.stringify(options.runtimeStream));
   out(");");
-  out(codegen.ioDeclsJavaScript);
   out("new rts.Stream(");
   codegen.program(ast, 'main', out);
   out(", process.stdin).pipe(process.stdout);");
@@ -52,7 +45,6 @@ if (require.main === module) {
     };
   function doTheThing(input) {
     var ast = JSON.parse(input);
-    addPrelude(ast);
     if (commander.output === '-') {
       compile(ast, writeTo(process.stdout), options);
     } else {
