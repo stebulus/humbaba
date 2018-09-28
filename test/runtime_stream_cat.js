@@ -1,9 +1,8 @@
-var stream = require('stream');
-
-var test = require('./lib/test');
-var test_rts = require('./runtime_stream');
 var rt = require('../humbaba-runtime');
 var rts = require('../humbaba-runtime-stream');
+var stream = require('stream');
+var t = require('tap');
+var ts = require('./lib/stream');
 
 var copyChar = new rt.IoBind(
   rt.GetChar,
@@ -45,21 +44,19 @@ function ChunkReadable(chunks) {
   });
 }
 
-function testWriting(chunks) {
-  return function (callback) {
-    var copy = new rts.Stream(program);
-    for (var i = 0; i < chunks.length; i++)
-      copy.write(chunks[i]);
-    copy.end();
-    test_rts.expectOutput(chunks.join('').split(''), copy, callback);
-  };
+function testWriting(chunks, message) {
+  var copy = new rts.Stream(program);
+  for (var i = 0; i < chunks.length; i++)
+    copy.write(chunks[i]);
+  copy.end();
+  ts.outputChunks(copy, chunks.join('').split(''),
+    message + ' (writing)');
 }
 
-function testPiping(chunks) {
-  return function (callback) {
-    var copy = new rts.Stream(program, new ChunkReadable(chunks));
-    test_rts.expectOutput(chunks.join('').split(''), copy, callback);
-  };
+function testPiping(chunks, message) {
+  var copy = new rts.Stream(program, new ChunkReadable(chunks));
+  ts.outputChunks(copy, chunks.join('').split(''),
+    message + ' (piping)');
 }
 
 var chunkses = [
@@ -68,13 +65,8 @@ var chunkses = [
   ['abc', 'xyz'],
 ];
 
-tests = {}
 for (var i = 0; i < chunkses.length; i++) {
-  var prefix = 'copyChunk_' + i.toString() + '_';
-  tests[prefix + 'writing'] = testWriting(chunkses[i]);
-  tests[prefix + 'piping'] = testPiping(chunkses[i]);
+  var message = 'copy ' + JSON.stringify(chunkses[i]);
+  testWriting(chunkses[i], message);
+  testPiping(chunkses[i], message);
 }
-exports.tests = tests;
-
-if (require.main === module)
-  test.main(tests);

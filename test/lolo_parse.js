@@ -1,16 +1,7 @@
-var fs = require('fs');
-var path = require('path');
-
 var rt = require('../humbaba-runtime');
 var rts = require('../humbaba-runtime-stream');
-var test = require('./lib/test');
-var test_codegen = require('./lolo_codegen');
-
-var llparse = (function () {
-  var here = path.dirname(module.filename)
-  var llparseSource = path.join(here, '..', 'lolo_parse.lj');
-  return JSON.parse(fs.readFileSync(llparseSource));
-})();
+var t = require('tap');
+var withLoloParse = require('./lib/lolo_parse').withLoloParse;
 
 function charList(s) {
   var list = "Nil";
@@ -19,395 +10,341 @@ function charList(s) {
   return list;
 }
 
-function withLoloParseProgram(expr) {
-  return {"declarations": llparse['declarations'].concat([
-    {"func": ["test"], "=": expr}
-  ])};
-}
-exports.withLoloParseProgram = withLoloParseProgram;
-
-function withLoloParse(expr) {
-  return test_codegen.programValue(withLoloParseProgram(expr));
-}
-
-function assertParseResult(expected, parser, input) {
+function assertParseResult(parser, input, expected, message) {
   var expectedValue = withLoloParse(expected);
   var actualValue = withLoloParse(["parseList", parser, input]);
-  test.assertSame(expectedValue, actualValue);
+  t.strictSame(expectedValue, actualValue, message);
 }
 
-function assertParsed(expected, parser, input) {
-  assertParseResult(["Right", expected], parser, charList(input));
+function assertParsed(parser, input, expected, message) {
+  assertParseResult(parser, charList(input), ["Right", expected], message);
 }
 
-function assertParsedTokens(expected, parser, input) {
-  assertParseResult(["Right", expected], parser, input);
+function assertParsedTokens(parser, input, expected, message) {
+  assertParseResult(parser, input, ["Right", expected], message);
 }
 
-function assertParseFail(parser, input) {
-  assertParseResult(["Left", {"str": "f"}], parser, charList(input));
+function assertParseFail(parser, input, message) {
+  assertParseResult(parser, charList(input), ["Left", {"str": "f"}], message);
 }
 
-tests = {
+t.strictSame(
+  withLoloParse(charList("350B")),
+  withLoloParse(["hex4", 13579]),
+  'hex4 odd number'
+);
 
-  hex4odd() {
-    test.assertSame(
-      withLoloParse(charList("350B")),
-      withLoloParse(["hex4", 13579]));
-  },
+t.strictSame(
+  withLoloParse(charList("09A4")),
+  withLoloParse(["hex4", 2468]),
+  'hex4 even number'
+);
 
-  hex4even() {
-    test.assertSame(
-      withLoloParse(charList("09A4")),
-      withLoloParse(["hex4", 2468]));
-  },
+assertParsed(["char", {"str": "x"}], "x", {"str": "x"}, 'parse char');
+assertParseFail(["char", {"str": "x"}], "y", 'parse char fail');
 
-  parseChar() {
-    assertParsed({"str": "x"}, ["char", {"str": "x"}], "x");
-  },
+assertParsed("optsign", "+", "True", 'parse sign plus');
+assertParsed("optsign", "-", "False", 'parse sign minus');
+assertParsed("optsign", "", "True", 'parse sign absent');
 
-  parseCharFail() {
-    assertParseFail(["char", {"str": "x"}], "y");
-  },
+assertParsed("digit", "3", {"str": "3"}, 'parse digit');
+assertParseFail("digit", "a", 'parse digit fail');
 
-  parseSignPlus() {
-    assertParsed("True", "optsign", "+");
-  },
+assertParsed(
+  ["pMany", "digit"],
+  "34",
+  ["Cons", {"str": "3"}, ["Cons", {"str": "4"}, "Nil"]],
+  "parse digit many"
+);
 
-  parseSignMinus() {
-    assertParsed("False", "optsign", "-");
-  },
+assertParseFail(["pMany", "digit"], "!", "parse digit many fail");
 
-  parseSignAbsent() {
-    assertParsed("True", "optsign", "");
-  },
+assertParsed(
+  ["pSome", "digit"],
+  "34",
+  ["Cons", {"str": "3"}, ["Cons", {"str": "4"}, "Nil"]],
+  "parse digit some"
+);
 
-  parseDigit() {
-    assertParsed({"str": "3"}, "digit", "3");
-  },
+assertParsed(["pSome", "digit"], "", "Nil", "parse digit some Nil");
 
-  parseDigitFail() {
-    assertParseFail("digit", "a");
-  },
+assertParsed("intLiteral", "5", ["IntLiteral", 5], "parse int literal");
+assertParsed("intLiteral", "+5", ["IntLiteral", 5],
+  "parse int literal signed");
+assertParsed("intLiteral", "-5", ["IntLiteral", -5],
+  "parse int literal negative");
+assertParsed("intLiteral", "5732", ["IntLiteral", 5732],
+  "parse int literal multidigit");
 
-  parseDigitMany() {
-    assertParsed(
-      ["Cons", {"str": "3"}, ["Cons", {"str": "4"}, "Nil"]],
-      ["pMany", "digit"],
-      "34");
-  },
+assertParsed("item", "b", {"str": "b"}, "parse any char");
 
-  parseDigitManyFail() {
-    assertParseFail(["pMany", "digit"], "!");
-  },
+assertParsed("charLiteral", "'b'", ["CharLiteral", {"str": "b"}],
+  "parse char literal");
 
-  parseDigitSome() {
-    assertParsed(
-      ["Cons", {"str": "3"}, ["Cons", {"str": "4"}, "Nil"]],
-      ["pSome", "digit"],
-      "34");
-  },
+t.strictSame(
+  withLoloParse(["digitToInt", {"str": "2"}]),
+  new rt.Box(2),
+  "digit to int"
+);
 
-  parseDigitSomeNil() {
-    assertParsed("Nil", ["pSome", "digit"], "");
-  },
+t.strictSame(
+  withLoloParse(["readInt",
+    ["Cons", {"str": "3"},
+    ["Cons", {"str": "7"},
+    ["Cons", {"str": "4"}, "Nil"]]]]),
+  new rt.Box(374),
+  "digits to int"
+);
 
-  parseIntLiteral() {
-    assertParsed(["IntLiteral", 5], "intLiteral", "5");
-  },
+t.strictSame(
+  withLoloParse(["charLe", {"str": "a"}, {"str": "a"}]),
+  rt.True,
+  "a <= a"
+);
 
-  parseIntLiteralSigned() {
-    assertParsed(["IntLiteral", 5], "intLiteral", "+5");
-  },
+t.strictSame(
+  withLoloParse(["charLe", {"str": "a"}, {"str": "b"}]),
+  rt.True,
+  "a <= b"
+);
 
-  parseIntLiteralNegative() {
-    assertParsed(["IntLiteral", -5], "intLiteral", "-5");
-  },
+t.strictSame(
+  withLoloParse(["charLe", {"str": "b"}, {"str": "a"}]),
+  rt.False,
+  "not (b <= a)"
+);
 
-  parseIntLiteralMultidigit() {
-    assertParsed(["IntLiteral", 5732], "intLiteral", "5732");
-  },
+t.strictSame(
+  withLoloParse(["charBetween", {"str": "a"}, {"str": "b"}, {"str": "c"}]),
+  rt.False,
+  "c is not between a & b"
+);
 
-  parseAnyChar() {
-    assertParsed({"str": "b"}, "item", "b");
-  },
 
-  parseCharLiteral() {
-    assertParsed(["CharLiteral", {"str": "b"}], "charLiteral", "'b'");
-  },
+t.strictSame(
+  withLoloParse(["charBetween", {"str": "a"}, {"str": "c"}, {"str": "b"}]),
+  rt.True,
+  "b is between a & c"
+);
 
-  digit2int() {
-    test.assertSame(new rt.Box(2),
-      withLoloParse(["digitToInt", {"str": "2"}]));
-  },
+assertParsed(
+  "varidOrReserved",
+  "xY",
+  ["VarId", ["Cons", {"str": "x"}, ["Cons", {"str": "Y"}, "Nil"]]],
+  "varid"
+);
 
-  digits2int() {
-    test.assertSame(new rt.Box(374),
-      withLoloParse(["readInt",
-        ["Cons", {"str": "3"},
-        ["Cons", {"str": "7"},
-        ["Cons", {"str": "4"}, "Nil"]]]]));
-  },
+assertParsed("varidOrReserved", "let", "Let", "reserved");
 
-  charLeAA() {
-    test.assertSame(rt.True,
-      withLoloParse(["charLe", {"str": "a"}, {"str": "a"}]));
-  },
+assertParsed("token", "(", "LParen", "symbol");
 
-  charLeAB() {
-    test.assertSame(rt.True,
-      withLoloParse(["charLe", {"str": "a"}, {"str": "b"}]));
-  },
+assertParsed("comment", "#fnord\n", "Unit", "comment");
 
-  charLeBA() {
-    test.assertSame(rt.False,
-      withLoloParse(["charLe", {"str": "b"}, {"str": "a"}]));
-  },
+assertParsed(["ignoreSome", "whitestuff"], "  #fnord\n \n", "Unit",
+  "whitestuff");
 
-  charBetweenABC() {
-    test.assertSame(rt.False,
-      withLoloParse(["charBetween", {"str": "a"}, {"str": "b"}, {"str": "c"}]));
-  },
+assertParsed(
+  ["pMany", "tokenInWhitespace"],
+  "  foo  #comment! \nbar",
+  ["Cons", ["VarId", charList("foo")],
+  ["Cons", ["VarId", charList("bar")],
+    "Nil"]],
+  "commentInStuff"
+);
 
-  charBetweenACB() {
-    test.assertSame(rt.True,
-      withLoloParse(["charBetween", {"str": "a"}, {"str": "c"}, {"str": "b"}]));
-  },
-
-  varid() {
-    assertParsed(
-      ["VarId", ["Cons", {"str": "x"}, ["Cons", {"str": "Y"}, "Nil"]]],
-      "varidOrReserved",
-      "xY");
-  },
-
-  reserved() {
-    assertParsed("Let", "varidOrReserved", "let");
-  },
-
-  symbol() {
-    assertParsed("LParen", "token", "(");
-  },
-
-  comment() {
-    assertParsed("Unit", "comment", "#fnord\n");
-  },
-
-  whitestuff() {
-    assertParsed("Unit", ["ignoreSome", "whitestuff"], "  #fnord\n \n");
-  },
-
-  commentInStuff() {
-    assertParsed(
-      ["Cons", ["VarId", charList("foo")],
-      ["Cons", ["VarId", charList("bar")],
-        "Nil"]],
-      ["pMany", "tokenInWhitespace"],
-      "  foo  #comment! \nbar");
-  },
-
-  letExp1() {
-    var bindings = ["Cons",
+assertParsedTokens(
+  "exp",
+  ["Cons", "Let",
+    ["Cons", "LBrace",
+    ["Cons", ["VarId", charList("x")],
+    ["Cons", "Equals",
+    ["Cons", ["IntLiteral", 3],
+    ["Cons", "RBrace",
+    ["Cons", "In",
+    ["Cons", ["VarId", charList("f")],
+    ["Cons", ["VarId", charList("x")],
+     "Nil"]]]]]]]]],
+  ["LetExp",
+    ["Cons",
       ["Binding",
         charList("x"),
         ["FExp", ["Cons", ["AInt", 3], "Nil"]]],
-      "Nil"];
-    var exp = ["FExp",
+      "Nil"],
+    ["FExp",
       ["Cons", ["AVar", charList("f")],
       ["Cons", ["AVar", charList("x")],
-       "Nil"]]];
-    assertParsedTokens(["LetExp", bindings, exp],
-      "exp",
-      ["Cons", "Let",
-      ["Cons", "LBrace",
-      ["Cons", ["VarId", charList("x")],
-      ["Cons", "Equals",
-      ["Cons", ["IntLiteral", 3],
-      ["Cons", "RBrace",
-      ["Cons", "In",
-      ["Cons", ["VarId", charList("f")],
-      ["Cons", ["VarId", charList("x")],
-       "Nil"]]]]]]]]]);
-  },
+       "Nil"]]]],
+  "let exp 1"
+);
 
-  letExp2() {
-    var bindings =
-      ["Cons", ["Binding",
+assertParsedTokens(
+  "exp",
+  ["Cons", "Let",
+    ["Cons", "LBrace",
+    ["Cons", ["VarId", charList("x")],
+    ["Cons", "Equals",
+    ["Cons", ["IntLiteral", 3],
+    ["Cons", "Semicolon",
+    ["Cons", ["VarId", charList("y")],
+    ["Cons", "Equals",
+    ["Cons", ["VarId", charList("x")],
+    ["Cons", "RBrace",
+    ["Cons", "In",
+    ["Cons", ["VarId", charList("f")],
+    ["Cons", ["VarId", charList("y")],
+     "Nil"]]]]]]]]]]]]],
+  ["LetExp",
+    ["Cons",
+      ["Binding",
         charList("x"),
         ["FExp", ["Cons", ["AInt", 3], "Nil"]]],
-      ["Cons", ["Binding",
-        charList("y"),
-        ["FExp", ["Cons", ["AVar", charList("x")], "Nil"]]],
-      "Nil"]];
-    var exp = ["FExp",
+      ["Cons",
+        ["Binding",
+          charList("y"),
+          ["FExp", ["Cons", ["AVar", charList("x")], "Nil"]]],
+        "Nil"]],
+    ["FExp",
       ["Cons", ["AVar", charList("f")],
       ["Cons", ["AVar", charList("y")],
-       "Nil"]]];
-    assertParsedTokens(["LetExp", bindings, exp],
-      "exp",
-      ["Cons", "Let",
-      ["Cons", "LBrace",
-      ["Cons", ["VarId", charList("x")],
-      ["Cons", "Equals",
-      ["Cons", ["IntLiteral", 3],
-      ["Cons", "Semicolon",
-      ["Cons", ["VarId", charList("y")],
-      ["Cons", "Equals",
-      ["Cons", ["VarId", charList("x")],
-      ["Cons", "RBrace",
-      ["Cons", "In",
-      ["Cons", ["VarId", charList("f")],
-      ["Cons", ["VarId", charList("y")],
-       "Nil"]]]]]]]]]]]]]);
-  },
+       "Nil"]]]],
+  "let exp 2"
+);
 
-  casedExp() {
-    assertParsedTokens(
-      ["CasedExp",
-        ["FExp",
-          ["Cons", ["AVar", charList("f")],
-          ["Cons", ["AVar", charList("x")],
-           "Nil"]]],
-        ["Cons",
-          ["DAlt",
-            charList("Cons"),
-            ["Cons", charList("hd"), ["Cons", charList("tl"), "Nil"]],
-            ["FExp", ["Cons", ["AInt", 1], "Nil"]]],
-        ["Cons",
-          ["DAlt",
-            charList("Nil"),
-            "Nil",
-            ["FExp", ["Cons", ["AInt", 0], "Nil"]]],
-          "Nil"]]],
-      "exp",
-      ["Cons", "Cased",
-      ["Cons", ["VarId", charList("f")],
-      ["Cons", ["VarId", charList("x")],
-      ["Cons", "Of",
-      ["Cons", "LBrace",
-      ["Cons", ["ConId", charList("Cons")],
-      ["Cons", ["VarId", charList("hd")],
-      ["Cons", ["VarId", charList("tl")],
-      ["Cons", "Arrow",
-      ["Cons", ["IntLiteral", 1],
-      ["Cons", "Semicolon",
-      ["Cons", ["ConId", charList("Nil")],
-      ["Cons", "Arrow",
-      ["Cons", ["IntLiteral", 0],
-      ["Cons", "RBrace",
-       "Nil"]]]]]]]]]]]]]]]
-    );
-  },
+assertParsedTokens(
+  "exp",
+  ["Cons", "Cased",
+    ["Cons", ["VarId", charList("f")],
+    ["Cons", ["VarId", charList("x")],
+    ["Cons", "Of",
+    ["Cons", "LBrace",
+    ["Cons", ["ConId", charList("Cons")],
+    ["Cons", ["VarId", charList("hd")],
+    ["Cons", ["VarId", charList("tl")],
+    ["Cons", "Arrow",
+    ["Cons", ["IntLiteral", 1],
+    ["Cons", "Semicolon",
+    ["Cons", ["ConId", charList("Nil")],
+    ["Cons", "Arrow",
+    ["Cons", ["IntLiteral", 0],
+    ["Cons", "RBrace",
+     "Nil"]]]]]]]]]]]]]]],
+  ["CasedExp",
+    ["FExp",
+      ["Cons", ["AVar", charList("f")],
+      ["Cons", ["AVar", charList("x")],
+       "Nil"]]],
+    ["Cons",
+      ["DAlt",
+        charList("Cons"),
+        ["Cons", charList("hd"), ["Cons", charList("tl"), "Nil"]],
+        ["FExp", ["Cons", ["AInt", 1], "Nil"]]],
+    ["Cons",
+      ["DAlt",
+        charList("Nil"),
+        "Nil",
+        ["FExp", ["Cons", ["AInt", 0], "Nil"]]],
+      "Nil"]]],
+  "cased exp"
+);
 
-  caseiExp() {
-    assertParsedTokens(
-      ["CaseiExp",
-        ["FExp",
-          ["Cons", ["AVar", charList("f")],
-          ["Cons", ["AVar", charList("x")],
-           "Nil"]]],
-        ["Cons",
-          ["IAltInt",
-            3,
-            ["FExp", ["Cons", ["AInt", 1], "Nil"]]],
-        ["Cons",
-          ["IAltVar",
-            charList("foo"),
-            ["FExp", ["Cons", ["AInt", 0], "Nil"]]],
-          "Nil"]]],
-      "exp",
-      ["Cons", "Casei",
-      ["Cons", ["VarId", charList("f")],
-      ["Cons", ["VarId", charList("x")],
-      ["Cons", "Of",
-      ["Cons", "LBrace",
-      ["Cons", ["IntLiteral", 3],
-      ["Cons", "Arrow",
-      ["Cons", ["IntLiteral", 1],
-      ["Cons", "Semicolon",
-      ["Cons", ["VarId", charList("foo")],
-      ["Cons", "Arrow",
-      ["Cons", ["IntLiteral", 0],
-      ["Cons", "RBrace",
-       "Nil"]]]]]]]]]]]]]
-    );
-  },
+assertParsedTokens(
+  "exp",
+  ["Cons", "Casei",
+    ["Cons", ["VarId", charList("f")],
+    ["Cons", ["VarId", charList("x")],
+    ["Cons", "Of",
+    ["Cons", "LBrace",
+    ["Cons", ["IntLiteral", 3],
+    ["Cons", "Arrow",
+    ["Cons", ["IntLiteral", 1],
+    ["Cons", "Semicolon",
+    ["Cons", ["VarId", charList("foo")],
+    ["Cons", "Arrow",
+    ["Cons", ["IntLiteral", 0],
+    ["Cons", "RBrace",
+     "Nil"]]]]]]]]]]]]],
+  ["CaseiExp",
+    ["FExp",
+      ["Cons", ["AVar", charList("f")],
+      ["Cons", ["AVar", charList("x")],
+       "Nil"]]],
+    ["Cons",
+      ["IAltInt",
+        3,
+        ["FExp", ["Cons", ["AInt", 1], "Nil"]]],
+    ["Cons",
+      ["IAltVar",
+        charList("foo"),
+        ["FExp", ["Cons", ["AInt", 0], "Nil"]]],
+      "Nil"]]],
+  "casei exp"
+);
 
-  casecExp() {
-    assertParsedTokens(
-      ["CasecExp",
-        ["FExp",
-          ["Cons", ["AVar", charList("f")],
-          ["Cons", ["AVar", charList("x")],
-           "Nil"]]],
-        ["Cons",
-          ["CAltChar",
-            {"str": "a"},
-            ["FExp", ["Cons", ["AInt", 1], "Nil"]]],
-        ["Cons",
-          ["CAltVar",
-            charList("foo"),
-            ["FExp", ["Cons", ["AInt", 0], "Nil"]]],
-          "Nil"]]],
-      "exp",
-      ["Cons", "Casec",
-      ["Cons", ["VarId", charList("f")],
-      ["Cons", ["VarId", charList("x")],
-      ["Cons", "Of",
-      ["Cons", "LBrace",
-      ["Cons", ["CharLiteral", {"str": "a"}],
-      ["Cons", "Arrow",
-      ["Cons", ["IntLiteral", 1],
-      ["Cons", "Semicolon",
-      ["Cons", ["VarId", charList("foo")],
-      ["Cons", "Arrow",
-      ["Cons", ["IntLiteral", 0],
-      ["Cons", "RBrace",
-       "Nil"]]]]]]]]]]]]]
-    );
-  },
+assertParsedTokens(
+  "exp",
+  ["Cons", "Casec",
+    ["Cons", ["VarId", charList("f")],
+    ["Cons", ["VarId", charList("x")],
+    ["Cons", "Of",
+    ["Cons", "LBrace",
+    ["Cons", ["CharLiteral", {"str": "a"}],
+    ["Cons", "Arrow",
+    ["Cons", ["IntLiteral", 1],
+    ["Cons", "Semicolon",
+    ["Cons", ["VarId", charList("foo")],
+    ["Cons", "Arrow",
+    ["Cons", ["IntLiteral", 0],
+    ["Cons", "RBrace",
+     "Nil"]]]]]]]]]]]]],
+  ["CasecExp",
+    ["FExp",
+      ["Cons", ["AVar", charList("f")],
+      ["Cons", ["AVar", charList("x")],
+       "Nil"]]],
+    ["Cons",
+      ["CAltChar",
+        {"str": "a"},
+        ["FExp", ["Cons", ["AInt", 1], "Nil"]]],
+    ["Cons",
+      ["CAltVar",
+        charList("foo"),
+        ["FExp", ["Cons", ["AInt", 0], "Nil"]]],
+      "Nil"]]],
+  "casec exp"
+);
 
-  dataDecl() {
-    assertParsedTokens(
-      ["DataDecl",
-        charList("List"),
-        ["Cons", ["ConDecl", charList("Cons"), 2],
-        ["Cons", ["ConDecl", charList("Nil"), 0],
-         "Nil"]]],
-      "decl",
-      ["Cons", "Data",
-      ["Cons", ["ConId", charList("List")],
-      ["Cons", "Equals",
-      ["Cons", ["ConId", charList("Cons")],
-      ["Cons", ["IntLiteral", 2],
-      ["Cons", "Pipe",
-      ["Cons", ["ConId", charList("Nil")],
-      ["Cons", ["IntLiteral", 0],
-       "Nil"]]]]]]]]
-    );
-  },
+assertParsedTokens(
+  "decl",
+  ["Cons", "Data",
+    ["Cons", ["ConId", charList("List")],
+    ["Cons", "Equals",
+    ["Cons", ["ConId", charList("Cons")],
+    ["Cons", ["IntLiteral", 2],
+    ["Cons", "Pipe",
+    ["Cons", ["ConId", charList("Nil")],
+    ["Cons", ["IntLiteral", 0],
+     "Nil"]]]]]]]],
+  ["DataDecl",
+    charList("List"),
+    ["Cons", ["ConDecl", charList("Cons"), 2],
+    ["Cons", ["ConDecl", charList("Nil"), 0],
+     "Nil"]]],
+  "data decl"
+);
 
-  funcDecl() {
-    assertParsedTokens(
-      ["FuncDecl",
-        charList("const"),
-        ["Cons", charList("first"),
-        ["Cons", charList("second"),
-         "Nil"]],
-        ["FExp", ["Cons", ["AVar", charList("first")], "Nil"]]],
-      "decl",
-      ["Cons", ["VarId", charList("const")],
-      ["Cons", ["VarId", charList("first")],
-      ["Cons", ["VarId", charList("second")],
-      ["Cons", "Equals",
-      ["Cons", ["VarId", charList("first")],
-       "Nil"]]]]]
-    );
-  },
-
-}
-
-exports.tests = tests;
-
-if (require.main === module)
-  test.main(tests);
+assertParsedTokens(
+  "decl",
+  ["Cons", ["VarId", charList("const")],
+    ["Cons", ["VarId", charList("first")],
+    ["Cons", ["VarId", charList("second")],
+    ["Cons", "Equals",
+    ["Cons", ["VarId", charList("first")],
+     "Nil"]]]]],
+  ["FuncDecl",
+    charList("const"),
+    ["Cons", charList("first"),
+    ["Cons", charList("second"),
+     "Nil"]],
+    ["FExp", ["Cons", ["AVar", charList("first")], "Nil"]]],
+  "func decl"
+);

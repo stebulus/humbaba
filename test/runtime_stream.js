@@ -1,77 +1,35 @@
-var stream = require('stream');
-
-var test = require('./lib/test');
 var rt = require('../humbaba-runtime');
 var rts = require('../humbaba-runtime-stream');
+var stream = require('stream');
+var t = require('tap');
+var ts = require('./lib/stream');
 
-function collect(arr) {
-  return new stream.Writable({
-    write(chunk, _encoding, callback) {
-      arr.push(chunk);
-      callback();
-    }
-  });
-}
+ts.outputChunks(
+  new rts.Stream(new rt.IoPure(rt.Unit)),
+  [],
+  'null program'
+);
 
-function getOutput(stream, callback) {
-  var actualOutput = []
-  stream.pipe(collect(actualOutput))
-    .on('finish', function () {
-      callback(actualOutput);
-    });
-}
-exports.getOutput = getOutput;
+ts.outputChunks(
+  new rts.Stream(
+    new rt.IoPure(rt.Unit),
+    new stream.Readable({
+      read() { throw new Error('stdin was unexpectedly read'); }
+    })
+  ),
+  [],
+  'null program with stdin'
+);
 
-function getOutputString(stream, callback) {
-  getOutput(stream, function (chunks) { callback(chunks.join('')); });
-}
-exports.getOutputString = getOutputString;
+ts.outputChunks(
+  new rts.Stream(new rt.PutChar(new rt.Box('x'))),
+  ['x'],
+  'emit one char'
+);
 
-function expectOutput(expected, stream, callback) {
-  getOutput(stream, function (actualOutput) {
-    test.runTest(function () {
-      for (var i = 0; i < actualOutput.length; i++)
-        actualOutput[i] = actualOutput[i].toString();
-      test.assertSame(expected, actualOutput);
-    }, callback);
-  });
-}
-exports.expectOutput = expectOutput;
-
-function expectOutputString(expected, stream, callback) {
-  getOutputString(stream, function (actualOutput) {
-    test.runTest(function () {
-      test.assertSame(expected, actualOutput);
-    }, callback);
-  });
-}
-exports.expectOutputString = expectOutputString;
-
-tests = {
-
-  nullProgram(callback) {
-    var program = new rt.IoPure(rt.Unit);
-    expectOutput([], new rts.Stream(program), callback);
-  },
-
-  nullProgramStdin(callback) {
-    var stdin = new stream.Readable({
-      read() {
-        throw new Error('stdin was unexpectedly read');
-      }
-    });
-    var program = new rt.IoPure(rt.Unit);
-    var strm = new rts.Stream(program, stdin);
-    expectOutput([], strm, callback);
-  },
-
-  emitOneChar(callback) {
-    var program = new rt.PutChar(new rt.Box('x'));
-    expectOutput(['x'], new rts.Stream(program), callback);
-  },
-
-  emitSeveralChars(callback) {
-    var program = new rt.IoBind(
+ts.outputChunks(
+  new rts.Stream(
+    new rt.IoBind(
       new rt.PutChar(new rt.Box('x')),
       new rt.Box(function (_unit) {
         rt.IoBind.call(this,
@@ -81,42 +39,44 @@ tests = {
           })
         );
       })
-    );
-    expectOutput(['x', 'y', 'z'], new rts.Stream(program), callback);
-  },
+    )
+  ),
+  ['x', 'y', 'z'],
+  'emit several chars'
+);
 
-  copyOneCharWriting(callback) {
-    var program = new rt.IoBind(
+ts.outputChunks(
+  (function () {
+    var stream = new rts.Stream(
+      new rt.IoBind(
+        rt.GetChar,
+        new rt.Box(function (char) {
+          rt.PutChar.call(this, char);
+        })
+      )
+    );
+    stream.end('x');
+    return stream;
+  })(),
+  ['x'],
+  'copy one char (writing)'
+);
+
+ts.outputChunks(
+  new rts.Stream(
+    new rt.IoBind(
       rt.GetChar,
       new rt.Box(function (char) {
         rt.PutChar.call(this, char);
       })
-    );
-    var stream = new rts.Stream(program);
-    stream.end('x');
-    expectOutput(['x'], stream, callback);
-  },
-
-  copyOneCharPiping(callback) {
-    var stdin = new stream.Readable({
+    ),
+    new stream.Readable({
       read() {
         this.push('x');
         this.destroy();
       }
-    });
-    var program = new rt.IoBind(
-      rt.GetChar,
-      new rt.Box(function (char) {
-        rt.PutChar.call(this, char);
-      })
-    );
-    var strm = new rts.Stream(program, stdin);
-    expectOutput(['x'], strm, callback);
-  },
-
-};
-
-exports.tests = tests;
-
-if (require.main === module)
-  test.main(tests);
+    })
+  ),
+  ['x'],
+  'copy one char (piping)'
+);

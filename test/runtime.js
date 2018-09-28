@@ -1,5 +1,5 @@
-var test = require('./lib/test');
 var rt = require('../humbaba-runtime');
+var t = require('tap');
 
 var CONS = 1;
 var NIL = 2;
@@ -25,12 +25,14 @@ function arrayToList(arr) {
 }
 
 function forceList(head) {
+  var orighead = head;
   while (true) {
     rt.evaluate(head);
     if (head.tag === NIL)
       break;
     head = head.$t;
   }
+  return orighead;
 }
 
 function empty(x) {
@@ -81,93 +83,86 @@ function doubly(f, x) {
 }
 var boxedDoubly = new rt.Box(doubly);
 
-tests = {
+function evaluate(x) {
+  rt.evaluate(x);
+  return x;
+}
 
-  evalData() {
-    var x = new rt.Data(1);
-    rt.evaluate(x);
-    test.assertSame(new rt.Data(1), x);
-  },
+t.strictSame(evaluate(new rt.Data(1)), new rt.Data(1), 'evaluate data');
 
-  applyEmptyNil() {
-    var x = new rt.Apply(boxedEmpty, [new Nil()]);
-    rt.evaluate(x);
-    test.assertSame(new rt.Box(true), x);
-  },
+t.strictSame(
+  evaluate(new rt.Apply(boxedEmpty, [new Nil()])),
+  new rt.Box(true),
+  'apply empty Nil'
+);
 
-  applyEmptyCons() {
-    var x = new rt.Apply(boxedEmpty, [new Cons(new Nil(), new Nil())]);
-    rt.evaluate(x);
-    test.assertSame(new rt.Box(false), x);
-  },
+t.strictSame(
+  evaluate(new rt.Apply(boxedEmpty, [new Cons(new Nil(), new Nil())])),
+  new rt.Box(false),
+  'apply empty Cons'
+);
 
-  applyEmptyIndirectNil() {
-    var x = new rt.Apply(boxedEmpty, [new rt.Indirect(new Nil())]);
-    rt.evaluate(x);
-    test.assertSame(new rt.Box(true), x);
-  },
+t.strictSame(
+  evaluate(new rt.Apply(boxedEmpty, [new rt.Indirect(new Nil())])),
+  new rt.Box(true),
+  'apply empty indirect Nil'
+);
 
-  applyEmptyIndirectIndirectNil() {
-    var x = new rt.Apply(boxedEmpty, [new rt.Indirect(new rt.Indirect(new Nil()))]);
-    rt.evaluate(x);
-    test.assertSame(new rt.Box(true), x);
-  },
+t.strictSame(
+  evaluate(new rt.Apply(boxedEmpty,
+    [new rt.Indirect(new rt.Indirect(new Nil()))])),
+  new rt.Box(true),
+  'apply empty indirect indirect Nil'
+);
 
-  applyEmptyIndirectCons() {
-    var x = new rt.Apply(boxedEmpty, [new rt.Indirect(new Cons(new Nil(), new Nil()))]);
-    rt.evaluate(x);
-    test.assertSame(new rt.Box(false), x);
-  },
+t.strictSame(
+  evaluate(new rt.Apply(boxedEmpty,
+    [new rt.Indirect(new Cons(new Nil(), new Nil()))])),
+  new rt.Box(false),
+  'apply empty indirect Cons'
+);
 
-  applyExact() {
-    // composeApply prepend1 prepend2 Nil
-    var apply = new rt.Apply(boxedComposeApply, [prepend1, prepend2, nil]);
-    forceList(apply);
-    test.assertSame(arrayToList([1,2]), apply);
-  },
+t.strictSame(
+  // composeApply prepend1 prepend2 Nil
+  forceList(new rt.Apply(boxedComposeApply, [prepend1, prepend2, nil])),
+  arrayToList([1,2]),
+  'apply exact'
+);
+  
+t.strictSame(
+  // (composeApply prepend1 prepend2) Nil
+  forceList(new rt.Apply(new rt.Apply(boxedComposeApply, [prepend1, prepend2]), [nil])),
+  arrayToList([1,2]),
+  'apply too few'
+);
 
-  applyTooFew() {
-    // (composeApply prepend1 prepend2) Nil
-    var apply = new rt.Apply(boxedComposeApply, [prepend1, prepend2]);
-    var apply2 = new rt.Apply(apply, [nil]);
-    forceList(apply2);
-    test.assertSame(arrayToList([1,2]), apply2);
-  },
+t.strictSame(
+  // composeApply doubly doubly prepend1 Nil
+  forceList(new rt.Apply(boxedComposeApply, [boxedDoubly, boxedDoubly, prepend1, nil])),
+  arrayToList([1,1,1,1]),
+  'apply too many'
+);
 
-  applyTooMany() {
-    // composeApply doubly doubly prepend1 Nil
-    var apply = new rt.Apply(boxedComposeApply, [boxedDoubly, boxedDoubly, prepend1, nil]);
-    forceList(apply);
-    test.assertSame(arrayToList([1,1,1,1]), apply);
-  },
+t.strictSame(
+  evaluate(new rt.Apply(boxedIdentity, [nil])),
+  indirect(1, nil),
+  'continuation arg direct'
+);
 
-  continuationArgDirect() {
-    var thunk = new rt.Apply(boxedIdentity, [nil]);
-    rt.evaluate(thunk);
-    test.assertSame(indirect(1, nil), thunk);
-  },
+t.strictSame(
+  evaluate(new rt.Apply(boxedIdentity, [indirect(1, nil)])),
+  indirect(1, nil),
+  'continuation arg indirect'
+);
 
-  continuationArgIndirect() {
-    var thunk = new rt.Apply(boxedIdentity, [indirect(1, nil)]);
-    rt.evaluate(thunk);
-    test.assertSame(indirect(1, nil), thunk);
-  },
+t.strictSame(
+  evaluate(new rt.Apply(boxedIdentity, [indirect(2, nil)])),
+  indirect(1, nil),
+  'continuation arg indirect indirect'
+);
 
-  continuationArgIndirect2() {
-    var thunk = new rt.Apply(boxedIdentity, [indirect(2, nil)]);
-    rt.evaluate(thunk);
-    test.assertSame(indirect(1, nil), thunk);
-  },
-
-  continuationThisIndirect() {
-    var thunk = new rt.Indirect(new rt.Apply(boxedIdentity, [nil]));
-    rt.evaluate(thunk);
-    test.assertSame(indirect(1, nil), thunk);
-  },
-
-};
-
-exports.tests = tests;
-
-if (require.main === module)
-  test.main(tests);
+t.strictSame(
+  evaluate(new rt.Indirect(new rt.Apply(boxedIdentity, [nil]))),
+  indirect(1, nil),
+  'continuation arg this indirect'
+);

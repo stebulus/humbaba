@@ -46,6 +46,14 @@ function expr(astNode, chunk, target) {
 }
 exports.expr = expr;
 
+function exprCode(astNode, target) {
+  var s = '';
+  function chunk(text) { s += text; }
+  expr(astNode, chunk, target);
+  return s;
+}
+exports.exprCode = exprCode;
+
 function box(value, chunk, target) {
   if (target) {
     chunk('rt.Box.call(');
