@@ -2,7 +2,7 @@ var debugRT = require('debug')('humbaba:runtime');
 var debugIO = require('debug')('humbaba:io');
 var stream = require('stream');
 
-var rt = require('./runtime');
+var rt = require('./humbaba-runtime');
 
 /*
   Realize a humbaba graph as a duplex stream.

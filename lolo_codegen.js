@@ -64,13 +64,26 @@ function useVar(name, chunk, target) {
   if (target) {
     chunk('rt.Indirect.call(');
     chunk(target);
-    chunk(', $');
-    chunk(name);
+    chunk(', ');
+    varName(name, chunk);
     chunk(');');
   } else {
-    chunk('$')
-    chunk(name);
+    varName(name, chunk);
   }
+}
+
+function varName(name, chunk) {
+  var parts = name.split('.');
+  if (parts.length > 1) {
+    chunk(modName(parts.slice(0, -1)));
+    chunk('.');
+  }
+  chunk('$');
+  chunk(parts[parts.length-1]);
+}
+
+function modName(parts) {
+  return 'mod$' + parts.join('$');
 }
 
 function apply(astNode, chunk, target) {
@@ -182,22 +195,8 @@ function caseData(astNode, chunk, target) {
   if (target) chunk(';');
 }
 
-function program(ast, entry, chunk) {
-  chunk('(function () {');
-  chunk('function charEq(a, b) { rt.evaluate(a); a = rt.smashIndirects(a); rt.evaluate(b); b = rt.smashIndirects(b); var eq = a.fields[0] === b.fields[0] ? rt.True : rt.False; rt.Indirect.call(this, eq); }');
-  chunk('var $charEq = new rt.Box(charEq);');
-  chunk('function charOrd(a) { rt.evaluate(a); a = rt.smashIndirects(a); var ord = a.fields[0].charCodeAt(0); rt.Box.call(this, ord); }');
-  chunk('var $charOrd = new rt.Box(charOrd);');
-  chunk('function intAdd(a, b) { rt.evaluate(a); a = rt.smashIndirects(a); rt.evaluate(b); b = rt.smashIndirects(b); var sum = a.fields[0] + b.fields[0]; rt.Box.call(this, sum); }');
-  chunk('var $intAdd = new rt.Box(intAdd);');
-  chunk('function intMul(a, b) { rt.evaluate(a); a = rt.smashIndirects(a); rt.evaluate(b); b = rt.smashIndirects(b); var prod = a.fields[0] * b.fields[0]; rt.Box.call(this, prod); }');
-  chunk('var $intMul = new rt.Box(intMul);');
-  chunk('function intQuot(a, b) { rt.evaluate(a); a = rt.smashIndirects(a); rt.evaluate(b); b = rt.smashIndirects(b); var prod = Math.trunc(a.fields[0] / b.fields[0]); rt.Box.call(this, prod); }');
-  chunk('var $intQuot = new rt.Box(intQuot);');
-  chunk('function intRem(a, b) { rt.evaluate(a); a = rt.smashIndirects(a); rt.evaluate(b); b = rt.smashIndirects(b); var prod = a.fields[0] % b.fields[0]; rt.Box.call(this, prod); }');
-  chunk('var $intRem = new rt.Box(intRem);');
-  chunk('function intLe(a, b) { rt.evaluate(a); a = rt.smashIndirects(a); rt.evaluate(b); b = rt.smashIndirects(b); var cmp = a.fields[0] <= b.fields[0] ? rt.True : rt.False; rt.Indirect.call(this, cmp); }');
-  chunk('var $intLe = new rt.Box(intLe);');
+function module(ast, chunk) {
+  chunk("var rt = require('humbaba-runtime');\n");
   var decls = ast['declarations'];
   for (var i = 0; i < decls.length; i++) {
     chunk('\n');
@@ -205,6 +204,8 @@ function program(ast, entry, chunk) {
       functionDeclaration(decls[i], chunk);
     } else if ('data' in decls[i]) {
       dataDeclaration(decls[i], chunk);
+    } else if ('import' in decls[i]) {
+      importModule(decls[i]['import'], chunk);
     } else {
       for (var k in decls[i]) {
         if (k !== 'comment' && k !== 'comments') {
@@ -213,25 +214,31 @@ function program(ast, entry, chunk) {
       }
     }
   }
-  chunk('return $');
-  chunk(entry);
-  chunk(';})()');
 }
-exports.program = program;
+exports.module = module;
 
-function programToJavaScript(ast, entry) {
+function moduleToJavaScript(ast) {
   var chunks = [];
   function chunk(text) { chunks.push(text); }
-  program(ast, entry, chunk);
+  module(ast, chunk);
   return chunks.join('');
 }
-exports.programToJavaScript = programToJavaScript;
+exports.moduleToJavaScript = moduleToJavaScript;
+
+function exportName(name, chunk) {
+  chunk('exports.');
+  chunk(name);
+  chunk(' = ');
+  chunk(name);
+  chunk(';');
+}
 
 function functionDeclaration(astNode, chunk) {
   var lhs = astNode['func'];
   var name = lhs[0];
-  chunk('function func$');
-  chunk(name);
+  var funcName = 'func$' + name;
+  chunk('function ');
+  chunk(funcName);
   chunk('(');
   for (var i = 1; i < lhs.length; i++) {
     if (i > 1) chunk(', ');
@@ -241,21 +248,23 @@ function functionDeclaration(astNode, chunk) {
   chunk(') {');
   expr(astNode['='], chunk, 'this');
   chunk('}');
+  var varName = '$' + name;
   if (lhs.length === 1) {
     // "function" with zero arguments; let name refer to thunk
-    chunk('var $');
-    chunk(name);
-    chunk(' = new rt.Thunk(new rt.Data(1, []), func$');
-    chunk(name);
+    chunk('var ');
+    chunk(varName);
+    chunk(' = new rt.Thunk(new rt.Data(1, []), ');
+    chunk(funcName);
     chunk(');');
   } else {
     // actual function; put it in a box
-    chunk('var $');
-    chunk(name);
-    chunk(' = new rt.Box(func$');
-    chunk(name);
+    chunk('var ');
+    chunk(varName);
+    chunk(' = new rt.Box(');
+    chunk(funcName);
     chunk(');');
   }
+  exportName(varName, chunk);
 }
 
 function dataDeclaration(astNode, chunk) {
@@ -273,16 +282,19 @@ function dataDeclaration(astNode, chunk) {
 }
 
 function declareTag(name, value, chunk) {
-  chunk('var tag$');
-  chunk(name);
+  var tagName = 'tag$' + name;
+  chunk('var ');
+  chunk(tagName);
   chunk(' = ');
   chunk(value.toString());
   chunk(';');
+  exportName(tagName, chunk);
 }
 
 function declareUnboxedConstructor(name, arity, chunk) {
-  chunk('function data$');
-  chunk(name);
+  var dataName = 'data$' + name;
+  chunk('function ');
+  chunk(dataName);
   chunk('(');
   for (var i = 0; i < arity; i++) {
     if (i > 0) chunk(', ');
@@ -300,36 +312,36 @@ function declareUnboxedConstructor(name, arity, chunk) {
   }
   chunk(']);');
   chunk('}');
-  chunk('data$');
-  chunk(name);
+  chunk(dataName);
   chunk('.prototype = rt.Node;');
+  exportName(dataName, chunk);
 }
 
 function declareSingleton(name, chunk) {
-  chunk('var $');
-  chunk(name);
+  var varName = '$' + name;
+  chunk('var ');
+  chunk(varName);
   chunk(' = ');
   chunk('new data$');
   chunk(name);
   chunk('();');
+  exportName(varName, chunk);
 }
 
 function declareBoxedConstructor(name, chunk) {
-  chunk('var $');
-  chunk(name);
+  var varName = '$' + name;
+  chunk(varName);
   chunk(' = new rt.Box(data$');
   chunk(name);
   chunk(');');
+  exportName(varName, chunk);
 }
 
-exports.ioDeclsJavaScript =
-  'var $ioPure = new rt.Box(rt.IoPure);' +
-  'var $ioBind = new rt.Box(rt.IoBind);' +
-  'var $getChar = rt.GetChar;' +
-  'var $putChar = new rt.Box(rt.PutChar);' +
-  'var $isEOF = rt.IsEOF;';
-
-exports.preludeLolo = [
-  {"data": "Bool", "=": [["True"], ["False"]]},
-  {"data": "Unit", "=": [["Unit"]]},
-];
+function importModule(name, chunk) {
+  var nameParts = name.split('.');
+  chunk('var ');
+  chunk(modName(nameParts));
+  chunk(' = require(');
+  chunk(JSON.stringify(nameParts.join('/')));
+  chunk(');\n');
+}

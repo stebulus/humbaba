@@ -1,15 +1,16 @@
 var codegen = require('../lolo_codegen');
-var rts = require('../runtime_stream');
+var mod = require('../module');
+var primmod = require('./lib/prim_modules');
+var rts = require('../humbaba-runtime-stream');
+var rt = require('../humbaba-runtime');
 var test = require('./lib/test');
 var test_rts = require('./runtime_stream');
 
 function stdout(input, program) {
-  var code =
-    "var rt = require('../runtime');" +
-    codegen.ioDeclsJavaScript +
-    codegen.programToJavaScript(program, 'test');
-  var expr = eval(code);
-  var strm = new rts.Stream(expr);
+  var moduleCodeString = codegen.moduleToJavaScript(program);
+  var moduleFunc = eval(mod.wrapModuleFunc(moduleCodeString));
+  var module = mod.makeModule(primmod.require, moduleFunc);
+  var strm = new rts.Stream(module.exports.$test);
   if (input === null)
     strm.end();
   else
@@ -31,33 +32,38 @@ tests = {
 
   nullProgram(callback) {
     expectOutput("", null, {"declarations": [
-      {"func": ["test"], "=": ["ioPure", "Unit"]}
-    ].concat(codegen.preludeLolo)}, callback);
+      {"import": "Prim.IO"},
+      {"import": "Prim.Unit"},
+      {"func": ["test"], "=": ["Prim.IO.pure", "Prim.Unit.Unit"]}
+    ]}, callback);
   },
 
   emitOneChar(callback) {
     expectOutput("x", null, {"declarations": [
-      {"func": ["test"], "=": ["putChar", {"str": "x"}]}
-    ].concat(codegen.preludeLolo)}, callback);
+      {"import": "Prim.IO"},
+      {"func": ["test"], "=": ["Prim.IO.putChar", {"str": "x"}]}
+    ]}, callback);
   },
 
   emitSeveralChars(callback) {
     expectOutput("xyz", null, {"declarations": [
+      {"import": "Prim.IO"},
       {"func": ["const", "x", "y"], "=": "x"},
       {"func": ["ioThen", "ioa", "iob"], "=":
-        ["ioBind", "ioa", ["const", "iob"]]},
+        ["Prim.IO.bind", "ioa", ["const", "iob"]]},
       {"func": ["test"], "=":
-        ["ioThen", ["putChar", {"str": "x"}],
-        ["ioThen", ["putChar", {"str": "y"}],
-                   ["putChar", {"str": "z"}]]]}
-    ].concat(codegen.preludeLolo)}, callback);
+        ["ioThen", ["Prim.IO.putChar", {"str": "x"}],
+        ["ioThen", ["Prim.IO.putChar", {"str": "y"}],
+                   ["Prim.IO.putChar", {"str": "z"}]]]}
+    ]}, callback);
   },
 
   copyOneChar(callback) {
     expectOutput("x", "x", {"declarations": [
+      {"import": "Prim.IO"},
       {"func": ["test"], "=":
-        ["ioBind", "getChar", "putChar"]}
-    ].concat(codegen.preludeLolo)}, callback);
+        ["Prim.IO.bind", "Prim.IO.getChar", "Prim.IO.putChar"]}
+    ]}, callback);
   },
 
 };

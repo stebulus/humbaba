@@ -1,6 +1,8 @@
 var test = require('./lib/test');
-var rt = require('../runtime');
+var primmod = require('./lib/prim_modules');
+var rt = require('../humbaba-runtime');
 var codegen = require('../lolo_codegen');
+var mod = require('../module');
 
 function expr(astNode) {
   var s = '';
@@ -27,14 +29,17 @@ function assertExprValue(expected, astNode) {
 }
 
 function programValue(ast) {
-  var expr = eval(codegen.programToJavaScript(ast, 'test'));
+  var moduleCode = codegen.moduleToJavaScript(ast);
+  var moduleFunc = eval(mod.wrapModuleFunc(moduleCode));
+  var module = mod.makeModule(primmod.require, moduleFunc);
+  var expr = module.exports.$test;
   rt.evaluateDeep(expr);
   return rt.smashIndirects(expr);
 }
 exports.programValue = programValue;
 
-function assertProgramValue(expected, ast) {
-  test.assertSame(expected, programValue(ast));
+function assertProgramValue(expected, ast, require) {
+  test.assertSame(expected, programValue(ast, require));
 }
 
 tests = {
@@ -184,10 +189,11 @@ tests = {
 
   caseWithNestedEvaluand() {
     assertProgramValue(rt.False, {"declarations": [
+      {"import": "Prim.Char"},
       {"data": "Bool", "=": [["True", 0], ["False", 0]]},
       {"func": ["id", "x"], "=": "x"},
       {"func": ["test"], "=":
-        {"cased": ["charEq", 1, ["id", 0]],
+        {"cased": ["Prim.Char.eq", 1, ["id", 0]],
          "of": [["True", "True"], ["False", "False"]]}}
     ]});
   },

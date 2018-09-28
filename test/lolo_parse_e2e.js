@@ -4,8 +4,6 @@ var test_llp = require('./lolo_parse');
 var test_lls = require('./lolo_stream');
 
 var lolo_parse = test_llp.withLoloParseProgram("main")
-lolo_parse['declarations'] = codegen.preludeLolo
-  .concat(lolo_parse['declarations']);
 
 function expectParsed(expected, input, callback) {
   test_lls.getOutput(input, lolo_parse, function (output) {

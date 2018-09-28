@@ -1,7 +1,11 @@
 { "comment": "Parse lolo code on stdin and emit lolo-json code on stdout",
   "declarations":
 
-  [ {"comment":
+  [ {"import": "Prim.IO"},
+    {"import": "Prim.Char"},
+    {"import": "Prim.Int"},
+
+    {"comment":
 
 
 
@@ -103,23 +107,23 @@
                 ["intersperse", "x", "rest"]]]]]}]]}}
 
   , {"func": ["intSum", "ns"], "=":
-    ["foldr", "intAdd", 0, "ns"]}
+    ["foldr", "Prim.Int.add", 0, "ns"]}
 
   , {"func": ["intAbs", "n"], "=":
-    {"cased": ["intLe", 0, "n"], "of":
+    {"cased": ["Prim.Int.le", 0, "n"], "of":
       [["True", "n"],
-       ["False", ["intMul", -1, "n"]]]}}
+       ["False", ["Prim.Int.mul", -1, "n"]]]}}
 
   , {"func": ["charLe", "a", "b"], "=":
-    ["intLe", ["charOrd", "a"], ["charOrd", "b"]]}
+    ["Prim.Int.le", ["Prim.Char.ord", "a"], ["Prim.Char.ord", "b"]]}
 
-  , {"func": ["stringEq"], "=": ["listEq", "charEq"]}
+  , {"func": ["stringEq"], "=": ["listEq", "Prim.Char.eq"]}
 
   , {"func": ["ioThen", "ioa", "iob"], "=":
-    ["ioBind", "ioa", ["const", "iob"]]}
+    ["Prim.IO.bind", "ioa", ["const", "iob"]]}
 
   , {"func": ["sequence_", "ios"], "=":
-    ["foldr", "ioThen", ["ioPure", "Unit"], "ios"]}
+    ["foldr", "ioThen", ["Prim.IO.pure", "Unit"], "ios"]}
 
   , {"func": ["mapM_", "f", "xs"], "=":
     ["sequence_", ["map", "f", "xs"]]}
@@ -128,12 +132,13 @@
     ["foldl", "readIntStep", 0, "digits"]}
 
   , {"func": ["readIntStep", "acc", "digit"], "=":
-    ["intAdd", ["intMul", 10, "acc"], ["digitToInt", "digit"]]}
+    ["Prim.Int.add", ["Prim.Int.mul", 10, "acc"],
+                     ["digitToInt", "digit"]]}
 
   , {"func": ["digitToInt", "c"], "=":
-    ["intAdd",
-      ["charOrd", "c"],
-      ["intMul", -1, ["charOrd", {"str": "0"}]]]}
+    ["Prim.Int.add",
+      ["Prim.Char.ord", "c"],
+      ["Prim.Int.mul", -1, ["Prim.Char.ord", {"str": "0"}]]]}
 
   , {"func": ["showInt", "n"], "=":
     ["listJoin",
@@ -141,7 +146,7 @@
       ["showIntDigits", ["intAbs", "n"]]]}
 
   , {"func": ["showIntOptSign", "n"], "=":
-    {"cased": ["intLe", 0, "n"], "of":
+    {"cased": ["Prim.Int.le", 0, "n"], "of":
       [["True", "Nil"],
        ["False", ["Cons", {"str": "-"}, "Nil"]]]}}
 
@@ -155,8 +160,8 @@
       [[0, "Nil"],
        ["_",
           ["Cons",
-            ["intToDigit", ["intRem", "n", 10]],
-            ["showIntDigitsHelper", ["intQuot", "n", 10]]]]]}}
+            ["intToDigit", ["Prim.Int.rem", "n", 10]],
+            ["showIntDigitsHelper", ["Prim.Int.quot", "n", 10]]]]]}}
 
   , {"func": ["intToDigit", "n"], "=":
     {"casei": "n", "of":
@@ -172,7 +177,7 @@
        [9, {"str": "9"}],
        ["_", {"str": "?"}]]}}
 
-  , {"func": ["putStr", "s"], "=": ["mapM_", "putChar", "s"]}
+  , {"func": ["putStr", "s"], "=": ["mapM_", "Prim.IO.putChar", "s"]}
 
   , {"comments":
 
@@ -398,7 +403,7 @@
       ["pSome", ["pRight", "delimiter", "p"]]]}
 
   , {"comment": "char :: Char -> Parser Char Char",
-     "func": ["char", "c"], "=": ["require", ["charEq", "c"]]}
+     "func": ["char", "c"], "=": ["require", ["Prim.Char.eq", "c"]]}
 
   , {"comment": "charBetween :: Char -> Char -> Char -> Bool",
      "func": ["charBetween", "lo", "hi", "c"], "=":
@@ -892,7 +897,7 @@
     ["IntLiteral",
       {"cased": "sign", "of":
         [["True", "n"],
-         ["False", ["intMul", -1, "n"]]]}]}
+         ["False", ["Prim.Int.mul", -1, "n"]]]}]}
 
   , {"comment": "charLiteral :: Parser Char Char",
      "func": ["charLiteral"], "=":
@@ -949,9 +954,7 @@
 
   , {"comment": "comment :: Parser Char Unit",
      "func": ["comment"], "=":
-     ["pRight",
-       ["require", ["charEq", {"str": "#"}]],
-       ["ignoreUntil", "newline"]]}
+     ["pRight", ["char", {"str": "#"}], ["ignoreUntil", "newline"]]}
 
   , {"comment": "whitestuff :: Parser Char Unit",
      "func": ["whitestuff"], "=":
@@ -1427,7 +1430,7 @@
 
   , {"comment": "parseStdinHelper :: Parser Char Token -> Parser Token a -> IO (Either Char a)",
      "func": ["parseStdinHelper", "charstate", "tokenstate"], "=":
-    ["ioBind", "isEOF",
+    ["Prim.IO.bind", "Prim.IO.isEOF",
       ["parseStdinLoop", "charstate", "tokenstate"]]}
 
   , {"comment": "parseStdinLoop :: Parser Char Token -> Parser Token a -> Bool -> IO (Either Char a)",
@@ -1438,28 +1441,28 @@
           {"cased": ["feed", "token", "tokenstate"], "of":
             [["Consume", "tokenstate2",
               {"cased": ["feedEof", "tokenstate2"], "of":
-                [["GoodEof", "r", ["ioPure", ["Right", "r"]]],
-                 ["BadEof", ["ioPure", ["Left", {"str": "e"}]]]]}],
-             ["Pushback", "_", ["ioPure", ["Left", {"str": "p"}]]],
-             ["Fail", ["ioPure", ["Left", {"str": "f"}]]]]}],
-         ["BadEof", ["ioPure", ["Left", {"str": "e"}]]]]}],
-       ["False", ["ioBind", "getChar",
+                [["GoodEof", "r", ["Prim.IO.pure", ["Right", "r"]]],
+                 ["BadEof", ["Prim.IO.pure", ["Left", {"str": "e"}]]]]}],
+             ["Pushback", "_", ["Prim.IO.pure", ["Left", {"str": "p"}]]],
+             ["Fail", ["Prim.IO.pure", ["Left", {"str": "f"}]]]]}],
+         ["BadEof", ["Prim.IO.pure", ["Left", {"str": "e"}]]]]}],
+       ["False", ["Prim.IO.bind", "Prim.IO.getChar",
         ["parseStdinLoopChar", "charstate", "tokenstate"]]]]}}
 
   , {"comment": "parseStdinLoopChar :: Parser Char Token -> Parser Token a -> Char -> IO (Either Char a)",
      "func": ["parseStdinLoopChar", "charstate", "tokenstate", "c"], "=":
     {"cased": ["feed", "c", "charstate"], "of":
       [["Consume", "charstate2",
-        ["ioBind", "isEOF",
+        ["Prim.IO.bind", "Prim.IO.isEOF",
           ["parseStdinLoop", "charstate2", "tokenstate"]]],
        ["Pushback", "token",
           {"cased": ["feed", "token", "tokenstate"], "of":
             [["Consume", "tokenstate2",
                 ["parseStdinLoopChar", "tokenInWhitespace",
                   "tokenstate2", "c"]],
-             ["Pushback", "_", ["ioPure", ["Left", {"str": "p"}]]],
-             ["Fail", ["ioPure", ["Left", {"str": "f"}]]]]}],
-       ["Fail", ["ioPure", ["Left", {"str": "f"}]]]]}}
+             ["Pushback", "_", ["Prim.IO.pure", ["Left", {"str": "p"}]]],
+             ["Fail", ["Prim.IO.pure", ["Left", {"str": "f"}]]]]}],
+       ["Fail", ["Prim.IO.pure", ["Left", {"str": "f"}]]]]}}
 
   , {"comment":
 
@@ -1473,16 +1476,16 @@
 
   , {"func": ["emitArray", "itemEmitters"], "=":
     ["ioThen",
-      ["putChar", {"str": "["}],
+      ["Prim.IO.putChar", {"str": "["}],
       ["ioThen",
         ["sequence_",
-          ["intersperse", ["putChar", {"str": ","}], "itemEmitters"]],
-        ["putChar", {"str": "]"}]]]}
+          ["intersperse", ["Prim.IO.putChar", {"str": ","}], "itemEmitters"]],
+        ["Prim.IO.putChar", {"str": "]"}]]]}
 
   , {"func": ["emitStr", "s"], "=":
-    ["ioThen", ["putChar", {"str": "\""}],
+    ["ioThen", ["Prim.IO.putChar", {"str": "\""}],
     ["ioThen", ["mapM_", "emitStrChar", "s"],
-               ["putChar", {"str": "\""}]]]}
+               ["Prim.IO.putChar", {"str": "\""}]]]}
 
   , {"func": ["emitStrChar", "c"], "=":
     {"casec": "c", "of":
@@ -1494,19 +1497,20 @@
        [{"str": "\r"}, ["emitBackslashChar", {"str": "r"}]],
        [{"str": "\t"}, ["emitBackslashChar", {"str": "t"}]],
        ["_", {"cased": ["printableAscii", "c"], "of":
-          [["True", ["putChar", "c"]],
+          [["True", ["Prim.IO.putChar", "c"]],
            ["False", ["emitUnicodeEscape", "c"]]]}]]}}
 
   , {"func": ["printableAscii", "c"], "=":
     ["charBetween", {"str": "\u0020"}, {"str": "\u007e"}, "c"]}
 
   , {"func": ["emitBackslashChar", "c"], "=":
-    ["ioThen", ["putChar", {"str": "\\"}], ["putChar", "c"]]}
+    ["ioThen", ["Prim.IO.putChar", {"str": "\\"}],
+               ["Prim.IO.putChar", "c"]]}
 
   , {"func": ["emitUnicodeEscape", "c"], "=":
-    ["ioThen", ["putChar", {"str": "\\"}],
-    ["ioThen", ["putChar", {"str": "u"}],
-               ["putStr", ["hex4", ["charOrd", "c"]]]]]}
+    ["ioThen", ["Prim.IO.putChar", {"str": "\\"}],
+    ["ioThen", ["Prim.IO.putChar", {"str": "u"}],
+               ["putStr", ["hex4", ["Prim.Char.ord", "c"]]]]]}
 
   , {"func": ["hex4", "n"], "=":
     ["map", "hex1", ["reverse", ["hexits", 4, "n"]]]}
@@ -1536,95 +1540,96 @@
       [[0, "Nil"],
        ["_",
           ["Cons",
-            ["intRem", "n", 16],
-            ["hexits", ["intAdd", -1, "d"], ["intQuot", "n", 16]]]]]}}
+            ["Prim.Int.rem", "n", 16],
+            ["hexits", ["Prim.Int.add", -1, "d"],
+                       ["Prim.Int.quot", "n", 16]]]]]}}
 
   , {"func": ["emitDecls", "decls"], "=":
-    ["ioThen", ["putChar", {"str": "{"}],
-    ["ioThen", ["putChar", {"str": "\""}],
-    ["ioThen", ["putChar", {"str": "d"}],
-    ["ioThen", ["putChar", {"str": "e"}],
-    ["ioThen", ["putChar", {"str": "c"}],
-    ["ioThen", ["putChar", {"str": "l"}],
-    ["ioThen", ["putChar", {"str": "a"}],
-    ["ioThen", ["putChar", {"str": "r"}],
-    ["ioThen", ["putChar", {"str": "a"}],
-    ["ioThen", ["putChar", {"str": "t"}],
-    ["ioThen", ["putChar", {"str": "i"}],
-    ["ioThen", ["putChar", {"str": "o"}],
-    ["ioThen", ["putChar", {"str": "n"}],
-    ["ioThen", ["putChar", {"str": "s"}],
-    ["ioThen", ["putChar", {"str": "\""}],
-    ["ioThen", ["putChar", {"str": ":"}],
+    ["ioThen", ["Prim.IO.putChar", {"str": "{"}],
+    ["ioThen", ["Prim.IO.putChar", {"str": "\""}],
+    ["ioThen", ["Prim.IO.putChar", {"str": "d"}],
+    ["ioThen", ["Prim.IO.putChar", {"str": "e"}],
+    ["ioThen", ["Prim.IO.putChar", {"str": "c"}],
+    ["ioThen", ["Prim.IO.putChar", {"str": "l"}],
+    ["ioThen", ["Prim.IO.putChar", {"str": "a"}],
+    ["ioThen", ["Prim.IO.putChar", {"str": "r"}],
+    ["ioThen", ["Prim.IO.putChar", {"str": "a"}],
+    ["ioThen", ["Prim.IO.putChar", {"str": "t"}],
+    ["ioThen", ["Prim.IO.putChar", {"str": "i"}],
+    ["ioThen", ["Prim.IO.putChar", {"str": "o"}],
+    ["ioThen", ["Prim.IO.putChar", {"str": "n"}],
+    ["ioThen", ["Prim.IO.putChar", {"str": "s"}],
+    ["ioThen", ["Prim.IO.putChar", {"str": "\""}],
+    ["ioThen", ["Prim.IO.putChar", {"str": ":"}],
     ["ioThen", ["emitArray", ["map", "emitDecl", "decls"]],
-               ["putChar", {"str": "}"}]]]]]]]]]]]]]]]]]]}
+               ["Prim.IO.putChar", {"str": "}"}]]]]]]]]]]]]]]]]]]}
 
   , {"func": ["emitDecl", "decl"], "=":
     {"cased": "decl", "of":
       [["DataDecl", "name", "condecls",
-          ["ioThen", ["putChar", {"str": "{"}],
-          ["ioThen", ["putChar", {"str": "\""}],
-          ["ioThen", ["putChar", {"str": "d"}],
-          ["ioThen", ["putChar", {"str": "a"}],
-          ["ioThen", ["putChar", {"str": "t"}],
-          ["ioThen", ["putChar", {"str": "a"}],
-          ["ioThen", ["putChar", {"str": "\""}],
-          ["ioThen", ["putChar", {"str": ":"}],
+          ["ioThen", ["Prim.IO.putChar", {"str": "{"}],
+          ["ioThen", ["Prim.IO.putChar", {"str": "\""}],
+          ["ioThen", ["Prim.IO.putChar", {"str": "d"}],
+          ["ioThen", ["Prim.IO.putChar", {"str": "a"}],
+          ["ioThen", ["Prim.IO.putChar", {"str": "t"}],
+          ["ioThen", ["Prim.IO.putChar", {"str": "a"}],
+          ["ioThen", ["Prim.IO.putChar", {"str": "\""}],
+          ["ioThen", ["Prim.IO.putChar", {"str": ":"}],
           ["ioThen", ["emitStr", "name"],
-          ["ioThen", ["putChar", {"str": ","}],
-          ["ioThen", ["putChar", {"str": "\""}],
-          ["ioThen", ["putChar", {"str": "="}],
-          ["ioThen", ["putChar", {"str": "\""}],
-          ["ioThen", ["putChar", {"str": ":"}],
+          ["ioThen", ["Prim.IO.putChar", {"str": ","}],
+          ["ioThen", ["Prim.IO.putChar", {"str": "\""}],
+          ["ioThen", ["Prim.IO.putChar", {"str": "="}],
+          ["ioThen", ["Prim.IO.putChar", {"str": "\""}],
+          ["ioThen", ["Prim.IO.putChar", {"str": ":"}],
           ["ioThen", ["emitArray", ["map", "emitConDecl", "condecls"]],
-                     ["putChar", {"str": "}"}]]]]]]]]]]]]]]]]],
+                     ["Prim.IO.putChar", {"str": "}"}]]]]]]]]]]]]]]]]],
        ["FuncDecl", "name", "argnames", "expr",
-          ["ioThen", ["putChar", {"str": "{"}],
-          ["ioThen", ["putChar", {"str": "\""}],
-          ["ioThen", ["putChar", {"str": "f"}],
-          ["ioThen", ["putChar", {"str": "u"}],
-          ["ioThen", ["putChar", {"str": "n"}],
-          ["ioThen", ["putChar", {"str": "c"}],
-          ["ioThen", ["putChar", {"str": "\""}],
-          ["ioThen", ["putChar", {"str": ":"}],
+          ["ioThen", ["Prim.IO.putChar", {"str": "{"}],
+          ["ioThen", ["Prim.IO.putChar", {"str": "\""}],
+          ["ioThen", ["Prim.IO.putChar", {"str": "f"}],
+          ["ioThen", ["Prim.IO.putChar", {"str": "u"}],
+          ["ioThen", ["Prim.IO.putChar", {"str": "n"}],
+          ["ioThen", ["Prim.IO.putChar", {"str": "c"}],
+          ["ioThen", ["Prim.IO.putChar", {"str": "\""}],
+          ["ioThen", ["Prim.IO.putChar", {"str": ":"}],
           ["ioThen", ["emitArray", ["map", "emitStr",
             ["Cons", "name", "argnames"]]],
-          ["ioThen", ["putChar", {"str": ","}],
-          ["ioThen", ["putChar", {"str": "\""}],
-          ["ioThen", ["putChar", {"str": "="}],
-          ["ioThen", ["putChar", {"str": "\""}],
-          ["ioThen", ["putChar", {"str": ":"}],
+          ["ioThen", ["Prim.IO.putChar", {"str": ","}],
+          ["ioThen", ["Prim.IO.putChar", {"str": "\""}],
+          ["ioThen", ["Prim.IO.putChar", {"str": "="}],
+          ["ioThen", ["Prim.IO.putChar", {"str": "\""}],
+          ["ioThen", ["Prim.IO.putChar", {"str": ":"}],
           ["ioThen", ["emitExpr", "expr"],
-                     ["putChar", {"str": "}"}]]]]]]]]]]]]]]]]]]}}
+                     ["Prim.IO.putChar", {"str": "}"}]]]]]]]]]]]]]]]]]]}}
 
   , {"func": ["emitConDecl", "decl"], "=":
     {"cased": "decl", "of":
       [["ConDecl", "name", "arity",
-          ["ioThen", ["putChar", {"str": "["}],
+          ["ioThen", ["Prim.IO.putChar", {"str": "["}],
           ["ioThen", ["emitStr", "name"],
-          ["ioThen", ["putChar", {"str": ","}],
+          ["ioThen", ["Prim.IO.putChar", {"str": ","}],
           ["ioThen", ["emitInt", "arity"],
-                     ["putChar", {"str": "]"}]]]]]]]}}
+                     ["Prim.IO.putChar", {"str": "]"}]]]]]]]}}
 
   , {"func": ["emitExpr", "expr"], "=":
     {"cased": "expr", "of":
       [["LetExp", "bindings", "subexpr",
-          ["ioThen", ["putChar", {"str": "{"}],
-          ["ioThen", ["putChar", {"str": "\""}],
-          ["ioThen", ["putChar", {"str": "l"}],
-          ["ioThen", ["putChar", {"str": "e"}],
-          ["ioThen", ["putChar", {"str": "t"}],
-          ["ioThen", ["putChar", {"str": "\""}],
-          ["ioThen", ["putChar", {"str": ":"}],
+          ["ioThen", ["Prim.IO.putChar", {"str": "{"}],
+          ["ioThen", ["Prim.IO.putChar", {"str": "\""}],
+          ["ioThen", ["Prim.IO.putChar", {"str": "l"}],
+          ["ioThen", ["Prim.IO.putChar", {"str": "e"}],
+          ["ioThen", ["Prim.IO.putChar", {"str": "t"}],
+          ["ioThen", ["Prim.IO.putChar", {"str": "\""}],
+          ["ioThen", ["Prim.IO.putChar", {"str": ":"}],
           ["ioThen", ["emitArray", ["map", "emitBinding", "bindings"]],
-          ["ioThen", ["putChar", {"str": ","}],
-          ["ioThen", ["putChar", {"str": "\""}],
-          ["ioThen", ["putChar", {"str": "i"}],
-          ["ioThen", ["putChar", {"str": "n"}],
-          ["ioThen", ["putChar", {"str": "\""}],
-          ["ioThen", ["putChar", {"str": ":"}],
+          ["ioThen", ["Prim.IO.putChar", {"str": ","}],
+          ["ioThen", ["Prim.IO.putChar", {"str": "\""}],
+          ["ioThen", ["Prim.IO.putChar", {"str": "i"}],
+          ["ioThen", ["Prim.IO.putChar", {"str": "n"}],
+          ["ioThen", ["Prim.IO.putChar", {"str": "\""}],
+          ["ioThen", ["Prim.IO.putChar", {"str": ":"}],
           ["ioThen", ["emitExpr", "subexpr"],
-                     ["putChar", {"str": "}"}]]]]]]]]]]]]]]]]],
+                     ["Prim.IO.putChar", {"str": "}"}]]]]]]]]]]]]]]]]],
        ["CasedExp", "evaluand", "dalts",
           ["emitCaseExp", {"str": "d"}, "emitDAlt", "evaluand", "dalts"]],
        ["CaseiExp", "evaluand", "ialts",
@@ -1645,24 +1650,24 @@
             "Nil"]]]]]}}
 
   , {"func": ["emitCaseExp", "suffix", "emitAlt", "evaluand", "alts"], "=":
-      ["ioThen", ["putChar", {"str": "{"}],
-      ["ioThen", ["putChar", {"str": "\""}],
-      ["ioThen", ["putChar", {"str": "c"}],
-      ["ioThen", ["putChar", {"str": "a"}],
-      ["ioThen", ["putChar", {"str": "s"}],
-      ["ioThen", ["putChar", {"str": "e"}],
-      ["ioThen", ["putChar", "suffix"],
-      ["ioThen", ["putChar", {"str": "\""}],
-      ["ioThen", ["putChar", {"str": ":"}],
+      ["ioThen", ["Prim.IO.putChar", {"str": "{"}],
+      ["ioThen", ["Prim.IO.putChar", {"str": "\""}],
+      ["ioThen", ["Prim.IO.putChar", {"str": "c"}],
+      ["ioThen", ["Prim.IO.putChar", {"str": "a"}],
+      ["ioThen", ["Prim.IO.putChar", {"str": "s"}],
+      ["ioThen", ["Prim.IO.putChar", {"str": "e"}],
+      ["ioThen", ["Prim.IO.putChar", "suffix"],
+      ["ioThen", ["Prim.IO.putChar", {"str": "\""}],
+      ["ioThen", ["Prim.IO.putChar", {"str": ":"}],
       ["ioThen", ["emitExpr", "evaluand"],
-      ["ioThen", ["putChar", {"str": ","}],
-      ["ioThen", ["putChar", {"str": "\""}],
-      ["ioThen", ["putChar", {"str": "o"}],
-      ["ioThen", ["putChar", {"str": "f"}],
-      ["ioThen", ["putChar", {"str": "\""}],
-      ["ioThen", ["putChar", {"str": ":"}],
+      ["ioThen", ["Prim.IO.putChar", {"str": ","}],
+      ["ioThen", ["Prim.IO.putChar", {"str": "\""}],
+      ["ioThen", ["Prim.IO.putChar", {"str": "o"}],
+      ["ioThen", ["Prim.IO.putChar", {"str": "f"}],
+      ["ioThen", ["Prim.IO.putChar", {"str": "\""}],
+      ["ioThen", ["Prim.IO.putChar", {"str": ":"}],
       ["ioThen", ["emitArray", ["map", "emitAlt", "alts"]],
-                 ["putChar", {"str": "}"}]]]]]]]]]]]]]]]]]]}
+                 ["Prim.IO.putChar", {"str": "}"}]]]]]]]]]]]]]]]]]]}
 
   , {"func": ["emitDAlt", "dalt"], "=":
     {"cased": "dalt", "of":
@@ -1702,17 +1707,17 @@
   , {"func": ["emitAExp", "aexpr"], "=":
     {"cased": "aexpr", "of":
       [["AChar", "c",
-          ["ioThen", ["putChar", {"str": "{"}],
-          ["ioThen", ["putChar", {"str": "\""}],
-          ["ioThen", ["putChar", {"str": "s"}],
-          ["ioThen", ["putChar", {"str": "t"}],
-          ["ioThen", ["putChar", {"str": "r"}],
-          ["ioThen", ["putChar", {"str": "\""}],
-          ["ioThen", ["putChar", {"str": ":"}],
-          ["ioThen", ["putChar", {"str": "\""}],
+          ["ioThen", ["Prim.IO.putChar", {"str": "{"}],
+          ["ioThen", ["Prim.IO.putChar", {"str": "\""}],
+          ["ioThen", ["Prim.IO.putChar", {"str": "s"}],
+          ["ioThen", ["Prim.IO.putChar", {"str": "t"}],
+          ["ioThen", ["Prim.IO.putChar", {"str": "r"}],
+          ["ioThen", ["Prim.IO.putChar", {"str": "\""}],
+          ["ioThen", ["Prim.IO.putChar", {"str": ":"}],
+          ["ioThen", ["Prim.IO.putChar", {"str": "\""}],
           ["ioThen", ["emitStrChar", "c"],
-          ["ioThen", ["putChar", {"str": "\""}],
-                     ["putChar", {"str": "}"}]]]]]]]]]]]],
+          ["ioThen", ["Prim.IO.putChar", {"str": "\""}],
+                     ["Prim.IO.putChar", {"str": "}"}]]]]]]]]]]]],
        ["AInt", "n", ["emitInt", "n"]],
        ["AVar", "s", ["emitStr", "s"]],
        ["ACon", "s", ["emitStr", "s"]],
@@ -1722,17 +1727,17 @@
     ["putStr", ["showInt", "n"]]}
 
   , {"func": ["emitChar", "c"], "=":
-    ["ioThen", ["putChar", {"str": "{"}],
-    ["ioThen", ["putChar", {"str": "\""}],
-    ["ioThen", ["putChar", {"str": "s"}],
-    ["ioThen", ["putChar", {"str": "t"}],
-    ["ioThen", ["putChar", {"str": "r"}],
-    ["ioThen", ["putChar", {"str": "\""}],
-    ["ioThen", ["putChar", {"str": ":"}],
-    ["ioThen", ["putChar", {"str": "\""}],
-    ["ioThen", ["putChar", "c"],
-    ["ioThen", ["putChar", {"str": "\""}],
-               ["putChar", {"str": "}"}]]]]]]]]]]]}
+    ["ioThen", ["Prim.IO.putChar", {"str": "{"}],
+    ["ioThen", ["Prim.IO.putChar", {"str": "\""}],
+    ["ioThen", ["Prim.IO.putChar", {"str": "s"}],
+    ["ioThen", ["Prim.IO.putChar", {"str": "t"}],
+    ["ioThen", ["Prim.IO.putChar", {"str": "r"}],
+    ["ioThen", ["Prim.IO.putChar", {"str": "\""}],
+    ["ioThen", ["Prim.IO.putChar", {"str": ":"}],
+    ["ioThen", ["Prim.IO.putChar", {"str": "\""}],
+    ["ioThen", ["Prim.IO.putChar", "c"],
+    ["ioThen", ["Prim.IO.putChar", {"str": "\""}],
+               ["Prim.IO.putChar", {"str": "}"}]]]]]]]]]]]}
 
   , {"comment":
 
@@ -1746,11 +1751,11 @@
 
   , {"func": ["checkParseResult", "result"], "=":
     {"cased": "result", "of":
-      [["Left", "c", ["putChar", "c"]],
+      [["Left", "c", ["Prim.IO.putChar", "c"]],
        ["Right", "decls", ["emitDecls", "decls"]]]}}
 
   , {"func": ["main"], "=":
-    ["ioBind", "parseStdin", "checkParseResult"]}
+    ["Prim.IO.bind", "parseStdin", "checkParseResult"]}
 
   ]
 }

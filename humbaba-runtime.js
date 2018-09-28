@@ -229,7 +229,7 @@ function evaluate(expr) {
         expr = smashIndirects(oldexpr);
         break;
       case THUNK:
-        if (expr.evaluand === undefined)
+        if (typeof expr.evaluand === 'undefined')
           throw new Error("thunk without evaluand -- infinite loop?");
         var evaluand = expr.evaluand;
         delete expr.evaluand;
@@ -240,7 +240,7 @@ function evaluate(expr) {
         expr = evaluand;
         break;
       case INDIRECT:
-        if (expr.target === undefined)
+        if (typeof expr.target === 'undefined')
           throw new Error("indirect without target -- infinite loop?");
         var target = expr.target;
         delete expr.target;

@@ -11,24 +11,8 @@ function stdout(s) {
   process.stdout.write(s);
 }
 
-function addPrelude(ast) {
-  ast['declarations'] = codegen.preludeLolo
-    .concat(ast['declarations']);
-}
-exports.addPrelude = addPrelude;
-
-function compile(ast, out, options) {
-  out("var process = require('process');");
-  out("var rt = require(");
-  out(JSON.stringify(options.runtime));
-  out(");");
-  out("var rts = require(");
-  out(JSON.stringify(options.runtimeStream));
-  out(");");
-  out(codegen.ioDeclsJavaScript);
-  out("new rts.Stream(");
-  codegen.program(ast, 'main', out);
-  out(", process.stdin).pipe(process.stdout);");
+function compile(ast, out) {
+  codegen.module(ast, out);
 }
 exports.compile = compile;
 
@@ -42,22 +26,15 @@ if (require.main === module) {
   commander.version('0.1.0')
     .usage('[options] [file]')
     .option('-o, --output <file>', 'write to file (default stdout)')
-    .option('--runtime <module>', 'use module as runtime (default humbaba/runtime)')
-    .option('--runtime-stream <module>', 'use module as runtime-stream (default humbaba/runtime_stream)')
     .parse(process.argv);
   commander.output = commander.output || '-';
-  var options =
-    { runtime: commander.runtime || 'humbaba/runtime'
-    , runtimeStream: commander.runtimeStream || 'humbaba/runtime_stream'
-    };
   function doTheThing(input) {
     var ast = JSON.parse(input);
-    addPrelude(ast);
     if (commander.output === '-') {
-      compile(ast, writeTo(process.stdout), options);
+      compile(ast, writeTo(process.stdout));
     } else {
       strm = fs.createWriteStream(commander.output);
-      compile(ast, writeTo(strm), options);
+      compile(ast, writeTo(strm));
       strm.end();
     }
   }
