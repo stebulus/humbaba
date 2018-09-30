@@ -1,8 +1,8 @@
-var llp = require('./lib/lolo_parse');
+var llp = require('../test-lib/lolo_parse');
 var t = require('tap');
-var tp = require('./lib/promise');
-var ts = require('./lib/stream');
-var stdout = require('./lib/runtime_stream').stdout;
+var tp = require('../test-lib/promise');
+var ts = require('../test-lib/stream');
+var stdout = require('../test-lib/runtime_stream').stdout;
 
 var lolo_parse_program = llp.withLoloParseProgram("main")
 

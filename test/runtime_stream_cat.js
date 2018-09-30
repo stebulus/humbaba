@@ -2,8 +2,8 @@ var rt = require('../humbaba-runtime');
 var rts = require('../humbaba-runtime-stream');
 var stream = require('stream');
 var t = require('tap');
-var tp = require('./lib/promise');
-var ts = require('./lib/stream');
+var tp = require('../test-lib/promise');
+var ts = require('../test-lib/stream');
 
 var copyChar = new rt.IoBind(
   rt.GetChar,

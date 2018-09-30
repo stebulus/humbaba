@@ -1,7 +1,7 @@
-var codegen = require('../../lolo_codegen');
-var mod = require('../../module');
+var codegen = require('../lolo_codegen');
+var mod = require('../module');
 var primmod = require('./prim_modules');
-var rts = require('../../humbaba-runtime-stream');
+var rts = require('../humbaba-runtime-stream');
 
 function stdout(program, input) {
   var moduleCodeString = codegen.moduleToJavaScript(program);

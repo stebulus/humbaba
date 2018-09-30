@@ -1,10 +1,10 @@
 var process = require('process');
-var promise = require('./lib/promise');
+var promise = require('../test-lib/promise');
 var rt = require('../humbaba-runtime');
 var rts = require('../humbaba-runtime-stream');
 var stream = require('stream');
 var t = require('tap');
-var ts = require('./lib/stream');
+var ts = require('../test-lib/stream');
 
 promise.resolvesStrictSame(t,
   ts.output(new rts.Stream(new rt.IoPure(rt.Unit))),

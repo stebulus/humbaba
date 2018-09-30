@@ -4,7 +4,7 @@ var path = require('path');
 
 var llparse = (function () {
   var here = path.dirname(module.filename)
-  var llparseSource = path.join(here, '..', '..', 'lolo_parse.lj');
+  var llparseSource = path.join(here, '..', 'lolo_parse.lj');
   return JSON.parse(fs.readFileSync(llparseSource));
 })();
 
