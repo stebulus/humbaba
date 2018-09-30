@@ -1,5 +1,5 @@
 var evaluate = require('../lib/evaluate');
-var rt = require('../../humbaba-runtime');
+var rt = require('../../../runtime/humbaba-runtime');
 var t = require('tap');
 
 t.strictSame(evaluate.program({"declarations":

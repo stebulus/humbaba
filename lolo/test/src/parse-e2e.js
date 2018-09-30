@@ -1,10 +1,10 @@
-var llp = require('../../lib/lolo-parse');
+var tparse = require('../lib/parse');
 var t = require('tap');
-var tp = require('../../lib/promise');
-var ts = require('../../lib/stream');
-var stdout = require('../../lib/runtime-stream').stdout;
+var tp = require('../../../runtime/test/lib/promise');
+var ts = require('../../../runtime/test/lib/stream');
+var stdout = require('../lib/runtime-stream').stdout;
 
-var lolo_parse_program = llp.withLoloParseProgram("main")
+var lolo_parse_program = tparse.withLoloParseProgram("main")
 
 function lolo_parse(input, expected, message) {
   tp.resolvesStrictSame(t,

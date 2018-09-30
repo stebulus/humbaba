@@ -1,4 +1,4 @@
-var codegen = require('../../../lolo-codegen');
+var codegen = require('../../codegen');
 var t = require('tap');
 
 t.throws(function () {

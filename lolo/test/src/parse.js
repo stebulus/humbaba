@@ -1,7 +1,7 @@
-var rt = require('../../../humbaba-runtime');
-var rts = require('../../../humbaba-runtime-stream');
+var rt = require('../../../runtime/humbaba-runtime');
+var rts = require('../../../runtime/humbaba-runtime-stream');
 var t = require('tap');
-var withLoloParse = require('../../lib/lolo-parse').withLoloParse;
+var withLoloParse = require('../lib/parse').withLoloParse;
 
 function charList(s) {
   var list = "Nil";
