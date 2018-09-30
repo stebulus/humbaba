@@ -157,10 +157,8 @@ function applyTo(args) {
         allArgs = func.args.concat(args);
         unboxedFunc = func.func;
         break;
-      case INDIRECT:
-        throw new Error("evaluate() didn't smash indirects?");
       default:
-        throw new Error("apply of non-function: " + func.type);
+        throw new Error("an Apply node's function field evaluated to a non-function (of type " + func.type + "), which probably indicates a bug in the humbaba toolchain or runtime");
     }
     var desired = unboxedFunc.length;
     var present = allArgs.length;
