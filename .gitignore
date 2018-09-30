@@ -2,3 +2,5 @@
 /cat.js
 /cat.lj
 /lolo_parse.js
+/.nyc_output
+/coverage
