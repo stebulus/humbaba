@@ -166,3 +166,11 @@ t.strictSame(
   indirect(1, nil),
   'continuation arg this indirect'
 );
+
+t.throws(function () {
+  var weird = new rt.Empty();
+  weird.type = -3;
+  weird.tag = 0;
+  weird.fields = [];
+  rt.evaluate(weird);
+}, /node type/, 'weird node type causes an exception')
