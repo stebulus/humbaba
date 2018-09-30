@@ -1,51 +1,10 @@
 var process = require('process');
-var promise = require('../test-lib/promise');
-var rt = require('../humbaba-runtime');
-var rts = require('../humbaba-runtime-stream');
+var promise = require('../../test-lib/promise');
+var rt = require('../../humbaba-runtime');
+var rts = require('../../humbaba-runtime-stream');
 var stream = require('stream');
 var t = require('tap');
-var ts = require('../test-lib/stream');
-
-promise.resolvesStrictSame(t,
-  ts.output(new rts.Stream(new rt.IoPure(rt.Unit))),
-  [],
-  'null program'
-);
-
-promise.resolvesStrictSame(t,
-  ts.output(new rts.Stream(
-    new rt.IoPure(rt.Unit),
-    new stream.Readable({
-      read() { throw new Error('stdin was unexpectedly read'); }
-    })
-  )),
-  [],
-  'null program with stdin'
-);
-
-promise.resolvesStrictSame(t,
-  ts.output(new rts.Stream(new rt.PutChar(new rt.Box('x')))),
-  ['x'],
-  'emit one char'
-);
-
-promise.resolvesStrictSame(t,
-  ts.output(new rts.Stream(
-    new rt.IoBind(
-      new rt.PutChar(new rt.Box('x')),
-      new rt.Box(function (_unit) {
-        rt.IoBind.call(this,
-          new rt.PutChar(new rt.Box('y')),
-          new rt.Box(function (_unit) {
-            rt.PutChar.call(this, new rt.Box('z'));
-          })
-        );
-      })
-    )
-  )),
-  ['x', 'y', 'z'],
-  'emit several chars'
-);
+var ts = require('../../test-lib/stream');
 
 function copyOneChar() {
   return new rt.IoBind(
