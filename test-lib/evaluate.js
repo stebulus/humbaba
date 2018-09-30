@@ -1,6 +1,6 @@
-var codegen = require('../lolo_codegen');
+var codegen = require('../lolo-codegen');
 var mod = require('../module');
-var primmod = require('./prim_modules');
+var primmod = require('./prim-modules');
 var rt = require('../humbaba-runtime');
 
 function expr(astNode) {

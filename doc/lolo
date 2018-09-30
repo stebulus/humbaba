@@ -26,12 +26,12 @@ The AST for this declaration is, in JSON,
 The JSON syntax is much less user-friendly, but is convenient
 for bootstrapping, since it can be parsed using the built-in JSON
 facilities of the JavaScript environment.  Indeed, the parser for
-the main syntax is written in the JSON syntax.  (See lolo_parse.lj.)
+the main syntax is written in the JSON syntax.  (See lolo-parse.lj.)
 
 Further reading:
-  lolo_codegen.js
+  lolo-codegen.js
       - generating JavaScript code from a Lolo AST
   ljc.js
       - compiling Lolo JSON to JavaScript
-  lolo_parse.lj
+  lolo-parse.lj
       - parsing Lolo and emitting the AST as JSON

@@ -24,7 +24,7 @@ function ljc(input, output, callback) {
 }
 
 function bootstrap(callback) {
-  ljc('lolo_parse.lj', 'lolo_parse.js', callback);
+  ljc('lolo-parse.lj', 'lolo-parse.js', callback);
 }
 exports.bootstrap = bootstrap;
 
