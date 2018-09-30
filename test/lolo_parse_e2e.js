@@ -6,8 +6,9 @@ var stdout = require('./lib/runtime_stream').stdout;
 var lolo_parse_program = llp.withLoloParseProgram("main")
 
 function lolo_parse(input, expected, message) {
-  ts.outputJSON(
+  ts.output(
     stdout(lolo_parse_program, input),
+    ts.asJSON,
     expected,
     message
   );

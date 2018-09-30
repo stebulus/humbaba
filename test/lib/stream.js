@@ -24,32 +24,21 @@ function getOutputString(stream, callback) {
 }
 exports.getOutputString = getOutputString;
 
-function outputChunks(stream, expected, message) {
+function output(stream, form, expected, message) {
   t.test(message, function (t) {
-    getOutput(stream, function (actualOutput) {
-      t.strictSame(actualOutput, expected, message);
-      t.end();
-    });
-  });
-}
-exports.outputChunks = outputChunks;
-
-function output(stream, expected, message) {
-  t.test(message, function (t) {
-    getOutputString(stream, function (actualOutput) {
-      t.strictSame(actualOutput, expected, message);
+    getOutput(stream, function (actual) {
+      t.strictSame(form(actual), expected, message);
       t.end();
     });
   });
 }
 exports.output = output;
 
-function outputJSON(stream, expected, message) {
-  t.test(message, function (t) {
-    getOutputString(stream, function (actualOutput) {
-      t.strictSame(JSON.parse(actualOutput), expected, message);
-      t.end();
-    });
-  });
-}
-exports.outputJSON = outputJSON;
+function asChunks(chunks) { return chunks; }
+exports.asChunks = asChunks;
+
+function asString(chunks) { return chunks.join(''); }
+exports.asString = asString;
+
+function asJSON(chunks) { return JSON.parse(asString(chunks)); }
+exports.asJSON = asJSON;

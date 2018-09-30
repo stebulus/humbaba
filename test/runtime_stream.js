@@ -4,30 +4,33 @@ var stream = require('stream');
 var t = require('tap');
 var ts = require('./lib/stream');
 
-ts.outputChunks(
+ts.output(
   new rts.Stream(new rt.IoPure(rt.Unit)),
+  ts.asChunks,
   [],
   'null program'
 );
 
-ts.outputChunks(
+ts.output(
   new rts.Stream(
     new rt.IoPure(rt.Unit),
     new stream.Readable({
       read() { throw new Error('stdin was unexpectedly read'); }
     })
   ),
+  ts.asChunks,
   [],
   'null program with stdin'
 );
 
-ts.outputChunks(
+ts.output(
   new rts.Stream(new rt.PutChar(new rt.Box('x'))),
+  ts.asChunks,
   ['x'],
   'emit one char'
 );
 
-ts.outputChunks(
+ts.output(
   new rts.Stream(
     new rt.IoBind(
       new rt.PutChar(new rt.Box('x')),
@@ -41,11 +44,12 @@ ts.outputChunks(
       })
     )
   ),
+  ts.asChunks,
   ['x', 'y', 'z'],
   'emit several chars'
 );
 
-ts.outputChunks(
+ts.output(
   (function () {
     var stream = new rts.Stream(
       new rt.IoBind(
@@ -58,11 +62,12 @@ ts.outputChunks(
     stream.end('x');
     return stream;
   })(),
+  ts.asChunks,
   ['x'],
   'copy one char (writing)'
 );
 
-ts.outputChunks(
+ts.output(
   new rts.Stream(
     new rt.IoBind(
       rt.GetChar,
@@ -77,6 +82,7 @@ ts.outputChunks(
       }
     })
   ),
+  ts.asChunks,
   ['x'],
   'copy one char (piping)'
 );

@@ -1,7 +1,7 @@
-var output = require('./lib/stream').output;
+var ts = require('./lib/stream');
 var stdout = require('./lib/runtime_stream').stdout;
 
-output(
+ts.output(
   stdout(
     {"declarations": [
       {"import": "Prim.IO"},
@@ -10,11 +10,12 @@ output(
     ]},
     null
   ),
+  ts.asString,
   "",
   "null program"
 );
 
-output(
+ts.output(
   stdout(
     {"declarations": [
       {"import": "Prim.IO"},
@@ -22,11 +23,12 @@ output(
     ]},
     null
   ),
+  ts.asString,
   "x",
   "emit one char"
 );
 
-output(
+ts.output(
   stdout(
     {"declarations": [
       {"import": "Prim.IO"},
@@ -40,11 +42,12 @@ output(
     ]},
     null
   ),
+  ts.asString,
   "xyz",
   "emit several chars"
 );
 
-output(
+ts.output(
   stdout(
     {"declarations": [
       {"import": "Prim.IO"},
@@ -53,6 +56,7 @@ output(
     ]},
     "x"
   ),
+  ts.asString,
   "x",
   "copy one char"
 );

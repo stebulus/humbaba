@@ -49,13 +49,13 @@ function testWriting(chunks, message) {
   for (var i = 0; i < chunks.length; i++)
     copy.write(chunks[i]);
   copy.end();
-  ts.outputChunks(copy, chunks.join('').split(''),
+  ts.output(copy, ts.asChunks, chunks.join('').split(''),
     message + ' (writing)');
 }
 
 function testPiping(chunks, message) {
   var copy = new rts.Stream(program, new ChunkReadable(chunks));
-  ts.outputChunks(copy, chunks.join('').split(''),
+  ts.output(copy, ts.asChunks, chunks.join('').split(''),
     message + ' (piping)');
 }
 
