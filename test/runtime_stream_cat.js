@@ -2,6 +2,7 @@ var rt = require('../humbaba-runtime');
 var rts = require('../humbaba-runtime-stream');
 var stream = require('stream');
 var t = require('tap');
+var tp = require('./lib/promise');
 var ts = require('./lib/stream');
 
 var copyChar = new rt.IoBind(
@@ -49,13 +50,13 @@ function testWriting(chunks, message) {
   for (var i = 0; i < chunks.length; i++)
     copy.write(chunks[i]);
   copy.end();
-  ts.output(copy, ts.asChunks, chunks.join('').split(''),
+  tp.resolvesStrictSame(t, ts.output(copy), chunks.join('').split(''),
     message + ' (writing)');
 }
 
 function testPiping(chunks, message) {
   var copy = new rts.Stream(program, new ChunkReadable(chunks));
-  ts.output(copy, ts.asChunks, chunks.join('').split(''),
+  tp.resolvesStrictSame(t, ts.output(copy), chunks.join('').split(''),
     message + ' (piping)');
 }
 

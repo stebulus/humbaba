@@ -1,5 +1,4 @@
 var stream = require('stream');
-var t = require('tap');
 
 function collect(arr) {
   return new stream.Writable({
@@ -10,26 +9,13 @@ function collect(arr) {
   });
 }
 
-function getOutput(stream, callback) {
-  var actualOutput = []
-  stream.pipe(collect(actualOutput))
-    .on('finish', function () {
-      callback(actualOutput);
-    });
-}
-exports.getOutput = getOutput;
-
-function getOutputString(stream, callback) {
-  getOutput(stream, function (chunks) { callback(chunks.join('')); });
-}
-exports.getOutputString = getOutputString;
-
-function output(stream, form, expected, message) {
-  t.test(message, function (t) {
-    getOutput(stream, function (actual) {
-      t.strictSame(form(actual), expected, message);
-      t.end();
-    });
+function output(stream) {
+  return new Promise(function (resolve, reject) {
+    var actualOutput = []
+    stream.pipe(collect(actualOutput))
+      .on('finish', function () {
+        resolve(actualOutput);
+      });
   });
 }
 exports.output = output;

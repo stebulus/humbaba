@@ -1,14 +1,14 @@
 var llp = require('./lib/lolo_parse');
 var t = require('tap');
+var tp = require('./lib/promise');
 var ts = require('./lib/stream');
 var stdout = require('./lib/runtime_stream').stdout;
 
 var lolo_parse_program = llp.withLoloParseProgram("main")
 
 function lolo_parse(input, expected, message) {
-  ts.output(
-    stdout(lolo_parse_program, input),
-    ts.asJSON,
+  tp.resolvesStrictSame(t,
+    ts.output(stdout(lolo_parse_program, input)).then(ts.asJSON),
     expected,
     message
   );
