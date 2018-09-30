@@ -10,11 +10,12 @@ function devaluate(x) {
   return new rt.Apply(boxedIdentity, [x]);
 }
 
+var dataWithFields = new rt.Box(1);
 var e = devaluate(new rt.Data(0,
-  [devaluate(rt.True), devaluate(rt.False)]));
+  [devaluate(rt.True), devaluate(dataWithFields)]));
 rt.evaluateDeep(e);
 e = rt.smashIndirects(e);
-t.strictSame(e, new rt.Data(0, [rt.True, rt.False]),
+t.strictSame(e, new rt.Data(0, [rt.True, dataWithFields]),
   'all fields evaluated');
 
 function constant(x, y) {
