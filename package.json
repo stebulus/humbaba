@@ -10,7 +10,7 @@
     "debug": "~3.1.0"
   },
   "scripts": {
-    "test": "tap 'test/src/**/*.js'",
+    "test": "tap --cov --100 'test/src/**/*.js'",
     "prepare": "node bootstrap.js"
   },
   "devDependencies": {
