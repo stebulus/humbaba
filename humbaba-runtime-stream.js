@@ -155,7 +155,7 @@ function Stream(program, stdin) {
   function write(chunk, _encoding, callback) {
     debugRT('writing %d to stdin', chunk.length);
     if (s.pendingChunk)
-      throw new Error("write() called while chunk pending");
+      throw new Error("_write() was called again before the previous call's callback was invoked, which violates the protocol between stream.Writable and this function");
     s.pendingChunk = chunk.toString();
     s.pendingChunkIndex = 0;
     s.pendingChunkCallback = callback;
