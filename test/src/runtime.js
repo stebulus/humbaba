@@ -1,4 +1,4 @@
-var rt = require('../humbaba-runtime');
+var rt = require('../../humbaba-runtime');
 var t = require('tap');
 
 var CONS = 1;

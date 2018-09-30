@@ -1,7 +1,7 @@
 var t = require('tap');
-var tp = require('../../test-lib/promise');
-var ts = require('../../test-lib/stream');
-var stdout = require('../../test-lib/runtime-stream').stdout;
+var tp = require('../../lib/promise');
+var ts = require('../../lib/stream');
+var stdout = require('../../lib/runtime-stream').stdout;
 
 tp.resolvesStrictSame(t,
   ts.output(stdout(

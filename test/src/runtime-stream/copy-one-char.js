@@ -1,10 +1,10 @@
 var process = require('process');
-var promise = require('../../test-lib/promise');
-var rt = require('../../humbaba-runtime');
-var rts = require('../../humbaba-runtime-stream');
+var promise = require('../../lib/promise');
+var rt = require('../../../humbaba-runtime');
+var rts = require('../../../humbaba-runtime-stream');
 var stream = require('stream');
 var t = require('tap');
-var ts = require('../../test-lib/stream');
+var ts = require('../../lib/stream');
 
 function copyOneChar() {
   return new rt.IoBind(
