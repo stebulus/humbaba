@@ -32,6 +32,7 @@ function Stream(program, stdin) {
   s.advancing = false;
   s.stdin = stdin;
   s.stdinActive = false;
+  s.closed = false;
   return s;
 
   function intermediateResult(result) {
@@ -41,18 +42,7 @@ function Stream(program, stdin) {
       s.expr = new rt.Apply(s.stack.pop(), [result]);
       moreToDo = true;
     } else {
-      debugRT('program ending');
       s.expr = null;
-      process.nextTick(function () {
-        debugRT('closing stdout');
-        s.push(null);
-      });
-      if (s.pendingChunk) {
-        process.nextTick(s.pendingChunkCallback,
-          new Error("humbaba program ended"));
-      }
-      if (s.finalCallback)
-        process.nextTick(s.finalCallback);
       moreToDo = false;
     }
     return moreToDo;
@@ -65,18 +55,22 @@ function Stream(program, stdin) {
     }
   }
 
+  function finishPendingWrite(err) {
+    s.pendingChunk = null;
+    s.pendingChunkIndex = null;
+    process.nextTick(s.pendingChunkCallback, err);
+    s.pendingChunkCallback = null;
+  }
+
   function advance() {
     if (s.advancing) {
       debugRT('advance shortcircuit');
       return;
-    } else if (!s.expr) {
-      debugRT('not advancing, because program is ending');
-      return;
     }
     debugRT('advance');
     s.advancing = true;
-    var moreToDo;
-    do {
+    var moreToDo = s.expr != null;
+    while (moreToDo) {
       rt.evaluate(s.expr);
       s.expr = rt.smashIndirects(s.expr);
       switch (s.expr.tag) {
@@ -112,12 +106,8 @@ function Stream(program, stdin) {
             var char = s.pendingChunk.charAt(s.pendingChunkIndex++);
             debugIO('getchar %j', char);
             moreToDo = intermediateResult(new rt.Box(char));
-            if (s.pendingChunkIndex >= s.pendingChunk.length) {
-              s.pendingChunk = null;
-              s.pendingChunkIndex = null;
-              process.nextTick(s.pendingChunkCallback);
-              s.pendingChunkCallback = null;
-            }
+            if (s.pendingChunkIndex >= s.pendingChunk.length)
+              finishPendingWrite();
           }
           break;
         case rt.ISEOF:
@@ -136,7 +126,23 @@ function Stream(program, stdin) {
         default:
           throw new Error('weird tag in: ' + JSON.stringify(s.expr));
       }
-    } while (moreToDo);
+    }
+    if (!s.expr) {
+      debugRT('program ending');
+      process.nextTick(function () {
+        if (!s.closed) {
+          debugRT('closing stdout');
+          s.push(null);
+          s.closed = true;
+        }
+      });
+      if (s.pendingChunk)
+        finishPendingWrite(new Error("could not write input to humbaba program, because it ended"));
+      if (s.finalCallback) {
+        process.nextTick(s.finalCallback);
+        s.finalCallback = null;
+      }
+    }
     s.advancing = false;
   }
 
