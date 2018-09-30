@@ -20,9 +20,6 @@ function output(stream) {
 }
 exports.output = output;
 
-function asChunks(chunks) { return chunks; }
-exports.asChunks = asChunks;
-
 function asString(chunks) { return chunks.join(''); }
 exports.asString = asString;
 
