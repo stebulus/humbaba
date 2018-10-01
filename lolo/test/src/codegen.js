@@ -126,3 +126,13 @@ t.strictSame(evaluate.program({"declarations": [
     {"cased": ["Prim.Char.eq", 1, ["id", 0]],
      "of": [["True", "True"], ["False", "False"]]}}
 ]}), rt.False, 'case of data, expression is fully evaluated');
+
+t.strictSame(evaluate.program({"declarations": [
+  {"func": ["test"], "=": 3},
+  {"comment": "three"}
+]}), new rt.Box(3), 'ignore comment');
+
+t.strictSame(evaluate.program({"declarations": [
+  {"func": ["test"], "=": 4},
+  {"comments": "four"}
+]}), new rt.Box(4), 'ignore comments');
