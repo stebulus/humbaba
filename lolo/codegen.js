@@ -9,7 +9,6 @@ function weirdCode(astNode) {
 
 function expr(astNode, chunk, target) {
   switch (typeof astNode) {
-    case 'boolean':
     case 'number':
       box(astNode, chunk, target);
       break;

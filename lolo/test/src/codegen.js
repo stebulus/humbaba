@@ -8,7 +8,6 @@ function exprValue(astNode, expected, message) {
 }
 
 exprValue(3, new rt.Box(3), 'numeric literal');
-exprValue(true, new rt.Box(true), 'boolean literal');
 exprValue(null, new rt.Box(null), 'null literal');
 exprValue({"str": "a string"}, new rt.Box("a string"), 'string literal');
 
