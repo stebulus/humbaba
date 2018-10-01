@@ -10,7 +10,7 @@
     "debug": "~3.1.0"
   },
   "scripts": {
-    "test": "tap --cov --100 'test/src/**/*.js'"
+    "test": "node ljc.js -o Lolo/Parse.js Lolo/Parse.lj && tap --cov --100 'test/src/**/*.js'"
   },
   "devDependencies": {
     "tap": "^12.0.1"

@@ -13,7 +13,7 @@ function makeRuntime(require, module, exports) {
 function lookupModuleFunc(name) {
   if (name === 'humbaba-runtime') {
     return makeRuntime;
-  } else if (name.startsWith('Prim/')) {
+  } else if (name.startsWith('Prim/') || name.startsWith('Lolo/')) {
     var source = path.join(here, '..', '..', name + '.js');
     var code = fs.readFileSync(source);
     return eval(mod.wrapModuleFunc(code));

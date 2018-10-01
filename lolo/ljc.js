@@ -5,7 +5,7 @@ var commander = require('commander');
 var fs = require('fs');
 var process = require('process');
 
-var codegen = require('./lolo-codegen');
+var codegen = require('./codegen');
 
 function stdout(s) {
   process.stdout.write(s);
