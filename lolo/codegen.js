@@ -218,7 +218,8 @@ function module(ast, chunk) {
     } else if ('data' in decls[i]) {
       dataDeclaration(decls[i], chunk);
     } else if ('import' in decls[i]) {
-      importModule(decls[i]['import'], chunk);
+      var trueName = decls[i]['import'];
+      importModule(trueName, decls[i]['as'], chunk);
     } else {
       for (var k in decls[i]) {
         if (k !== 'comment' && k !== 'comments') {
@@ -350,11 +351,10 @@ function declareBoxedConstructor(name, chunk) {
   exportName(varName, chunk);
 }
 
-function importModule(name, chunk) {
-  var nameParts = name.split('.');
+function importModule(name, alias, chunk) {
   chunk('var ');
-  chunk(modName(nameParts));
+  chunk(modName(alias ? [alias] : name.split('.')));
   chunk(' = require(');
-  chunk(JSON.stringify(nameParts.join('/')));
+  chunk(JSON.stringify(name.replace(/\./g, '/')));
   chunk(');\n');
 }

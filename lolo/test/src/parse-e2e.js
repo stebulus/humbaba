@@ -1,14 +1,16 @@
-var tparse = require('../lib/parse');
 var t = require('tap');
 var tp = require('../../../runtime/test/lib/promise');
 var ts = require('../../../runtime/test/lib/stream');
 var stdout = require('../lib/runtime-stream').stdout;
 
-var lolo_parse_program = tparse.withLoloParseProgram("main")
+var program = {"declarations": [
+  {"import": "Lolo.Parse"},
+  {"func": ["test"], "=": "Lolo.Parse.main"}
+]}
 
 function lolo_parse(input, expected, message) {
   tp.resolvesStrictSame(t,
-    ts.output(stdout(lolo_parse_program, input)).then(ts.asJSON),
+    ts.output(stdout(program, input)).then(ts.asJSON),
     expected,
     message
   );
