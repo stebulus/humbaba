@@ -77,6 +77,16 @@ t.strictSame(evaluate.program({"declarations": [
 t.strictSame(evaluate.program({"declarations": [
   {"data": "List",
    "=": [["Cons", 2], ["Nil", 0]]},
+  {"func": ["identity", "x"], "=": "x"},
+  {"func": ["test"],
+   "=":
+    ["identity",
+      {"cased": "Nil", "of": [["Nil", 4], ["Cons", "x", "y", 5]]}]}
+]}), new rt.Box(4), 'case of data, first branch (not overwrite)');
+
+t.strictSame(evaluate.program({"declarations": [
+  {"data": "List",
+   "=": [["Cons", 2], ["Nil", 0]]},
   {"func": ["test"],
    "=": {"cased": "Nil", "of": [["Cons", "x", "y", 5], ["Nil", 4]]}}
 ]}), new rt.Box(4), 'case of data, second branch');
