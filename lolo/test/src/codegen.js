@@ -19,6 +19,12 @@ exprValue({"let": [["x", 4], ["y", "x"]], in: "y"}, new rt.Box(4),
   'letrec, first var');
 exprValue({"let": [["y", "x"], ["x", 4]], in: "y"}, new rt.Box(4),
   'letrec, second var');
+exprValue(
+  {"let": [["a", 5]], "in": {"let": [["a", 4]], "in": "a"}},
+  new rt.Box(4), 'let in expr, shadowing variables');
+exprValue(
+  {"let": [["a", {"let": [["a", 4]], "in": "a"}]], "in": "a"},
+  new rt.Box(4), 'let in binding, shadowing variables');
 
 t.strictSame(evaluate.program({"declarations": [
   {"func": ["identity", "x"], "=": "x"},

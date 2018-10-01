@@ -112,7 +112,10 @@ function apply(astNode, chunk, target) {
 }
 
 function letExpr(astNode, chunk, target) {
-  chunk('(function () {');
+  if (target)
+    chunk('(function (target) {');
+  else
+    chunk('(function () {');
   var bindings = astNode['let'];
   for (var i = 0; i < bindings.length; i++) {
     chunk('var $');
@@ -122,13 +125,16 @@ function letExpr(astNode, chunk, target) {
   for (var i = 0; i < bindings.length; i++)
     expr(bindings[i][1], chunk, '$' + bindings[i][0]);
   if (target) {
-    expr(astNode['in'], chunk, target);
+    expr(astNode['in'], chunk, 'target');
+    chunk('}).call(this, ');
+    chunk(target);
+    chunk(');');
   } else {
     chunk('return ');
     expr(astNode['in'], chunk, null);
     chunk(';');
+    chunk('}).call(this);');
   }
-  chunk('})();');
 }
 
 function caseLiteral(astNode, exprKey, chunk, target) {
