@@ -2,7 +2,7 @@ var fs = require('fs');
 var path = require('path');
 
 var mod = require('../../module');
-var rt = require('../../../runtime/humbaba-runtime');
+var rt = require('humbaba-runtime/humbaba-runtime');
 
 var here = path.dirname(module.filename);
 

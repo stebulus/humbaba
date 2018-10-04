@@ -1,6 +1,6 @@
 var evaluate = require('../lib/evaluate');
-var rt = require('../../../runtime/humbaba-runtime');
-var rts = require('../../../runtime/humbaba-runtime-stream');
+var rt = require('humbaba-runtime/humbaba-runtime');
+var rts = require('humbaba-runtime/humbaba-runtime-stream');
 var t = require('tap');
 
 function withLoloParse(expr) {

@@ -1,7 +1,7 @@
 var codegen = require('../../codegen');
 var mod = require('../../module');
 var primmod = require('./prim-modules');
-var rt = require('../../../runtime/humbaba-runtime');
+var rt = require('humbaba-runtime/humbaba-runtime');
 
 function expr(astNode) {
   var e = eval(codegen.exprCode(astNode));

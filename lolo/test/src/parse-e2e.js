@@ -1,6 +1,6 @@
 var t = require('tap');
-var tp = require('../../../runtime/test/lib/promise');
-var ts = require('../../../runtime/test/lib/stream');
+var tp = require('humbaba-runtime/test/lib/promise');
+var ts = require('humbaba-runtime/test/lib/stream');
 var stdout = require('../lib/runtime-stream').stdout;
 
 var program = {"declarations": [
