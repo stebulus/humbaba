@@ -1,0 +1,102 @@
+{ "comments":
+    [ "A random number generator, following\n"
+    , "    Claessen, K. and Palka M.\n"
+    , "    Splittable pseudorandom number generators using cryptographic hashing.\n"
+    , "    Proc. Haskell Symp. 2013, pp. 47-58.\n"
+    , "    http://publications.lib.chalmers.se/records/fulltext/183348/local_183348.pdf\n"
+    , "except that we use AES-128 as the underlying block cipher"
+    , "instead of the paper's ThreeFish."
+    ],
+  "declarations":
+
+  [ {"import": "Prim.Int", "as": "I"}
+  , {"import": "Data.Bool", "as": "B"}
+  , {"import": "Data.List", "as": "L"}
+  , {"import": "Data.Tuple", "as": "T"}
+  , {"import": "Lolo.Random.JS", "as": "JS"}
+
+  , {"comment":
+
+    "### See section 3.3 of Claessen and Palka. ###"
+
+    }
+
+  , {"comments":
+      [ "data Rand = Rand Block (List Bool)\n"
+      , "where Block is a boxed nodejs Buffer."
+      ],
+     "data": "Rand", "=": [["Rand", 2]]}
+
+  , {"comment": "split :: Rand -> Tuple2 Rand Rand",
+     "func": ["split", "r"], "=":
+       ["T.Tuple2",
+         ["addBit", "B.False", "r"],
+         ["addBit", "B.True", "r"]]}
+
+  , {"comment": "addBit :: Bool -> Rand -> Rand",
+     "func": ["addBit", "bit", "r"], "=":
+      {"cased": "r", "of":
+        [["Rand", "block", "bits",
+          {"let": [["newbits", ["L.Cons", "bit", "bits"]]], "in":
+            {"casei": ["L.length", "newbits"], "of":
+              [[128, ["Rand", ["encrypt", "block", "newbits"], "L.Nil"]],
+               ["n", ["Rand", "block", "newbits"]]]}}]]}}
+
+  , {"comment": "rand :: Rand -> Int",
+     "func": ["rand", "r"], "=":
+      {"cased": "r", "of":
+        [["Rand", "block", "bits",
+          {"cased": ["JS.toInts", ["encrypt", "block", ["pad", "bits"]]],
+           "of": [["T.Tuple4", "a", "_", "_", "_", "a"]]}]]}}
+
+  , {"comment": "mkRand :: Int -> Rand",
+     "func": ["mkRand", "seed"], "=":
+     ["Rand", ["JS.fromInts", ["T.Tuple4", "seed", 0, 0, 0]], "L.Nil"]}
+
+  , {"comment": "encrypt :: Block -> List Bool -> Block",
+     "func": ["encrypt", "key", "bits"], "=":
+      ["JS.encrypt", "key", ["JS.fromInts", ["fromBits", "bits"]]]}
+
+  , {"comment": "pad :: List Bool -> List Bool",
+     "func": ["pad", "bits"], "=":
+      {"let": [["needed",
+                ["I.add", 128, ["I.mul", -1, ["L.length", "bits"]]]],
+               ["extra",
+                ["L.replicate", "needed", "B.False"]]],
+       "in": ["L.append", "extra", "bits"]}}
+
+  , {"comment": "boolToInt :: Bool -> Int",
+     "func": ["boolToInt", "bit"], "=":
+      {"cased": "bit", "of": [["B.True", 1], ["B.False", 0]]}}
+
+  , {"comment": "pushLSB :: Bool -> Int -> Int",
+     "func": ["pushLSB", "bit", "n"], "=":
+      ["I.and", ["I.shiftl", "n", 1], ["boolToInt", "bit"]]}
+
+  , {"comment": "bitsToInt :: List Bool -> Int",
+     "func": ["bitsToInt", "bits"], "=":
+     ["L.foldl", "pushLSB", 0, "bits"]}
+
+  , {"comment": "fromBits :: List Bool -> Tuple4 Int Int Int Int",
+     "func": ["fromBits", "bits"], "=":
+     {"cased": ["splits", 8, "bits"], "of":
+      [["L.Cons", "a", "xs",
+       {"cased": "xs", "of":
+          [["L.Cons", "b", "xs",
+           {"cased": "xs", "of":
+              [["L.Cons", "c", "xs",
+               {"cased": "xs", "of":
+                  [["L.Cons", "d", "xs",
+                    ["T.Tuple4", "a", "b", "c", "d"]]]}]]}]]}]]}}
+
+  , {"comment": "splits :: Int -> List a -> List (List a)",
+     "func": ["splits", "n", "xs"], "=":
+     {"cased": "xs", "of":
+      [["L.Nil", "L.Nil"],
+       ["L.Cons", "_", "_",
+          {"cased": ["L.splitAt", "n", "xs"], "of":
+            [["T.Tuple2", "head", "tail",
+              ["L.Cons", "head", ["splits", "n", "tail"]]]]}]]}}
+
+  ]
+}

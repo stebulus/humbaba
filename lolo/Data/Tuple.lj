@@ -1,5 +1,7 @@
 {"declarations":
   [ {"data": "Tuple2", "=": [["Tuple2", 2]]}
+  , {"data": "Tuple3", "=": [["Tuple3", 3]]}
+  , {"data": "Tuple4", "=": [["Tuple4", 4]]}
 
   , {"func": ["swap", "ab"], "=":
     {"cased": "ab", "of":

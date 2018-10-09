@@ -1,6 +1,6 @@
 {"declarations":
-  [ {"import": "Prim.Int"}
-  , {"import": "Data.Bool"}
+  [ {"import": "Prim.Int", "as": "I"}
+  , {"import": "Data.Bool", "as": "B"}
   , {"import": "Data.Function"}
   , {"import": "Data.Maybe", "as": "M"}
 
@@ -31,7 +31,7 @@
     ["foldl", ["Data.Function.flip", "Cons"], "Nil"]}
 
   , {"func": ["intSum", "ns"], "=":
-    ["foldr", "Prim.Int.add", 0, "ns"]}
+    ["foldr", "I.add", 0, "ns"]}
 
   , {"func": ["length", "xs"], "=":
     ["intSum", ["map", ["Data.Function.const", 1], "xs"]]}
@@ -47,14 +47,14 @@
       [["Cons", "x", "xrest",
           {"cased": "ys", "of":
             [["Cons", "y", "yrest",
-              ["Data.Bool.and",
+              ["B.and",
                 ["elemEq", "x", "y"],
                 ["eq", "elemEq", "xrest", "yrest"]]],
-             ["Nil", "Data.Bool.False"]]}],
+             ["Nil", "B.False"]]}],
        ["Nil",
           {"cased": "ys", "of":
-            [["Cons", "_", "_", "Data.Bool.False"],
-             ["Nil", "Data.Bool.True"]]}]]}}
+            [["Cons", "_", "_", "B.False"],
+             ["Nil", "B.True"]]}]]}}
 
   , {"func": ["intersperse", "x", "ys"], "=":
     {"cased": "ys", "of":
@@ -66,5 +66,43 @@
                 ["Cons", "y",
                 ["Cons", "x",
                 ["intersperse", "x", "rest"]]]]]}]]}}
+
+  , {"func": ["from", "n"], "=":
+    ["Cons", "n", ["from", ["I.add", 1, "n"]]]}
+
+  , {"func": ["gt", "a", "b"], "=": ["B.not", ["I.le", "b", "a"]]}
+
+  , {"func": ["replicate", "n", "x"], "=":
+    ["map", ["const", "x"], ["takeWhile", ["gt", "n"], ["from", 0]]]}
+
+  , {"func": ["takeWhile", "f", "xs"], "=":
+    {"cased": "xs", "of":
+      [["Nil", "Nil"],
+       ["Cons", "x", "rest",
+        {"cased": ["f", "x"], "of":
+          [["B.True", ["Cons", "x", ["takeWhile", "f", "rest"]]],
+           ["B.False", "Nil"]]}]]}}
+
+  , {"func": ["take", "n", "xs"], "=":
+    {"casei": "n", "of":
+      [[0, "Nil"],
+       ["n",
+        {"cased": "xs", "of":
+          [["Nil", "Nil"],
+           ["Cons", "x", "tail",
+              ["Cons", "x", ["take", ["I.add", -1, "n"], "tail"]]]]}]]}}
+
+  , {"func": ["drop", "n", "xs"], "=":
+    {"casei": "n", "of":
+      [[0, "xs"],
+       ["n",
+        {"cased": "xs", "of":
+          [["Nil", "Nil"],
+           ["Cons", "_", "tail",
+              ["drop", ["I.add", -1, "n"], "tail"]]]}]]}}
+
+  , {"func": ["splitAt", "n", "xs"], "=":
+    {"casei": "n", "of":
+      [["n", ["T.Tuple2", ["take", "n", "xs"], ["drop", "n", "xs"]]]]}}
 
   ]}
