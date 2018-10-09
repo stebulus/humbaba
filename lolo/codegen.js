@@ -79,14 +79,23 @@ function useVar(name, chunk, target) {
   }
 }
 
-function varName(name, chunk) {
+function qualifiedName(name, prefix, chunk) {
   var parts = name.split('.');
   if (parts.length > 1) {
     chunk(modName(parts.slice(0, -1)));
     chunk('.');
   }
+  chunk(prefix);
   chunk('$');
   chunk(parts[parts.length-1]);
+}
+
+function varName(name, chunk) {
+  qualifiedName(name, '', chunk);
+}
+
+function tagName(name, chunk) {
+  qualifiedName(name, 'tag', chunk);
 }
 
 function modName(parts) {
@@ -190,8 +199,7 @@ function caseData(astNode, chunk, target) {
     var args = alts[i].slice(1, -1);
     var rhs = alts[i][alts[i].length-1];
     chunk('\ncase ');
-    chunk('tag$');
-    chunk(con);
+    tagName(con, chunk);
     chunk(': ');
     for (var j = 0; j < args.length; j++) {
       chunk('var $');
