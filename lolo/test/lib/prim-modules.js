@@ -10,10 +10,12 @@ function makeRuntime(require, module, exports) {
   module.exports = rt;
 };
 
+var importable = ['Data', 'Prim', 'Lolo'];
+
 function lookupModuleFunc(name) {
   if (name === 'humbaba-runtime') {
     return makeRuntime;
-  } else if (name.startsWith('Prim/') || name.startsWith('Lolo/')) {
+  } else if (importable.indexOf(name.split('/')[0]) >= 0) {
     var source = path.join(here, '..', '..', name + '.js');
     var code = fs.readFileSync(source);
     return eval(mod.wrapModuleFunc(code));

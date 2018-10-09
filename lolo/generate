@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+compile() {
+  node ljc.js -o "$1".js "$1".lj
+}
+set -x
+compile Data/Bool
+compile Data/Function
+compile Data/List
+compile Data/Tuple
+compile Lolo/Parse

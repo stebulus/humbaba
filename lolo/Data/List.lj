@@ -1,0 +1,64 @@
+{"declarations":
+  [ {"import": "Prim.Int"}
+  , {"import": "Data.Bool"}
+  , {"import": "Data.Function"}
+
+  , {"data": "List", "=": [["Nil", 0], ["Cons", 2]]}
+
+  , {"func": ["map", "f", "xs"], "=":
+    {"cased": "xs", "of":
+      [["Nil", "Nil"],
+       ["Cons", "x", "rest",
+          ["Cons", ["f", "x"], ["map", "f", "rest"]]]]}}
+
+  , {"func": ["foldr", "f", "z", "xs"], "=":
+    {"cased": "xs", "of":
+      [["Cons", "x", "rest", ["f", "x", ["foldr", "f", "z", "rest"]]],
+       ["Nil", "z"]]}}
+
+  , {"func": ["foldl", "f", "z", "xs"], "=":
+    {"cased": "xs", "of":
+      [["Cons", "x", "rest", ["foldl", "f", ["f", "z", "x"], "rest"]],
+       ["Nil", "z"]]}}
+
+  , {"func": ["reverse"], "=":
+    ["foldl", ["Data.Function.flip", "Cons"], "Nil"]}
+
+  , {"func": ["intSum", "ns"], "=":
+    ["foldr", "Prim.Int.add", 0, "ns"]}
+
+  , {"func": ["length", "xs"], "=":
+    ["intSum", ["map", ["Data.Function.const", 1], "xs"]]}
+
+  , {"func": ["append", "xs", "ys"], "=":
+    ["foldr", "Cons", "ys", "xs"]}
+
+  , {"func": ["concat", "xss"], "=":
+    ["foldr", "append", "Nil", "xss"]}
+
+  , {"func": ["eq", "elemEq", "xs", "ys"], "=":
+    {"cased": "xs", "of":
+      [["Cons", "x", "xrest",
+          {"cased": "ys", "of":
+            [["Cons", "y", "yrest",
+              ["Data.Bool.and",
+                ["elemEq", "x", "y"],
+                ["eq", "elemEq", "xrest", "yrest"]]],
+             ["Nil", "Data.Bool.False"]]}],
+       ["Nil",
+          {"cased": "ys", "of":
+            [["Cons", "_", "_", "Data.Bool.False"],
+             ["Nil", "Data.Bool.True"]]}]]}}
+
+  , {"func": ["intersperse", "x", "ys"], "=":
+    {"cased": "ys", "of":
+      [["Nil", "Nil"],
+       ["Cons", "y", "rest",
+          {"cased": "rest", "of":
+            [["Nil", ["Cons", "y", "Nil"]],
+             ["Cons", "_", "_",
+                ["Cons", "y",
+                ["Cons", "x",
+                ["intersperse", "x", "rest"]]]]]}]]}}
+
+  ]}

@@ -1,0 +1,13 @@
+{"declarations":
+  [ {"data": "Bool", "=": [["True", 0], ["False", 0]]}
+
+  , {"func": ["and", "a", "b"], "=":
+    {"cased": "a", "of": [["True", "b"], ["False", "a"]]}}
+
+  , {"func": ["or", "a", "b"], "=":
+    {"cased": "a", "of": [["True", "a"], ["False", "b"]]}}
+
+  , {"func": ["not", "a"], "=":
+    {"cased": "a", "of": [["True", "False"], ["False", "True"]]}}
+
+  ]}

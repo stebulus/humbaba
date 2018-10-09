@@ -1,0 +1,10 @@
+{"declarations":
+  [ {"func": ["id", "x"], "=": "x"}
+
+  , {"func": ["compose", "f", "g", "x"], "=": ["f", ["g", "x"]]}
+
+  , {"func": ["flip", "f", "x", "y"], "=": ["f", "y", "x"]}
+
+  , {"func": ["const", "x", "y"], "=": "x"}
+
+  ]}

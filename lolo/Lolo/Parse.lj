@@ -1,11 +1,16 @@
 { "comment": "Parse lolo code on stdin and emit lolo-json code on stdout",
   "declarations":
 
-  [ {"import": "Prim.IO"},
-    {"import": "Prim.Char"},
-    {"import": "Prim.Int"},
+  [ {"import": "Prim.IO"}
+  , {"import": "Prim.Char"}
+  , {"import": "Prim.Int"}
+  , {"import": "Data.Bool", "as": "B"}
+  , {"import": "Data.Function", "as": "F"}
+  , {"import": "Data.List", "as": "L"}
+  , {"import": "Data.Tuple", "as": "T"}
 
-    {"comment":
+
+  , {"comment":
 
 
 
@@ -17,119 +22,41 @@
 
   , {"data": "Unit", "=": [["Unit", 0]]}
 
-  , {"data": "Bool", "=": [["True", 0], ["False", 0]]}
-
-  , {"func": ["boolAnd", "a", "b"], "=":
-    {"cased": "a", "of": [["True", "b"], ["False", "a"]]}}
-
-  , {"func": ["boolOr", "a", "b"], "=":
-    {"cased": "a", "of": [["True", "a"], ["False", "b"]]}}
-
-  , {"func": ["boolNot", "a"], "=":
-    {"cased": "a", "of": [["True", "False"], ["False", "True"]]}}
-
-  , {"data": "List", "=": [["Cons", 2], ["Nil", 0]]}
-
   , {"data": "Either", "=": [["Left", 1], ["Right", 1]]}
 
   , {"data": "Maybe", "=": [["Just", 1], ["Nothing", 0]]}
 
-  , {"data": "Tuple2", "=": [["Tuple2", 2]]}
-
-  , {"func": ["id", "x"], "=": "x"}
-
-  , {"func": ["compose", "f", "g", "x"], "=": ["f", ["g", "x"]]}
-
-  , {"func": ["flip", "f", "x", "y"], "=": ["f", "y", "x"]}
-
-  , {"func": ["const", "x", "y"], "=": "x"}
-
-  , {"func": ["map", "f", "xs"], "=":
-    {"cased": "xs", "of":
-      [["Nil", "Nil"],
-       ["Cons", "x", "rest",
-          ["Cons", ["f", "x"], ["map", "f", "rest"]]]]}}
-
   , {"func": ["lookup", "eq", "tuples", "x"], "=":
     {"cased": "tuples", "of":
-      [["Nil", "Nothing"],
-       ["Cons", "tuple", "rest",
+      [["L.Nil", "Nothing"],
+       ["L.Cons", "tuple", "rest",
           {"cased": "tuple", "of":
-            [["Tuple2", "key", "value",
+            [["T.Tuple2", "key", "value",
               {"cased": ["eq", "key", "x"], "of":
-                [["True", ["Just", "value"]],
-                 ["False", ["lookup", "eq", "rest", "x"]]]}]]}]]}}
-
-  , {"func": ["foldr", "f", "z", "xs"], "=":
-    {"cased": "xs", "of":
-      [["Cons", "x", "rest", ["f", "x", ["foldr", "f", "z", "rest"]]],
-       ["Nil", "z"]]}}
-
-  , {"func": ["foldl", "f", "z", "xs"], "=":
-    {"cased": "xs", "of":
-      [["Cons", "x", "rest", ["foldl", "f", ["f", "z", "x"], "rest"]],
-       ["Nil", "z"]]}}
-
-  , {"func": ["reverse"], "=": ["foldl", ["flip", "Cons"], "Nil"]}
-
-  , {"func": ["length", "xs"], "=":
-    ["intSum", ["map", ["const", 1], "xs"]]}
-
-  , {"func": ["listJoin", "xs", "ys"], "=":
-    ["foldr", "Cons", "ys", "xs"]}
-
-  , {"func": ["concat", "xss"], "=":
-    ["foldr", "listJoin", "Nil", "xss"]}
-
-  , {"func": ["listEq", "eq", "xs", "ys"], "=":
-    {"cased": "xs", "of":
-      [["Cons", "x", "xrest",
-          {"cased": "ys", "of":
-            [["Cons", "y", "yrest",
-              ["boolAnd",
-                ["eq", "x", "y"],
-                ["listEq", "eq", "xrest", "yrest"]]],
-             ["Nil", "False"]]}],
-       ["Nil",
-          {"cased": "ys", "of":
-            [["Cons", "_", "_", "False"],
-             ["Nil", "True"]]}]]}}
-
-  , {"func": ["intersperse", "x", "ys"], "=":
-    {"cased": "ys", "of":
-      [["Nil", "Nil"],
-       ["Cons", "y", "rest",
-          {"cased": "rest", "of":
-            [["Nil", ["Cons", "y", "Nil"]],
-             ["Cons", "_", "_",
-                ["Cons", "y",
-                ["Cons", "x",
-                ["intersperse", "x", "rest"]]]]]}]]}}
-
-  , {"func": ["intSum", "ns"], "=":
-    ["foldr", "Prim.Int.add", 0, "ns"]}
+                [["B.True", ["Just", "value"]],
+                 ["B.False", ["lookup", "eq", "rest", "x"]]]}]]}]]}}
 
   , {"func": ["intAbs", "n"], "=":
     {"cased": ["Prim.Int.le", 0, "n"], "of":
-      [["True", "n"],
-       ["False", ["Prim.Int.mul", -1, "n"]]]}}
+      [["B.True", "n"],
+       ["B.False", ["Prim.Int.mul", -1, "n"]]]}}
 
   , {"func": ["charLe", "a", "b"], "=":
     ["Prim.Int.le", ["Prim.Char.ord", "a"], ["Prim.Char.ord", "b"]]}
 
-  , {"func": ["stringEq"], "=": ["listEq", "Prim.Char.eq"]}
+  , {"func": ["stringEq"], "=": ["L.eq", "Prim.Char.eq"]}
 
   , {"func": ["ioThen", "ioa", "iob"], "=":
-    ["Prim.IO.bind", "ioa", ["const", "iob"]]}
+    ["Prim.IO.bind", "ioa", ["F.const", "iob"]]}
 
   , {"func": ["sequence_", "ios"], "=":
-    ["foldr", "ioThen", ["Prim.IO.pure", "Unit"], "ios"]}
+    ["L.foldr", "ioThen", ["Prim.IO.pure", "Unit"], "ios"]}
 
   , {"func": ["mapM_", "f", "xs"], "=":
-    ["sequence_", ["map", "f", "xs"]]}
+    ["sequence_", ["L.map", "f", "xs"]]}
 
   , {"func": ["readInt", "digits"], "=":
-    ["foldl", "readIntStep", 0, "digits"]}
+    ["L.foldl", "readIntStep", 0, "digits"]}
 
   , {"func": ["readIntStep", "acc", "digit"], "=":
     ["Prim.Int.add", ["Prim.Int.mul", 10, "acc"],
@@ -141,25 +68,25 @@
       ["Prim.Int.mul", -1, ["Prim.Char.ord", {"str": "0"}]]]}
 
   , {"func": ["showInt", "n"], "=":
-    ["listJoin",
+    ["L.append",
       ["showIntOptSign", "n"],
       ["showIntDigits", ["intAbs", "n"]]]}
 
   , {"func": ["showIntOptSign", "n"], "=":
     {"cased": ["Prim.Int.le", 0, "n"], "of":
-      [["True", "Nil"],
-       ["False", ["Cons", {"str": "-"}, "Nil"]]]}}
+      [["B.True", "L.Nil"],
+       ["B.False", ["L.Cons", {"str": "-"}, "L.Nil"]]]}}
 
   , {"func": ["showIntDigits", "n"], "=":
     {"casei": "n", "of":
-      [[0, ["Cons", {"str": "0"}, "Nil"]],
-       ["_", ["reverse", ["showIntDigitsHelper", "n"]]]]}}
+      [[0, ["L.Cons", {"str": "0"}, "L.Nil"]],
+       ["_", ["L.reverse", ["showIntDigitsHelper", "n"]]]]}}
 
   , {"func": ["showIntDigitsHelper", "n"], "=":
     {"casei": "n", "of":
-      [[0, "Nil"],
+      [[0, "L.Nil"],
        ["_",
-          ["Cons",
+          ["L.Cons",
             ["intToDigit", ["Prim.Int.rem", "n", 10]],
             ["showIntDigitsHelper", ["Prim.Int.quot", "n", 10]]]]]}}
 
@@ -228,10 +155,10 @@
   , {"comment": "parseList :: Parser i r -> List i -> Either Char r",
      "func": ["parseList", "parser", "s"], "=":
     {"cased": "s", "of":
-      [["Nil", {"cased": ["feedEof", "parser"], "of":
+      [["L.Nil", {"cased": ["feedEof", "parser"], "of":
          [["GoodEof", "r", ["Right", "r"]],
           ["BadEof", ["Left", {"str": "e"}]]]}],
-       ["Cons", "i", "is", {"cased": ["feed", "i", "parser"], "of":
+       ["L.Cons", "i", "is", {"cased": ["feed", "i", "parser"], "of":
          [["Consume", "p", ["parseList", "p", "is"]],
           ["Pushback", "r", ["Left", {"str": "p"}]],
           ["Fail", ["Left", {"str": "f"}]]]}]]}}
@@ -297,7 +224,7 @@
        ["More", "onEof", "onChar",
           ["More",
             ["eofedMap", "f", "onEof"],
-            ["compose", ["peekedMap", "f"], "onChar"]]]]}}
+            ["F.compose", ["peekedMap", "f"], "onChar"]]]]}}
 
   , {"comment": "pure for Parser instance of Applicative",
      "func": ["pPure", "x"], "=": ["Done", "x"]}
@@ -320,7 +247,7 @@
 
   , {"comment": "empty for Parser instance of Applicative",
     "func": ["pEmpty"], "=":
-    ["More", "BadEof", ["const", "Fail"]]}
+    ["More", "BadEof", ["F.const", "Fail"]]}
 
   , {"comments":
       ["<|> for Parser instance of Alternative.",
@@ -343,19 +270,19 @@
 
   , {"comment": "*> for Parser instance of Applicative",
      "func": ["pRight", "left", "right"], "=":
-    ["pApply", ["pMap", ["flip", "const"], "left"], "right"]}
+    ["pApply", ["pMap", ["F.flip", "F.const"], "left"], "right"]}
 
   , {"comment": "<* for Parser instance of Applicative",
      "func": ["pLeft", "left", "right"], "=":
-    ["pApply", ["pMap", "const", "left"], "right"]}
+    ["pApply", ["pMap", "F.const", "left"], "right"]}
 
   , {"comment": "some for Parser instance of Applicative",
      "func": ["pSome", "p"], "=":
-    ["pAlt", ["pMany", "p"], ["Done", "Nil"]]}
+    ["pAlt", ["pMany", "p"], ["Done", "L.Nil"]]}
 
   , {"comment": "many for Parser instance of Applicative",
      "func": ["pMany", "p"], "=":
-    ["pApply", ["pMap", "Cons", "p"], ["pSome", "p"]]}
+    ["pApply", ["pMap", "L.Cons", "p"], ["pSome", "p"]]}
 
   , {"comment":
 
@@ -369,7 +296,7 @@
 
   , {"comment": "item :: Parser a a",
      "func": ["item"], "=":
-    ["More", "BadEof", ["compose", "Consume", "Done"]]}
+    ["More", "BadEof", ["F.compose", "Consume", "Done"]]}
 
   , {"comment": "optional :: Parser i a -> Parser i (Maybe a)",
      "func": ["optional", "p"], "=":
@@ -382,8 +309,8 @@
   , {"comment": "requirePeek :: (a -> Bool) -> a -> Peeked a a",
      "func": ["requirePeek", "pred", "a"], "=":
     {"cased": ["pred", "a"], "of":
-      [["True", ["Consume", ["Done", "a"]]],
-       ["False", "Fail"]]}}
+      [["B.True", ["Consume", ["Done", "a"]]],
+       ["B.False", "Fail"]]}}
 
   , {"comment": "ignore :: Parser i r -> Parser i Unit",
      "func": ["ignore", "p"], "=": ["pRight", "p", ["Done", "Unit"]]}
@@ -399,7 +326,7 @@
   , {"comment": "delimitedList :: Parser i d -> Parser i a -> Parser i (List a)",
      "func": ["delimitedList", "delimiter", "p"], "=":
     ["pApply",
-      ["pMap", "Cons", "p"],
+      ["pMap", "L.Cons", "p"],
       ["pSome", ["pRight", "delimiter", "p"]]]}
 
   , {"comment": "char :: Char -> Parser Char Char",
@@ -407,7 +334,7 @@
 
   , {"comment": "charBetween :: Char -> Char -> Char -> Bool",
      "func": ["charBetween", "lo", "hi", "c"], "=":
-    ["boolAnd", ["charLe", "lo", "c"], ["charLe", "c", "hi"]]}
+    ["B.and", ["charLe", "lo", "c"], ["charLe", "c", "hi"]]}
 
   , {"comment": "charRange :: Char -> Char -> Parser Char Char",
      "func": ["charRange", "lo", "hi"], "=":
@@ -453,429 +380,429 @@
       [["IntLiteral", "n",
           {"cased": "b", "of":
             [["IntLiteral", "m", ["intEq", "m", "n"]],
-             ["CharLiteral", "_", "False"],
-             ["VarId", "_", "False"],
-             ["ConId", "_", "False"],
-             ["Let", "False"],
-             ["In", "False"],
-             ["Cased", "False"],
-             ["Casei", "False"],
-             ["Casec", "False"],
-             ["Of", "False"],
-             ["Data", "False"],
-             ["Equals", "False"],
-             ["Arrow", "False"],
-             ["LParen", "False"],
-             ["RParen", "False"],
-             ["LBrace", "False"],
-             ["RBrace", "False"],
-             ["Semicolon", "False"],
-             ["Pipe", "False"]]}
+             ["CharLiteral", "_", "B.False"],
+             ["VarId", "_", "B.False"],
+             ["ConId", "_", "B.False"],
+             ["Let", "B.False"],
+             ["In", "B.False"],
+             ["Cased", "B.False"],
+             ["Casei", "B.False"],
+             ["Casec", "B.False"],
+             ["Of", "B.False"],
+             ["Data", "B.False"],
+             ["Equals", "B.False"],
+             ["Arrow", "B.False"],
+             ["LParen", "B.False"],
+             ["RParen", "B.False"],
+             ["LBrace", "B.False"],
+             ["RBrace", "B.False"],
+             ["Semicolon", "B.False"],
+             ["Pipe", "B.False"]]}
           ],
        ["CharLiteral", "c",
           {"cased": "b", "of":
-            [["IntLiteral", "_", "False"],
+            [["IntLiteral", "_", "B.False"],
              ["CharLiteral", "d", ["intEq", "c", "d"]],
-             ["VarId", "_", "False"],
-             ["ConId", "_", "False"],
-             ["Let", "False"],
-             ["In", "False"],
-             ["Cased", "False"],
-             ["Casei", "False"],
-             ["Casec", "False"],
-             ["Of", "False"],
-             ["Data", "False"],
-             ["Equals", "False"],
-             ["Arrow", "False"],
-             ["LParen", "False"],
-             ["RParen", "False"],
-             ["LBrace", "False"],
-             ["RBrace", "False"],
-             ["Semicolon", "False"],
-             ["Pipe", "False"]]}
+             ["VarId", "_", "B.False"],
+             ["ConId", "_", "B.False"],
+             ["Let", "B.False"],
+             ["In", "B.False"],
+             ["Cased", "B.False"],
+             ["Casei", "B.False"],
+             ["Casec", "B.False"],
+             ["Of", "B.False"],
+             ["Data", "B.False"],
+             ["Equals", "B.False"],
+             ["Arrow", "B.False"],
+             ["LParen", "B.False"],
+             ["RParen", "B.False"],
+             ["LBrace", "B.False"],
+             ["RBrace", "B.False"],
+             ["Semicolon", "B.False"],
+             ["Pipe", "B.False"]]}
           ],
        ["VarId", "ident",
           {"cased": "b", "of":
-            [["IntLiteral", "_", "False"],
-             ["CharLiteral", "_", "False"],
+            [["IntLiteral", "_", "B.False"],
+             ["CharLiteral", "_", "B.False"],
              ["VarId", "ident2", ["stringEq", "ident", "ident2"]],
-             ["ConId", "_", "False"],
-             ["Let", "False"],
-             ["In", "False"],
-             ["Cased", "False"],
-             ["Casei", "False"],
-             ["Casec", "False"],
-             ["Of", "False"],
-             ["Data", "False"],
-             ["Equals", "False"],
-             ["Arrow", "False"],
-             ["LParen", "False"],
-             ["RParen", "False"],
-             ["LBrace", "False"],
-             ["RBrace", "False"],
-             ["Semicolon", "False"],
-             ["Pipe", "False"]]}
+             ["ConId", "_", "B.False"],
+             ["Let", "B.False"],
+             ["In", "B.False"],
+             ["Cased", "B.False"],
+             ["Casei", "B.False"],
+             ["Casec", "B.False"],
+             ["Of", "B.False"],
+             ["Data", "B.False"],
+             ["Equals", "B.False"],
+             ["Arrow", "B.False"],
+             ["LParen", "B.False"],
+             ["RParen", "B.False"],
+             ["LBrace", "B.False"],
+             ["RBrace", "B.False"],
+             ["Semicolon", "B.False"],
+             ["Pipe", "B.False"]]}
           ],
        ["ConId", "ident",
           {"cased": "b", "of":
-            [["IntLiteral", "_", "False"],
-             ["CharLiteral", "_", "False"],
-             ["VarId", "_", "False"],
+            [["IntLiteral", "_", "B.False"],
+             ["CharLiteral", "_", "B.False"],
+             ["VarId", "_", "B.False"],
              ["ConId", "ident2", ["stringEq", "ident", "ident2"]],
-             ["Let", "False"],
-             ["In", "False"],
-             ["Cased", "False"],
-             ["Casei", "False"],
-             ["Casec", "False"],
-             ["Of", "False"],
-             ["Data", "False"],
-             ["Equals", "False"],
-             ["Arrow", "False"],
-             ["LParen", "False"],
-             ["RParen", "False"],
-             ["LBrace", "False"],
-             ["RBrace", "False"],
-             ["Semicolon", "False"],
-             ["Pipe", "False"]]}
+             ["Let", "B.False"],
+             ["In", "B.False"],
+             ["Cased", "B.False"],
+             ["Casei", "B.False"],
+             ["Casec", "B.False"],
+             ["Of", "B.False"],
+             ["Data", "B.False"],
+             ["Equals", "B.False"],
+             ["Arrow", "B.False"],
+             ["LParen", "B.False"],
+             ["RParen", "B.False"],
+             ["LBrace", "B.False"],
+             ["RBrace", "B.False"],
+             ["Semicolon", "B.False"],
+             ["Pipe", "B.False"]]}
           ],
        ["Let",
           {"cased": "b", "of":
-            [["IntLiteral", "_", "False"],
-             ["CharLiteral", "_", "False"],
-             ["VarId", "_", "False"],
-             ["ConId", "_", "False"],
-             ["Let", "True"],
-             ["In", "False"],
-             ["Cased", "False"],
-             ["Casei", "False"],
-             ["Casec", "False"],
-             ["Of", "False"],
-             ["Data", "False"],
-             ["Equals", "False"],
-             ["Arrow", "False"],
-             ["LParen", "False"],
-             ["RParen", "False"],
-             ["LBrace", "False"],
-             ["RBrace", "False"],
-             ["Semicolon", "False"],
-             ["Pipe", "False"]]}
+            [["IntLiteral", "_", "B.False"],
+             ["CharLiteral", "_", "B.False"],
+             ["VarId", "_", "B.False"],
+             ["ConId", "_", "B.False"],
+             ["Let", "B.True"],
+             ["In", "B.False"],
+             ["Cased", "B.False"],
+             ["Casei", "B.False"],
+             ["Casec", "B.False"],
+             ["Of", "B.False"],
+             ["Data", "B.False"],
+             ["Equals", "B.False"],
+             ["Arrow", "B.False"],
+             ["LParen", "B.False"],
+             ["RParen", "B.False"],
+             ["LBrace", "B.False"],
+             ["RBrace", "B.False"],
+             ["Semicolon", "B.False"],
+             ["Pipe", "B.False"]]}
           ],
        ["In",
           {"cased": "b", "of":
-            [["IntLiteral", "_", "False"],
-             ["CharLiteral", "_", "False"],
-             ["VarId", "_", "False"],
-             ["ConId", "_", "False"],
-             ["Let", "False"],
-             ["In", "True"],
-             ["Cased", "False"],
-             ["Casei", "False"],
-             ["Casec", "False"],
-             ["Of", "False"],
-             ["Data", "False"],
-             ["Equals", "False"],
-             ["Arrow", "False"],
-             ["LParen", "False"],
-             ["RParen", "False"],
-             ["LBrace", "False"],
-             ["RBrace", "False"],
-             ["Semicolon", "False"],
-             ["Pipe", "False"]]}
+            [["IntLiteral", "_", "B.False"],
+             ["CharLiteral", "_", "B.False"],
+             ["VarId", "_", "B.False"],
+             ["ConId", "_", "B.False"],
+             ["Let", "B.False"],
+             ["In", "B.True"],
+             ["Cased", "B.False"],
+             ["Casei", "B.False"],
+             ["Casec", "B.False"],
+             ["Of", "B.False"],
+             ["Data", "B.False"],
+             ["Equals", "B.False"],
+             ["Arrow", "B.False"],
+             ["LParen", "B.False"],
+             ["RParen", "B.False"],
+             ["LBrace", "B.False"],
+             ["RBrace", "B.False"],
+             ["Semicolon", "B.False"],
+             ["Pipe", "B.False"]]}
           ],
        ["Cased",
           {"cased": "b", "of":
-            [["IntLiteral", "_", "False"],
-             ["CharLiteral", "_", "False"],
-             ["VarId", "_", "False"],
-             ["ConId", "_", "False"],
-             ["Let", "False"],
-             ["In", "False"],
-             ["Cased", "True"],
-             ["Casei", "False"],
-             ["Casec", "False"],
-             ["Of", "False"],
-             ["Data", "False"],
-             ["Equals", "False"],
-             ["Arrow", "False"],
-             ["LParen", "False"],
-             ["RParen", "False"],
-             ["LBrace", "False"],
-             ["RBrace", "False"],
-             ["Semicolon", "False"],
-             ["Pipe", "False"]]}
+            [["IntLiteral", "_", "B.False"],
+             ["CharLiteral", "_", "B.False"],
+             ["VarId", "_", "B.False"],
+             ["ConId", "_", "B.False"],
+             ["Let", "B.False"],
+             ["In", "B.False"],
+             ["Cased", "B.True"],
+             ["Casei", "B.False"],
+             ["Casec", "B.False"],
+             ["Of", "B.False"],
+             ["Data", "B.False"],
+             ["Equals", "B.False"],
+             ["Arrow", "B.False"],
+             ["LParen", "B.False"],
+             ["RParen", "B.False"],
+             ["LBrace", "B.False"],
+             ["RBrace", "B.False"],
+             ["Semicolon", "B.False"],
+             ["Pipe", "B.False"]]}
           ],
        ["Casei",
           {"cased": "b", "of":
-            [["IntLiteral", "_", "False"],
-             ["CharLiteral", "_", "False"],
-             ["VarId", "_", "False"],
-             ["ConId", "_", "False"],
-             ["Let", "False"],
-             ["In", "False"],
-             ["Cased", "False"],
-             ["Casei", "True"],
-             ["Casec", "False"],
-             ["Of", "False"],
-             ["Data", "False"],
-             ["Equals", "False"],
-             ["Arrow", "False"],
-             ["LParen", "False"],
-             ["RParen", "False"],
-             ["LBrace", "False"],
-             ["RBrace", "False"],
-             ["Semicolon", "False"],
-             ["Pipe", "False"]]}
+            [["IntLiteral", "_", "B.False"],
+             ["CharLiteral", "_", "B.False"],
+             ["VarId", "_", "B.False"],
+             ["ConId", "_", "B.False"],
+             ["Let", "B.False"],
+             ["In", "B.False"],
+             ["Cased", "B.False"],
+             ["Casei", "B.True"],
+             ["Casec", "B.False"],
+             ["Of", "B.False"],
+             ["Data", "B.False"],
+             ["Equals", "B.False"],
+             ["Arrow", "B.False"],
+             ["LParen", "B.False"],
+             ["RParen", "B.False"],
+             ["LBrace", "B.False"],
+             ["RBrace", "B.False"],
+             ["Semicolon", "B.False"],
+             ["Pipe", "B.False"]]}
           ],
        ["Casec",
           {"cased": "b", "of":
-            [["IntLiteral", "_", "False"],
-             ["CharLiteral", "_", "False"],
-             ["VarId", "_", "False"],
-             ["ConId", "_", "False"],
-             ["Let", "False"],
-             ["In", "False"],
-             ["Cased", "False"],
-             ["Casei", "False"],
-             ["Casec", "True"],
-             ["Of", "False"],
-             ["Data", "False"],
-             ["Equals", "False"],
-             ["Arrow", "False"],
-             ["LParen", "False"],
-             ["RParen", "False"],
-             ["LBrace", "False"],
-             ["RBrace", "False"],
-             ["Semicolon", "False"],
-             ["Pipe", "False"]]}
+            [["IntLiteral", "_", "B.False"],
+             ["CharLiteral", "_", "B.False"],
+             ["VarId", "_", "B.False"],
+             ["ConId", "_", "B.False"],
+             ["Let", "B.False"],
+             ["In", "B.False"],
+             ["Cased", "B.False"],
+             ["Casei", "B.False"],
+             ["Casec", "B.True"],
+             ["Of", "B.False"],
+             ["Data", "B.False"],
+             ["Equals", "B.False"],
+             ["Arrow", "B.False"],
+             ["LParen", "B.False"],
+             ["RParen", "B.False"],
+             ["LBrace", "B.False"],
+             ["RBrace", "B.False"],
+             ["Semicolon", "B.False"],
+             ["Pipe", "B.False"]]}
           ],
        ["Of",
           {"cased": "b", "of":
-            [["IntLiteral", "_", "False"],
-             ["CharLiteral", "_", "False"],
-             ["VarId", "_", "False"],
-             ["ConId", "_", "False"],
-             ["Let", "False"],
-             ["In", "False"],
-             ["Cased", "False"],
-             ["Casei", "False"],
-             ["Casec", "False"],
-             ["Of", "True"],
-             ["Data", "False"],
-             ["Equals", "False"],
-             ["Arrow", "False"],
-             ["LParen", "False"],
-             ["RParen", "False"],
-             ["LBrace", "False"],
-             ["RBrace", "False"],
-             ["Semicolon", "False"],
-             ["Pipe", "False"]]}
+            [["IntLiteral", "_", "B.False"],
+             ["CharLiteral", "_", "B.False"],
+             ["VarId", "_", "B.False"],
+             ["ConId", "_", "B.False"],
+             ["Let", "B.False"],
+             ["In", "B.False"],
+             ["Cased", "B.False"],
+             ["Casei", "B.False"],
+             ["Casec", "B.False"],
+             ["Of", "B.True"],
+             ["Data", "B.False"],
+             ["Equals", "B.False"],
+             ["Arrow", "B.False"],
+             ["LParen", "B.False"],
+             ["RParen", "B.False"],
+             ["LBrace", "B.False"],
+             ["RBrace", "B.False"],
+             ["Semicolon", "B.False"],
+             ["Pipe", "B.False"]]}
           ],
        ["Data",
           {"cased": "b", "of":
-            [["IntLiteral", "_", "False"],
-             ["CharLiteral", "_", "False"],
-             ["VarId", "_", "False"],
-             ["ConId", "_", "False"],
-             ["Let", "False"],
-             ["In", "False"],
-             ["Cased", "False"],
-             ["Casei", "False"],
-             ["Casec", "False"],
-             ["Of", "False"],
-             ["Data", "True"],
-             ["Equals", "False"],
-             ["Arrow", "False"],
-             ["LParen", "False"],
-             ["RParen", "False"],
-             ["LBrace", "False"],
-             ["RBrace", "False"],
-             ["Semicolon", "False"],
-             ["Pipe", "False"]]}
+            [["IntLiteral", "_", "B.False"],
+             ["CharLiteral", "_", "B.False"],
+             ["VarId", "_", "B.False"],
+             ["ConId", "_", "B.False"],
+             ["Let", "B.False"],
+             ["In", "B.False"],
+             ["Cased", "B.False"],
+             ["Casei", "B.False"],
+             ["Casec", "B.False"],
+             ["Of", "B.False"],
+             ["Data", "B.True"],
+             ["Equals", "B.False"],
+             ["Arrow", "B.False"],
+             ["LParen", "B.False"],
+             ["RParen", "B.False"],
+             ["LBrace", "B.False"],
+             ["RBrace", "B.False"],
+             ["Semicolon", "B.False"],
+             ["Pipe", "B.False"]]}
           ],
        ["Equals",
           {"cased": "b", "of":
-            [["IntLiteral", "_", "False"],
-             ["CharLiteral", "_", "False"],
-             ["VarId", "_", "False"],
-             ["ConId", "_", "False"],
-             ["Let", "False"],
-             ["In", "False"],
-             ["Cased", "False"],
-             ["Casei", "False"],
-             ["Casec", "False"],
-             ["Of", "False"],
-             ["Data", "False"],
-             ["Equals", "True"],
-             ["Arrow", "False"],
-             ["LParen", "False"],
-             ["RParen", "False"],
-             ["LBrace", "False"],
-             ["RBrace", "False"],
-             ["Semicolon", "False"],
-             ["Pipe", "False"]]}
+            [["IntLiteral", "_", "B.False"],
+             ["CharLiteral", "_", "B.False"],
+             ["VarId", "_", "B.False"],
+             ["ConId", "_", "B.False"],
+             ["Let", "B.False"],
+             ["In", "B.False"],
+             ["Cased", "B.False"],
+             ["Casei", "B.False"],
+             ["Casec", "B.False"],
+             ["Of", "B.False"],
+             ["Data", "B.False"],
+             ["Equals", "B.True"],
+             ["Arrow", "B.False"],
+             ["LParen", "B.False"],
+             ["RParen", "B.False"],
+             ["LBrace", "B.False"],
+             ["RBrace", "B.False"],
+             ["Semicolon", "B.False"],
+             ["Pipe", "B.False"]]}
           ],
        ["Arrow",
           {"cased": "b", "of":
-            [["IntLiteral", "_", "False"],
-             ["CharLiteral", "_", "False"],
-             ["VarId", "_", "False"],
-             ["ConId", "_", "False"],
-             ["Let", "False"],
-             ["In", "False"],
-             ["Cased", "False"],
-             ["Casei", "False"],
-             ["Casec", "False"],
-             ["Of", "False"],
-             ["Data", "False"],
-             ["Equals", "False"],
-             ["Arrow", "True"],
-             ["LParen", "False"],
-             ["RParen", "False"],
-             ["LBrace", "False"],
-             ["RBrace", "False"],
-             ["Semicolon", "False"],
-             ["Pipe", "False"]]}
+            [["IntLiteral", "_", "B.False"],
+             ["CharLiteral", "_", "B.False"],
+             ["VarId", "_", "B.False"],
+             ["ConId", "_", "B.False"],
+             ["Let", "B.False"],
+             ["In", "B.False"],
+             ["Cased", "B.False"],
+             ["Casei", "B.False"],
+             ["Casec", "B.False"],
+             ["Of", "B.False"],
+             ["Data", "B.False"],
+             ["Equals", "B.False"],
+             ["Arrow", "B.True"],
+             ["LParen", "B.False"],
+             ["RParen", "B.False"],
+             ["LBrace", "B.False"],
+             ["RBrace", "B.False"],
+             ["Semicolon", "B.False"],
+             ["Pipe", "B.False"]]}
           ],
        ["LParen",
           {"cased": "b", "of":
-            [["IntLiteral", "_", "False"],
-             ["CharLiteral", "_", "False"],
-             ["VarId", "_", "False"],
-             ["ConId", "_", "False"],
-             ["Let", "False"],
-             ["In", "False"],
-             ["Cased", "False"],
-             ["Casei", "False"],
-             ["Casec", "False"],
-             ["Of", "False"],
-             ["Data", "False"],
-             ["Equals", "False"],
-             ["Arrow", "False"],
-             ["LParen", "True"],
-             ["RParen", "False"],
-             ["LBrace", "False"],
-             ["RBrace", "False"],
-             ["Semicolon", "False"],
-             ["Pipe", "False"]]}
+            [["IntLiteral", "_", "B.False"],
+             ["CharLiteral", "_", "B.False"],
+             ["VarId", "_", "B.False"],
+             ["ConId", "_", "B.False"],
+             ["Let", "B.False"],
+             ["In", "B.False"],
+             ["Cased", "B.False"],
+             ["Casei", "B.False"],
+             ["Casec", "B.False"],
+             ["Of", "B.False"],
+             ["Data", "B.False"],
+             ["Equals", "B.False"],
+             ["Arrow", "B.False"],
+             ["LParen", "B.True"],
+             ["RParen", "B.False"],
+             ["LBrace", "B.False"],
+             ["RBrace", "B.False"],
+             ["Semicolon", "B.False"],
+             ["Pipe", "B.False"]]}
           ],
        ["RParen",
           {"cased": "b", "of":
-            [["IntLiteral", "_", "False"],
-             ["CharLiteral", "_", "False"],
-             ["VarId", "_", "False"],
-             ["ConId", "_", "False"],
-             ["Let", "False"],
-             ["In", "False"],
-             ["Cased", "False"],
-             ["Casei", "False"],
-             ["Casec", "False"],
-             ["Of", "False"],
-             ["Data", "False"],
-             ["Equals", "False"],
-             ["Arrow", "False"],
-             ["LParen", "False"],
-             ["RParen", "True"],
-             ["LBrace", "False"],
-             ["RBrace", "False"],
-             ["Semicolon", "False"],
-             ["Pipe", "False"]]}
+            [["IntLiteral", "_", "B.False"],
+             ["CharLiteral", "_", "B.False"],
+             ["VarId", "_", "B.False"],
+             ["ConId", "_", "B.False"],
+             ["Let", "B.False"],
+             ["In", "B.False"],
+             ["Cased", "B.False"],
+             ["Casei", "B.False"],
+             ["Casec", "B.False"],
+             ["Of", "B.False"],
+             ["Data", "B.False"],
+             ["Equals", "B.False"],
+             ["Arrow", "B.False"],
+             ["LParen", "B.False"],
+             ["RParen", "B.True"],
+             ["LBrace", "B.False"],
+             ["RBrace", "B.False"],
+             ["Semicolon", "B.False"],
+             ["Pipe", "B.False"]]}
           ],
        ["LBrace",
           {"cased": "b", "of":
-            [["IntLiteral", "_", "False"],
-             ["CharLiteral", "_", "False"],
-             ["VarId", "_", "False"],
-             ["ConId", "_", "False"],
-             ["Let", "False"],
-             ["In", "False"],
-             ["Cased", "False"],
-             ["Casei", "False"],
-             ["Casec", "False"],
-             ["Of", "False"],
-             ["Data", "False"],
-             ["Equals", "False"],
-             ["Arrow", "False"],
-             ["LParen", "False"],
-             ["RParen", "False"],
-             ["LBrace", "True"],
-             ["RBrace", "False"],
-             ["Semicolon", "False"],
-             ["Pipe", "False"]]}
+            [["IntLiteral", "_", "B.False"],
+             ["CharLiteral", "_", "B.False"],
+             ["VarId", "_", "B.False"],
+             ["ConId", "_", "B.False"],
+             ["Let", "B.False"],
+             ["In", "B.False"],
+             ["Cased", "B.False"],
+             ["Casei", "B.False"],
+             ["Casec", "B.False"],
+             ["Of", "B.False"],
+             ["Data", "B.False"],
+             ["Equals", "B.False"],
+             ["Arrow", "B.False"],
+             ["LParen", "B.False"],
+             ["RParen", "B.False"],
+             ["LBrace", "B.True"],
+             ["RBrace", "B.False"],
+             ["Semicolon", "B.False"],
+             ["Pipe", "B.False"]]}
           ],
        ["RBrace",
           {"cased": "b", "of":
-            [["IntLiteral", "_", "False"],
-             ["CharLiteral", "_", "False"],
-             ["VarId", "_", "False"],
-             ["ConId", "_", "False"],
-             ["Let", "False"],
-             ["In", "False"],
-             ["Cased", "False"],
-             ["Casei", "False"],
-             ["Casec", "False"],
-             ["Of", "False"],
-             ["Data", "False"],
-             ["Equals", "False"],
-             ["Arrow", "False"],
-             ["LParen", "False"],
-             ["RParen", "False"],
-             ["LBrace", "False"],
-             ["RBrace", "True"],
-             ["Semicolon", "False"],
-             ["Pipe", "False"]]}
+            [["IntLiteral", "_", "B.False"],
+             ["CharLiteral", "_", "B.False"],
+             ["VarId", "_", "B.False"],
+             ["ConId", "_", "B.False"],
+             ["Let", "B.False"],
+             ["In", "B.False"],
+             ["Cased", "B.False"],
+             ["Casei", "B.False"],
+             ["Casec", "B.False"],
+             ["Of", "B.False"],
+             ["Data", "B.False"],
+             ["Equals", "B.False"],
+             ["Arrow", "B.False"],
+             ["LParen", "B.False"],
+             ["RParen", "B.False"],
+             ["LBrace", "B.False"],
+             ["RBrace", "B.True"],
+             ["Semicolon", "B.False"],
+             ["Pipe", "B.False"]]}
           ],
        ["Semicolon",
           {"cased": "b", "of":
-            [["IntLiteral", "_", "False"],
-             ["CharLiteral", "_", "False"],
-             ["VarId", "_", "False"],
-             ["ConId", "_", "False"],
-             ["Let", "False"],
-             ["In", "False"],
-             ["Cased", "False"],
-             ["Casei", "False"],
-             ["Casec", "False"],
-             ["Of", "False"],
-             ["Data", "False"],
-             ["Equals", "False"],
-             ["Arrow", "False"],
-             ["LParen", "False"],
-             ["RParen", "False"],
-             ["LBrace", "False"],
-             ["RBrace", "False"],
-             ["Semicolon", "True"],
-             ["Pipe", "False"]]}
+            [["IntLiteral", "_", "B.False"],
+             ["CharLiteral", "_", "B.False"],
+             ["VarId", "_", "B.False"],
+             ["ConId", "_", "B.False"],
+             ["Let", "B.False"],
+             ["In", "B.False"],
+             ["Cased", "B.False"],
+             ["Casei", "B.False"],
+             ["Casec", "B.False"],
+             ["Of", "B.False"],
+             ["Data", "B.False"],
+             ["Equals", "B.False"],
+             ["Arrow", "B.False"],
+             ["LParen", "B.False"],
+             ["RParen", "B.False"],
+             ["LBrace", "B.False"],
+             ["RBrace", "B.False"],
+             ["Semicolon", "B.True"],
+             ["Pipe", "B.False"]]}
           ],
        ["Pipe",
           {"cased": "b", "of":
-            [["IntLiteral", "_", "False"],
-             ["CharLiteral", "_", "False"],
-             ["VarId", "_", "False"],
-             ["ConId", "_", "False"],
-             ["Let", "False"],
-             ["In", "False"],
-             ["Cased", "False"],
-             ["Casei", "False"],
-             ["Casec", "False"],
-             ["Of", "False"],
-             ["Data", "False"],
-             ["Equals", "False"],
-             ["Arrow", "False"],
-             ["LParen", "False"],
-             ["RParen", "False"],
-             ["LBrace", "False"],
-             ["RBrace", "False"],
-             ["Semicolon", "False"],
-             ["Pipe", "True"]]}
+            [["IntLiteral", "_", "B.False"],
+             ["CharLiteral", "_", "B.False"],
+             ["VarId", "_", "B.False"],
+             ["ConId", "_", "B.False"],
+             ["Let", "B.False"],
+             ["In", "B.False"],
+             ["Cased", "B.False"],
+             ["Casei", "B.False"],
+             ["Casec", "B.False"],
+             ["Of", "B.False"],
+             ["Data", "B.False"],
+             ["Equals", "B.False"],
+             ["Arrow", "B.False"],
+             ["LParen", "B.False"],
+             ["RParen", "B.False"],
+             ["LBrace", "B.False"],
+             ["RBrace", "B.False"],
+             ["Semicolon", "B.False"],
+             ["Pipe", "B.True"]]}
           ]]}}
 
   , {"comment": "optsign :: Parser Char Bool",
      "func": ["optsign"], "=":
     ["pAlt",
       ["pRight", ["char", {"str": "-"}],
-        ["pPure", "False"]],
+        ["pPure", "B.False"]],
       ["pRight", ["optional", ["char", {"str": "+"}]],
-        ["pPure", "True"]]]}
+        ["pPure", "B.True"]]]}
 
   , {"comment": "digit :: Parser Char Char",
      "func": ["digit"], "=": "ascDigit"}
@@ -896,8 +823,8 @@
      "func": ["makeIntLiteral", "sign", "n"], "=":
     ["IntLiteral",
       {"cased": "sign", "of":
-        [["True", "n"],
-         ["False", ["Prim.Int.mul", -1, "n"]]]}]}
+        [["B.True", "n"],
+         ["B.False", ["Prim.Int.mul", -1, "n"]]]}]}
 
   , {"comment": "charLiteral :: Parser Char Char",
      "func": ["charLiteral"], "=":
@@ -967,51 +894,51 @@
   , {"comment": "varidOrReserved :: Parser Char Token",
      "func": ["varidOrReserved"], "=":
     ["pMap", "fixupReserved",
-      ["pApply", ["pMap", "Cons", "small"], ["pSome", "identChar"]]]}
+      ["pApply", ["pMap", "L.Cons", "small"], ["pSome", "identChar"]]]}
 
-  , {"comment": "reservedWords :: List (Tuple2 String Token)",
+  , {"comment": "reservedWords :: List (T.Tuple2 String Token)",
      "func": ["reservedWords"], "=":
-    ["Cons", ["Tuple2",
-      ["Cons", {"str": "l"},
-      ["Cons", {"str": "e"},
-      ["Cons", {"str": "t"},
-      "Nil"]]], "Let"],
-    ["Cons", ["Tuple2",
-      ["Cons", {"str": "i"},
-      ["Cons", {"str": "n"},
-      "Nil"]], "In"],
-    ["Cons", ["Tuple2",
-      ["Cons", {"str": "c"},
-      ["Cons", {"str": "a"},
-      ["Cons", {"str": "s"},
-      ["Cons", {"str": "e"},
-      ["Cons", {"str": "d"},
-      "Nil"]]]]], "Cased"],
-    ["Cons", ["Tuple2",
-      ["Cons", {"str": "c"},
-      ["Cons", {"str": "a"},
-      ["Cons", {"str": "s"},
-      ["Cons", {"str": "e"},
-      ["Cons", {"str": "i"},
-      "Nil"]]]]], "Casei"],
-    ["Cons", ["Tuple2",
-      ["Cons", {"str": "c"},
-      ["Cons", {"str": "a"},
-      ["Cons", {"str": "s"},
-      ["Cons", {"str": "e"},
-      ["Cons", {"str": "c"},
-      "Nil"]]]]], "Casec"],
-    ["Cons", ["Tuple2",
-      ["Cons", {"str": "o"},
-      ["Cons", {"str": "f"},
-      "Nil"]], "Of"],
-    ["Cons", ["Tuple2",
-      ["Cons", {"str": "d"},
-      ["Cons", {"str": "a"},
-      ["Cons", {"str": "t"},
-      ["Cons", {"str": "a"},
-      "Nil"]]]], "Data"],
-    "Nil"]]]]]]]}
+    ["L.Cons", ["T.Tuple2",
+      ["L.Cons", {"str": "l"},
+      ["L.Cons", {"str": "e"},
+      ["L.Cons", {"str": "t"},
+      "L.Nil"]]], "Let"],
+    ["L.Cons", ["T.Tuple2",
+      ["L.Cons", {"str": "i"},
+      ["L.Cons", {"str": "n"},
+      "L.Nil"]], "In"],
+    ["L.Cons", ["T.Tuple2",
+      ["L.Cons", {"str": "c"},
+      ["L.Cons", {"str": "a"},
+      ["L.Cons", {"str": "s"},
+      ["L.Cons", {"str": "e"},
+      ["L.Cons", {"str": "d"},
+      "L.Nil"]]]]], "Cased"],
+    ["L.Cons", ["T.Tuple2",
+      ["L.Cons", {"str": "c"},
+      ["L.Cons", {"str": "a"},
+      ["L.Cons", {"str": "s"},
+      ["L.Cons", {"str": "e"},
+      ["L.Cons", {"str": "i"},
+      "L.Nil"]]]]], "Casei"],
+    ["L.Cons", ["T.Tuple2",
+      ["L.Cons", {"str": "c"},
+      ["L.Cons", {"str": "a"},
+      ["L.Cons", {"str": "s"},
+      ["L.Cons", {"str": "e"},
+      ["L.Cons", {"str": "c"},
+      "L.Nil"]]]]], "Casec"],
+    ["L.Cons", ["T.Tuple2",
+      ["L.Cons", {"str": "o"},
+      ["L.Cons", {"str": "f"},
+      "L.Nil"]], "Of"],
+    ["L.Cons", ["T.Tuple2",
+      ["L.Cons", {"str": "d"},
+      ["L.Cons", {"str": "a"},
+      ["L.Cons", {"str": "t"},
+      ["L.Cons", {"str": "a"},
+      "L.Nil"]]]], "Data"],
+    "L.Nil"]]]]]]]}
 
   , {"comment": "fixupReserved :: String -> Token",
      "func": ["fixupReserved", "ident"], "=":
@@ -1022,7 +949,7 @@
   , {"comment": "conid :: Parser Char Token",
      "func": ["conid"], "=":
     ["pMap", "ConId",
-      ["pApply", ["pMap", "Cons", "large"], ["pSome", "identChar"]]]}
+      ["pApply", ["pMap", "L.Cons", "large"], ["pSome", "identChar"]]]}
 
   , {"comments":
       [ "token :: Parser Char Token\n"
@@ -1436,7 +1363,7 @@
   , {"comment": "parseStdinLoop :: Parser Char Token -> Parser Token a -> Bool -> IO (Either Char a)",
      "func": ["parseStdinLoop", "charstate", "tokenstate", "eof"], "=":
     {"cased": "eof", "of":
-      [["True", {"cased": ["feedEof", "charstate"], "of":
+      [["B.True", {"cased": ["feedEof", "charstate"], "of":
         [["GoodEof", "token",
           {"cased": ["feed", "token", "tokenstate"], "of":
             [["Consume", "tokenstate2",
@@ -1446,7 +1373,7 @@
              ["Pushback", "_", ["Prim.IO.pure", ["Left", {"str": "p"}]]],
              ["Fail", ["Prim.IO.pure", ["Left", {"str": "f"}]]]]}],
          ["BadEof", ["Prim.IO.pure", ["Left", {"str": "e"}]]]]}],
-       ["False", ["Prim.IO.bind", "Prim.IO.getChar",
+       ["B.False", ["Prim.IO.bind", "Prim.IO.getChar",
         ["parseStdinLoopChar", "charstate", "tokenstate"]]]]}}
 
   , {"comment": "parseStdinLoopChar :: Parser Char Token -> Parser Token a -> Char -> IO (Either Char a)",
@@ -1479,7 +1406,9 @@
       ["Prim.IO.putChar", {"str": "["}],
       ["ioThen",
         ["sequence_",
-          ["intersperse", ["Prim.IO.putChar", {"str": ","}], "itemEmitters"]],
+          ["L.intersperse",
+            ["Prim.IO.putChar", {"str": ","}],
+            "itemEmitters"]],
         ["Prim.IO.putChar", {"str": "]"}]]]}
 
   , {"func": ["emitStr", "s"], "=":
@@ -1497,8 +1426,8 @@
        [{"str": "\r"}, ["emitBackslashChar", {"str": "r"}]],
        [{"str": "\t"}, ["emitBackslashChar", {"str": "t"}]],
        ["_", {"cased": ["printableAscii", "c"], "of":
-          [["True", ["Prim.IO.putChar", "c"]],
-           ["False", ["emitUnicodeEscape", "c"]]]}]]}}
+          [["B.True", ["Prim.IO.putChar", "c"]],
+           ["B.False", ["emitUnicodeEscape", "c"]]]}]]}}
 
   , {"func": ["printableAscii", "c"], "=":
     ["charBetween", {"str": "\u0020"}, {"str": "\u007e"}, "c"]}
@@ -1513,7 +1442,7 @@
                ["putStr", ["hex4", ["Prim.Char.ord", "c"]]]]]}
 
   , {"func": ["hex4", "n"], "=":
-    ["map", "hex1", ["reverse", ["hexits", 4, "n"]]]}
+    ["L.map", "hex1", ["L.reverse", ["hexits", 4, "n"]]]}
 
   , {"func": ["hex1", "n"], "=":
     {"casei": "n", "of":
@@ -1537,9 +1466,9 @@
 
   , {"func": ["hexits", "d", "n"], "=":
     {"casei": "d", "of":
-      [[0, "Nil"],
+      [[0, "L.Nil"],
        ["_",
-          ["Cons",
+          ["L.Cons",
             ["Prim.Int.rem", "n", 16],
             ["hexits", ["Prim.Int.add", -1, "d"],
                        ["Prim.Int.quot", "n", 16]]]]]}}
@@ -1561,7 +1490,7 @@
     ["ioThen", ["Prim.IO.putChar", {"str": "s"}],
     ["ioThen", ["Prim.IO.putChar", {"str": "\""}],
     ["ioThen", ["Prim.IO.putChar", {"str": ":"}],
-    ["ioThen", ["emitArray", ["map", "emitDecl", "decls"]],
+    ["ioThen", ["emitArray", ["L.map", "emitDecl", "decls"]],
                ["Prim.IO.putChar", {"str": "}"}]]]]]]]]]]]]]]]]]]}
 
   , {"func": ["emitDecl", "decl"], "=":
@@ -1581,7 +1510,7 @@
           ["ioThen", ["Prim.IO.putChar", {"str": "="}],
           ["ioThen", ["Prim.IO.putChar", {"str": "\""}],
           ["ioThen", ["Prim.IO.putChar", {"str": ":"}],
-          ["ioThen", ["emitArray", ["map", "emitConDecl", "condecls"]],
+          ["ioThen", ["emitArray", ["L.map", "emitConDecl", "condecls"]],
                      ["Prim.IO.putChar", {"str": "}"}]]]]]]]]]]]]]]]]],
        ["FuncDecl", "name", "argnames", "expr",
           ["ioThen", ["Prim.IO.putChar", {"str": "{"}],
@@ -1592,8 +1521,8 @@
           ["ioThen", ["Prim.IO.putChar", {"str": "c"}],
           ["ioThen", ["Prim.IO.putChar", {"str": "\""}],
           ["ioThen", ["Prim.IO.putChar", {"str": ":"}],
-          ["ioThen", ["emitArray", ["map", "emitStr",
-            ["Cons", "name", "argnames"]]],
+          ["ioThen", ["emitArray", ["L.map", "emitStr",
+            ["L.Cons", "name", "argnames"]]],
           ["ioThen", ["Prim.IO.putChar", {"str": ","}],
           ["ioThen", ["Prim.IO.putChar", {"str": "\""}],
           ["ioThen", ["Prim.IO.putChar", {"str": "="}],
@@ -1621,7 +1550,7 @@
           ["ioThen", ["Prim.IO.putChar", {"str": "t"}],
           ["ioThen", ["Prim.IO.putChar", {"str": "\""}],
           ["ioThen", ["Prim.IO.putChar", {"str": ":"}],
-          ["ioThen", ["emitArray", ["map", "emitBinding", "bindings"]],
+          ["ioThen", ["emitArray", ["L.map", "emitBinding", "bindings"]],
           ["ioThen", ["Prim.IO.putChar", {"str": ","}],
           ["ioThen", ["Prim.IO.putChar", {"str": "\""}],
           ["ioThen", ["Prim.IO.putChar", {"str": "i"}],
@@ -1637,17 +1566,17 @@
        ["CasecExp", "evaluand", "calts",
           ["emitCaseExp", {"str": "c"}, "emitCAlt", "evaluand", "calts"]],
        ["FExp", "aexps",
-          {"casei": ["length", "aexps"], "of":
+          {"casei": ["L.length", "aexps"], "of":
             [[1, ["mapM_", "emitAExp", "aexps"]],
-             ["_", ["emitArray", ["map", "emitAExp", "aexps"]]]]}]]}}
+             ["_", ["emitArray", ["L.map", "emitAExp", "aexps"]]]]}]]}}
 
   , {"func": ["emitBinding", "binding"], "=":
     {"cased": "binding", "of":
       [["Binding", "var", "expr",
         ["emitArray",
-          ["Cons", ["emitStr", "var"],
-          ["Cons", ["emitExpr", "expr"],
-            "Nil"]]]]]}}
+          ["L.Cons", ["emitStr", "var"],
+          ["L.Cons", ["emitExpr", "expr"],
+            "L.Nil"]]]]]}}
 
   , {"func": ["emitCaseExp", "suffix", "emitAlt", "evaluand", "alts"], "=":
       ["ioThen", ["Prim.IO.putChar", {"str": "{"}],
@@ -1666,43 +1595,43 @@
       ["ioThen", ["Prim.IO.putChar", {"str": "f"}],
       ["ioThen", ["Prim.IO.putChar", {"str": "\""}],
       ["ioThen", ["Prim.IO.putChar", {"str": ":"}],
-      ["ioThen", ["emitArray", ["map", "emitAlt", "alts"]],
+      ["ioThen", ["emitArray", ["L.map", "emitAlt", "alts"]],
                  ["Prim.IO.putChar", {"str": "}"}]]]]]]]]]]]]]]]]]]}
 
   , {"func": ["emitDAlt", "dalt"], "=":
     {"cased": "dalt", "of":
       [["DAlt", "con", "vars", "expr",
           ["emitArray",
-            ["Cons", ["emitStr", "con"],
-              ["listJoin",
-                ["map", "emitStr", "vars"],
-                ["Cons", ["emitExpr", "expr"], "Nil"]]]]]]}}
+            ["L.Cons", ["emitStr", "con"],
+              ["L.append",
+                ["L.map", "emitStr", "vars"],
+                ["L.Cons", ["emitExpr", "expr"], "L.Nil"]]]]]]}}
 
   , {"func": ["emitIAlt", "ialt"], "=":
     {"cased": "ialt", "of":
       [["IAltInt", "n", "expr",
           ["emitArray",
-            ["Cons", ["emitInt", "n"],
-            ["Cons", ["emitExpr", "expr"],
-              "Nil"]]]],
+            ["L.Cons", ["emitInt", "n"],
+            ["L.Cons", ["emitExpr", "expr"],
+              "L.Nil"]]]],
        ["IAltVar", "var", "expr",
           ["emitArray",
-            ["Cons", ["emitStr", "var"],
-            ["Cons", ["emitExpr", "expr"],
-              "Nil"]]]]]}}
+            ["L.Cons", ["emitStr", "var"],
+            ["L.Cons", ["emitExpr", "expr"],
+              "L.Nil"]]]]]}}
 
   , {"func": ["emitCAlt", "calt"], "=":
     {"cased": "calt", "of":
       [["CAltChar", "c", "expr",
           ["emitArray",
-            ["Cons", ["emitChar", "c"],
-            ["Cons", ["emitExpr", "expr"],
-              "Nil"]]]],
+            ["L.Cons", ["emitChar", "c"],
+            ["L.Cons", ["emitExpr", "expr"],
+              "L.Nil"]]]],
        ["CAltVar", "var", "expr",
           ["emitArray",
-            ["Cons", ["emitStr", "var"],
-            ["Cons", ["emitExpr", "expr"],
-              "Nil"]]]]]}}
+            ["L.Cons", ["emitStr", "var"],
+            ["L.Cons", ["emitExpr", "expr"],
+              "L.Nil"]]]]]}}
 
   , {"func": ["emitAExp", "aexpr"], "=":
     {"cased": "aexpr", "of":
