@@ -7,7 +7,10 @@
   , {"import": "Data.Bool", "as": "B"}
   , {"import": "Data.Function", "as": "F"}
   , {"import": "Data.List", "as": "L"}
+  , {"import": "Data.Maybe", "as": "M"}
   , {"import": "Data.Tuple", "as": "T"}
+  , {"import": "Data.Unit", "as": "U"}
+  , {"import": "Lolo.Digits"}
 
 
   , {"comment":
@@ -20,26 +23,17 @@
 
     }
 
-  , {"data": "Unit", "=": [["Unit", 0]]}
-
   , {"data": "Either", "=": [["Left", 1], ["Right", 1]]}
-
-  , {"data": "Maybe", "=": [["Just", 1], ["Nothing", 0]]}
 
   , {"func": ["lookup", "eq", "tuples", "x"], "=":
     {"cased": "tuples", "of":
-      [["L.Nil", "Nothing"],
+      [["L.Nil", "M.Nothing"],
        ["L.Cons", "tuple", "rest",
           {"cased": "tuple", "of":
             [["T.Tuple2", "key", "value",
               {"cased": ["eq", "key", "x"], "of":
-                [["B.True", ["Just", "value"]],
+                [["B.True", ["M.Just", "value"]],
                  ["B.False", ["lookup", "eq", "rest", "x"]]]}]]}]]}}
-
-  , {"func": ["intAbs", "n"], "=":
-    {"cased": ["Prim.Int.le", 0, "n"], "of":
-      [["B.True", "n"],
-       ["B.False", ["Prim.Int.mul", -1, "n"]]]}}
 
   , {"func": ["charLe", "a", "b"], "=":
     ["Prim.Int.le", ["Prim.Char.ord", "a"], ["Prim.Char.ord", "b"]]}
@@ -50,59 +44,10 @@
     ["Prim.IO.bind", "ioa", ["F.const", "iob"]]}
 
   , {"func": ["sequence_", "ios"], "=":
-    ["L.foldr", "ioThen", ["Prim.IO.pure", "Unit"], "ios"]}
+    ["L.foldr", "ioThen", ["Prim.IO.pure", "U.Unit"], "ios"]}
 
   , {"func": ["mapM_", "f", "xs"], "=":
     ["sequence_", ["L.map", "f", "xs"]]}
-
-  , {"func": ["readInt", "digits"], "=":
-    ["L.foldl", "readIntStep", 0, "digits"]}
-
-  , {"func": ["readIntStep", "acc", "digit"], "=":
-    ["Prim.Int.add", ["Prim.Int.mul", 10, "acc"],
-                     ["digitToInt", "digit"]]}
-
-  , {"func": ["digitToInt", "c"], "=":
-    ["Prim.Int.add",
-      ["Prim.Char.ord", "c"],
-      ["Prim.Int.mul", -1, ["Prim.Char.ord", {"str": "0"}]]]}
-
-  , {"func": ["showInt", "n"], "=":
-    ["L.append",
-      ["showIntOptSign", "n"],
-      ["showIntDigits", ["intAbs", "n"]]]}
-
-  , {"func": ["showIntOptSign", "n"], "=":
-    {"cased": ["Prim.Int.le", 0, "n"], "of":
-      [["B.True", "L.Nil"],
-       ["B.False", ["L.Cons", {"str": "-"}, "L.Nil"]]]}}
-
-  , {"func": ["showIntDigits", "n"], "=":
-    {"casei": "n", "of":
-      [[0, ["L.Cons", {"str": "0"}, "L.Nil"]],
-       ["_", ["L.reverse", ["showIntDigitsHelper", "n"]]]]}}
-
-  , {"func": ["showIntDigitsHelper", "n"], "=":
-    {"casei": "n", "of":
-      [[0, "L.Nil"],
-       ["_",
-          ["L.Cons",
-            ["intToDigit", ["Prim.Int.rem", "n", 10]],
-            ["showIntDigitsHelper", ["Prim.Int.quot", "n", 10]]]]]}}
-
-  , {"func": ["intToDigit", "n"], "=":
-    {"casei": "n", "of":
-      [[0, {"str": "0"}],
-       [1, {"str": "1"}],
-       [2, {"str": "2"}],
-       [3, {"str": "3"}],
-       [4, {"str": "4"}],
-       [5, {"str": "5"}],
-       [6, {"str": "6"}],
-       [7, {"str": "7"}],
-       [8, {"str": "8"}],
-       [9, {"str": "9"}],
-       ["_", {"str": "?"}]]}}
 
   , {"func": ["putStr", "s"], "=": ["mapM_", "Prim.IO.putChar", "s"]}
 
@@ -300,7 +245,7 @@
 
   , {"comment": "optional :: Parser i a -> Parser i (Maybe a)",
      "func": ["optional", "p"], "=":
-    ["pAlt", ["pMap", "Just", "p"], ["pPure", "Nothing"]]}
+    ["pAlt", ["pMap", "M.Just", "p"], ["pPure", "M.Nothing"]]}
 
   , {"comment": "require :: (a -> Bool) -> Parser a a",
      "func": ["require", "pred"], "=":
@@ -313,11 +258,11 @@
        ["B.False", "Fail"]]}}
 
   , {"comment": "ignore :: Parser i r -> Parser i Unit",
-     "func": ["ignore", "p"], "=": ["pRight", "p", ["Done", "Unit"]]}
+     "func": ["ignore", "p"], "=": ["pRight", "p", ["Done", "U.Unit"]]}
 
   , {"comment": "ignoreSome :: Parser i r -> Parser i Unit",
      "func": ["ignoreSome", "p"], "=":
-    ["pAlt", ["pRight", "p", ["ignoreSome", "p"]], ["Done", "Unit"]]}
+    ["pAlt", ["pRight", "p", ["ignoreSome", "p"]], ["Done", "U.Unit"]]}
 
   , {"comment": "ignoreUntil :: Parser i r -> Parser i r",
      "func": ["ignoreUntil", "p"], "=":
@@ -813,7 +758,7 @@
 
   , {"comment": "natLiteral :: Parser Char Int",
      "func": ["natLiteral"], "=":
-    ["pMap", "readInt", ["pMany", "digit"]]}
+    ["pMap", "Lolo.Digits.readInt", ["pMany", "digit"]]}
 
   , {"comment": "intLiteral :: Parser Char Int",
      "func": ["intLiteral"], "=":
@@ -867,7 +812,7 @@
       ["pAlt",
         ["char", {"str": "\n"}],
         ["char", {"str": "\f"}]]],
-      ["Done", "Unit"]]}
+      ["Done", "U.Unit"]]}
 
   , {"comment": "whitechar :: Parser Char Char",
      "func": ["whitechar"], "=": "ascWhitechar"}
@@ -943,8 +888,8 @@
   , {"comment": "fixupReserved :: String -> Token",
      "func": ["fixupReserved", "ident"], "=":
     {"cased": ["lookup", "stringEq", "reservedWords", "ident"], "of":
-      [["Nothing", ["VarId", "ident"]],
-       ["Just", "x", "x"]]}}
+      [["M.Nothing", ["VarId", "ident"]],
+       ["M.Just", "x", "x"]]}}
 
   , {"comment": "conid :: Parser Char Token",
      "func": ["conid"], "=":
@@ -1653,7 +1598,7 @@
        ["ASub", "subexpr", ["emitExpr", "subexpr"]]]}}
 
   , {"func": ["emitInt", "n"], "=":
-    ["putStr", ["showInt", "n"]]}
+    ["putStr", ["Lolo.Digits.showInt", "n"]]}
 
   , {"func": ["emitChar", "c"], "=":
     ["ioThen", ["Prim.IO.putChar", {"str": "{"}],

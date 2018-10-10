@@ -7,6 +7,7 @@ function withLoloParse(expr) {
   return evaluate.program({"declarations": [
     {"import": "Data.Bool", "as": "B"},
     {"import": "Data.List", "as": "L"},
+    {"import": "Data.Unit", "as": "U"},
     {"import": "Lolo.Parse", "as": "P"},
     {"func": ["test"], "=": expr}
   ]});
@@ -92,21 +93,6 @@ assertParsed("P.charLiteral", "'b'", ["P.CharLiteral", {"str": "b"}],
   "parse char literal");
 
 t.strictSame(
-  withLoloParse(["P.digitToInt", {"str": "2"}]),
-  new rt.Box(2),
-  "digit to int"
-);
-
-t.strictSame(
-  withLoloParse(["P.readInt",
-    ["L.Cons", {"str": "3"},
-    ["L.Cons", {"str": "7"},
-    ["L.Cons", {"str": "4"}, "L.Nil"]]]]),
-  new rt.Box(374),
-  "digits to int"
-);
-
-t.strictSame(
   withLoloParse(["P.charLe", {"str": "a"}, {"str": "a"}]),
   rt.True,
   "a <= a"
@@ -151,9 +137,9 @@ assertParsed("P.varidOrReserved", "let", "P.Let", "reserved");
 
 assertParsed("P.token", "(", "P.LParen", "symbol");
 
-assertParsed("P.comment", "#fnord\n", "P.Unit", "comment");
+assertParsed("P.comment", "#fnord\n", "U.Unit", "comment");
 
-assertParsed(["P.ignoreSome", "P.whitestuff"], "  #fnord\n \n", "P.Unit",
+assertParsed(["P.ignoreSome", "P.whitestuff"], "  #fnord\n \n", "U.Unit",
   "whitestuff");
 
 assertParsed(

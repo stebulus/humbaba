@@ -1,0 +1,3 @@
+{"declarations":
+  [ {"data": "Maybe", "=": [["Nothing", 0], ["Just", 1]]}
+  ]}

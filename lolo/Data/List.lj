@@ -2,6 +2,7 @@
   [ {"import": "Prim.Int"}
   , {"import": "Data.Bool"}
   , {"import": "Data.Function"}
+  , {"import": "Data.Maybe", "as": "M"}
 
   , {"data": "List", "=": [["Nil", 0], ["Cons", 2]]}
 
