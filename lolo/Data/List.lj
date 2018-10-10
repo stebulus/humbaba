@@ -3,8 +3,11 @@
   , {"import": "Data.Bool", "as": "B"}
   , {"import": "Data.Function"}
   , {"import": "Data.Maybe", "as": "M"}
+  , {"import": "Data.Tuple", "as": "T"}
 
   , {"data": "List", "=": [["Nil", 0], ["Cons", 2]]}
+
+  , {"func": ["singleton", "x"], "=": ["Cons", "x", "Nil"]}
 
   , {"func": ["map", "f", "xs"], "=":
     {"cased": "xs", "of":
@@ -26,6 +29,9 @@
     {"cased": ["f", "z"], "of":
       [["M.Just", "x", ["Cons", "x", ["unfoldr", "f", "x"]]],
        ["M.Nothing", "Nil"]]}}
+
+  , {"func": ["maybeToList", "mx"], "=":
+    ["M.maybe", "Nil", "singleton", "mx"]}
 
   , {"func": ["reverse"], "=":
     ["foldl", ["Data.Function.flip", "Cons"], "Nil"]}
@@ -67,6 +73,9 @@
                 ["Cons", "x",
                 ["intersperse", "x", "rest"]]]]]}]]}}
 
+  , {"func": ["intercalate", "xs", "xss"], "=":
+    ["concat", ["intersperse", "xs", "xss"]]}
+
   , {"func": ["from", "n"], "=":
     ["Cons", "n", ["from", ["I.add", 1, "n"]]]}
 
@@ -82,6 +91,17 @@
         {"cased": ["f", "x"], "of":
           [["B.True", ["Cons", "x", ["takeWhile", "f", "rest"]]],
            ["B.False", "Nil"]]}]]}}
+
+  , {"func": ["zip", "as", "bs"], "=":
+    {"cased": "as", "of":
+      [["Nil", "Nil"],
+       ["Cons", "a", "as",
+          {"cased": "bs", "of":
+            [["Nil", "Nil"],
+             ["Cons", "b", "bs",
+                ["Cons",
+                  ["T.Tuple2", "a", "b"],
+                  ["zip", "as", "bs"]]]]}]]}}
 
   , {"func": ["take", "n", "xs"], "=":
     {"casei": "n", "of":

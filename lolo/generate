@@ -13,3 +13,4 @@ compile Data/Unit
 compile Lolo/Digits
 compile Lolo/Parse
 compile Lolo/Random
+compile Lolo/Tap

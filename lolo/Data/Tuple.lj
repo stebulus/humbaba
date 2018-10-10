@@ -3,6 +3,12 @@
   , {"data": "Tuple3", "=": [["Tuple3", 3]]}
   , {"data": "Tuple4", "=": [["Tuple4", 4]]}
 
+  , {"func": ["fst", "ab"], "=":
+    {"cased": "ab", "of": [["Tuple2", "a", "b", "a"]]}}
+
+  , {"func": ["snd", "ab"], "=":
+    {"cased": "ab", "of": [["Tuple2", "a", "b", "b"]]}}
+
   , {"func": ["swap", "ab"], "=":
     {"cased": "ab", "of":
       [["Tuple2", "a", "b", ["Tuple2", "b", "a"]]]}}
