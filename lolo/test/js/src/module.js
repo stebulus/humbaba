@@ -1,4 +1,4 @@
-var mod = require('../../module');
+var mod = require('../../../module');
 var t = require('tap');
 
 (function () {

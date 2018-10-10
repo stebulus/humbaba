@@ -1,5 +1,5 @@
-var codegen = require('../../codegen');
-var mod = require('../../module');
+var codegen = require('../../../codegen');
+var mod = require('../../../module');
 var primmod = require('./prim-modules');
 var rts = require('humbaba-runtime/humbaba-runtime-stream');
 

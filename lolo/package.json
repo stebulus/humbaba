@@ -11,7 +11,7 @@
     "humbaba-runtime": "file:../runtime"
   },
   "scripts": {
-    "test": "./generate && tap --cov --100 'test/src/**/*.js'"
+    "test": "./generate && NODE_PATH=../runtime:. tap --cov --100 'test/js/src/**/*.js' && NODE_PATH=../runtime:. tap 'test/lj/src/**/*.js'"
   },
   "devDependencies": {
     "tap": "^12.0.1"
