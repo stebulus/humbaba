@@ -1,0 +1,22 @@
+{ "declarations":
+  [ {"import": "Data.Bool", "as": "B"}
+  , {"import": "Data.List", "as": "L"}
+  , {"import": "Prim.Int"}
+  , {"import": "Prim.JString", "as": "JStr"}
+
+  , {"func": ["toString", "jstr"], "=":
+    ["toStringHelper", 0, ["JStr.length", "jstr"], "jstr"]}
+
+  , {"func": ["toStringHelper", "i", "len", "jstr"], "=":
+    ["B.bool",
+      ["L.Cons",
+        ["JStr.charAt", "jstr", "i"],
+        ["toStringHelper", ["Prim.Int.add", 1, "i"], "len", "jstr"]],
+      "L.Nil",
+      ["lt", "i", "len"]]}
+
+  , {"func": ["lt", "a", "b"], "=":
+    ["B.not", ["Prim.Int.le", "b", "a"]]}
+
+  ]
+}

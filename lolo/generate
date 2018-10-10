@@ -6,6 +6,7 @@ compile() {
 set -x
 compile Data/Bool
 compile Data/Function
+compile Data/JString
 compile Data/List
 compile Data/Maybe
 compile Data/Tuple
