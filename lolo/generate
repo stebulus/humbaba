@@ -1,9 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
-compile() {
-  node ljc.js -o "$1".js "$1".lj
+echorun() {
+  echo "$@"
+  "$@"
 }
-set -x
+compile() {
+  lastarg=${!#}
+  otherargs=("${@:1:$#-1}")
+  echorun node ljc.js "${otherargs[@]}" -o "$lastarg".js "$lastarg".lj
+}
 compile Data/Bool
 compile Data/Function
 compile Data/JString
