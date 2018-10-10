@@ -22,6 +22,11 @@
       [["Cons", "x", "rest", ["foldl", "f", ["f", "z", "x"], "rest"]],
        ["Nil", "z"]]}}
 
+  , {"func": ["unfoldr", "f", "z"], "=":
+    {"cased": ["f", "z"], "of":
+      [["M.Just", "x", ["Cons", "x", ["unfoldr", "f", "x"]]],
+       ["M.Nothing", "Nil"]]}}
+
   , {"func": ["reverse"], "=":
     ["foldl", ["Data.Function.flip", "Cons"], "Nil"]}
 
