@@ -1,0 +1,36 @@
+{ "declarations":
+  [ {"import": "Data.Bool", "as": "B"}
+  , {"import": "Data.JString", "as": "JStr"}
+  , {"import": "Data.List", "as": "L"}
+  , {"import": "Data.Tuple", "as": "T"}
+  , {"import": "Lolo.Tap"}
+  , {"import": "Prim.Int", "as": "I"}
+
+  , { "func": ["intEq", "a", "b"], "=":
+    ["B.and", ["I.le", "a", "b"], ["I.le", "b", "a"]]}
+
+  , { "func": ["main"], "=":
+    ["Lolo.Tap.runTests",
+
+      ["L.Cons",
+        ["T.Tuple2",
+          ["JStr.toString",
+            {"str": "length (replicate 0 x) == 0"}],
+          ["intEq", 0, ["L.length", ["L.replicate", 0, "B.True"]]]],
+
+      ["L.Cons",
+        ["T.Tuple2",
+          ["JStr.toString",
+            {"str": "length (replicate 1 x) == 1"}],
+          ["intEq", 1, ["L.length", ["L.replicate", 1, "B.True"]]]],
+
+      ["L.Cons",
+        ["T.Tuple2",
+          ["JStr.toString",
+            {"str": "length (replicate 2 x) == 2"}],
+          ["intEq", 2, ["L.length", ["L.replicate", 2, "B.True"]]]],
+
+        "L.Nil"]]]]}
+    
+  ]
+}

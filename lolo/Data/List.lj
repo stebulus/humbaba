@@ -79,10 +79,11 @@
   , {"func": ["from", "n"], "=":
     ["Cons", "n", ["from", ["I.add", 1, "n"]]]}
 
-  , {"func": ["gt", "a", "b"], "=": ["B.not", ["I.le", "b", "a"]]}
+  , {"func": ["gt", "a", "b"], "=": ["B.not", ["I.le", "a", "b"]]}
 
   , {"func": ["replicate", "n", "x"], "=":
-    ["map", ["const", "x"], ["takeWhile", ["gt", "n"], ["from", 0]]]}
+    ["map", ["Data.Function.const", "x"],
+      ["takeWhile", ["gt", "n"], ["from", 0]]]}
 
   , {"func": ["takeWhile", "f", "xs"], "=":
     {"cased": "xs", "of":
