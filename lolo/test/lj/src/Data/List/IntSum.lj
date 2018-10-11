@@ -1,0 +1,42 @@
+{ "declarations":
+  [ {"import": "Data.Bool", "as": "B"}
+  , {"import": "Data.JString", "as": "JStr"}
+  , {"import": "Data.List", "as": "L"}
+  , {"import": "Data.Tuple", "as": "T"}
+  , {"import": "Lolo.Random", "as": "R"}
+  , {"import": "Lolo.Tap"}
+  , {"import": "Prim.Int", "as": "I"}
+
+  , { "func": ["intEq", "a", "b"], "=":
+    ["B.and", ["I.le", "a", "b"], ["I.le", "b", "a"]]}
+
+  , { "func": ["main"], "=":
+    ["Lolo.Tap.runTests",
+
+      ["L.Cons",
+        ["T.Tuple2",
+          ["JStr.toString",
+            {"str": "intSum Nil == 0"}],
+          ["intEq", 0, ["L.intSum", "L.Nil"]]],
+
+      ["L.Cons",
+        ["T.Tuple2",
+          ["JStr.toString",
+            {"str": "intSum [7] == 7"}],
+          ["intEq", 7, ["L.intSum", ["L.Cons", 7, "L.Nil"]]]],
+
+      ["L.Cons",
+        ["T.Tuple2",
+          ["JStr.toString",
+            {"str": "intSum [1,2,3,4] == 10"}],
+          ["intEq", 10,
+            ["L.intSum",
+              ["L.Cons", 1,
+              ["L.Cons", 2,
+              ["L.Cons", 3,
+              ["L.Cons", 4, "L.Nil"]]]]]]],
+
+        "L.Nil"]]]]}
+    
+  ]
+}
