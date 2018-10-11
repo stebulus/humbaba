@@ -19,7 +19,7 @@ compile Data/Unit
 compile Lolo/Digits
 compile Lolo/Parse
 compile Lolo/Random
-compile Lolo/Tap
+compile test/lj/lib/Tap
 compile -m test/lj/src/Data/List/Append
 compile -m test/lj/src/Data/List/IntSum
 compile -m test/lj/src/Data/List/Replicate
