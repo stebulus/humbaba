@@ -1,0 +1,33 @@
+{ "declarations":
+  [ {"import": "Data.Bool", "as": "B"}
+  , {"import": "Data.JString", "as": "JStr"}
+  , {"import": "Data.List", "as": "L"}
+  , {"import": "Data.Tuple", "as": "T"}
+  , {"import": "Lolo.Random", "as": "R"}
+  , {"import": "Tap"}
+  , {"import": "Prim.Int", "as": "I"}
+
+  , { "func": ["intEq", "a", "b"], "=":
+    ["B.and", ["I.le", "a", "b"], ["I.le", "b", "a"]]}
+
+  , { "func": ["main"], "=":
+    ["Tap.runTests",
+
+      ["L.Cons",
+        ["T.Tuple2",
+          ["JStr.toString",
+            {"str": "result of pad has length 128"}],
+          ["intEq", 128, ["L.length", ["R.pad", "L.Nil"]]]],
+
+      ["L.Cons",
+        ["T.Tuple2",
+          ["JStr.toString",
+            {"str": "different seeds -> different generators"}],
+          ["B.not", ["intEq",
+            ["R.rand", ["R.mkRand", 0]],
+            ["R.rand", ["R.mkRand", 1]]]]],
+
+        "L.Nil"]]]}
+    
+  ]
+}

@@ -11,8 +11,14 @@ function stdout(s) {
   process.stdout.write(s);
 }
 
-function compile(ast, out) {
+var startCode =
+  "var process = require('process');" +
+  "var rts = require('humbaba-runtime-stream');" +
+  "new rts.Stream($main, process.stdin).pipe(process.stdout);"
+
+function compile(ast, main, out) {
   codegen.module(ast, out);
+  if (main) out(startCode);
 }
 exports.compile = compile;
 
@@ -26,15 +32,16 @@ if (require.main === module) {
   commander.version('0.1.0')
     .usage('[options] [file]')
     .option('-o, --output <file>', 'write to file (default stdout)')
+    .option('-m, --main', 'emit startup code')
     .parse(process.argv);
   commander.output = commander.output || '-';
   function doTheThing(input) {
     var ast = JSON.parse(input);
     if (commander.output === '-') {
-      compile(ast, writeTo(process.stdout));
+      compile(ast, commander.main, writeTo(process.stdout));
     } else {
       strm = fs.createWriteStream(commander.output);
-      compile(ast, writeTo(strm));
+      compile(ast, commander.main, writeTo(strm));
       strm.end();
     }
   }

@@ -1,0 +1,10 @@
+{"declarations":
+  [ {"data": "Maybe", "=": [["Nothing", 0], ["Just", 1]]}
+
+  , {"func": ["maybe", "b", "f", "ma"], "=":
+    {"cased": "ma", "of":
+      [ ["Nothing", "b"]
+      , ["Just", "a", ["f", "a"]] ]}}
+
+  ]
+}

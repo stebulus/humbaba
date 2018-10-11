@@ -1,0 +1,63 @@
+{ "declarations":
+  [ {"import": "Prim.Char"}
+  , {"import": "Prim.Int"}
+  , {"import": "Data.Bool", "as": "B"}
+  , {"import": "Data.List", "as": "L"}
+
+  , {"func": ["readInt", "digits"], "=":
+    ["L.foldl", "readIntStep", 0, "digits"]}
+
+  , {"func": ["readIntStep", "acc", "digit"], "=":
+    ["Prim.Int.add", ["Prim.Int.mul", 10, "acc"],
+                     ["digitToInt", "digit"]]}
+
+  , {"func": ["digitToInt", "c"], "=":
+    ["Prim.Int.add",
+      ["Prim.Char.ord", "c"],
+      ["Prim.Int.mul", -1, ["Prim.Char.ord", {"str": "0"}]]]}
+
+  , {"func": ["showInt", "n"], "=":
+    ["L.append",
+      ["showIntOptSign", "n"],
+      ["showIntDigits", ["intAbs", "n"]]]}
+
+  , {"func": ["showIntOptSign", "n"], "=":
+    {"cased": ["Prim.Int.le", 0, "n"], "of":
+      [["B.True", "L.Nil"],
+       ["B.False", ["L.Cons", {"str": "-"}, "L.Nil"]]]}}
+
+  , {"func": ["showIntDigits", "n"], "=":
+    {"casei": "n", "of":
+      [[0, ["L.Cons", {"str": "0"}, "L.Nil"]],
+       ["_", ["L.reverse", ["showIntDigitsHelper", "n"]]]]}}
+
+  , {"func": ["showIntDigitsHelper", "n"], "=":
+    {"casei": "n", "of":
+      [[0, "L.Nil"],
+       ["_",
+          ["L.Cons",
+            ["intToDigit", ["Prim.Int.rem", "n", 10]],
+            ["showIntDigitsHelper", ["Prim.Int.quot", "n", 10]]]]]}}
+
+  , {"func": ["intToDigit", "n"], "=":
+    {"casei": "n", "of":
+      [[0, {"str": "0"}],
+       [1, {"str": "1"}],
+       [2, {"str": "2"}],
+       [3, {"str": "3"}],
+       [4, {"str": "4"}],
+       [5, {"str": "5"}],
+       [6, {"str": "6"}],
+       [7, {"str": "7"}],
+       [8, {"str": "8"}],
+       [9, {"str": "9"}],
+       ["_", {"str": "?"}]]}}
+
+  , {"func": ["intAbs", "n"], "=":
+    {"cased": ["Prim.Int.le", 0, "n"], "of":
+      [["B.True", "n"],
+       ["B.False", ["Prim.Int.mul", -1, "n"]]]}}
+
+  ]
+}
+

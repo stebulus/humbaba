@@ -1,0 +1,153 @@
+{ "comments":
+  [ "Test-Anything Protocol\n"
+  , "https://testanything.org/"
+  ]
+, "declarations":
+  [ { "import": "Prim.Int" }
+  , { "import": "Prim.IO" }
+  , { "import": "Data.Bool", "as": "B" }
+  , { "import": "Data.Function", "as": "F" }
+  , { "import": "Data.List", "as": "L" }
+  , { "import": "Data.Maybe", "as": "M" }
+  , { "import": "Data.Tuple", "as": "T" }
+  , { "import": "Data.Unit", "as": "U" }
+  , { "import": "Lolo.Digits" }
+
+  , { "comment": "runTests :: List (Tuple2 String Bool) -> IO ()"
+    , "func": ["runTests", "tests"], "=":
+      ["ioThen",
+        ["putStrLn", "version"],
+        ["runTestsHelper", 0, "tests"]]}
+
+  , { "comment": "runTestsHelper :: Int -> List (Tuple2 String Bool) -> IO ()"
+    , "func": ["runTestsHelper", "n", "tests"], "=":
+      { "cased": "tests", "of":
+      [ ["L.Nil", ["putStrLn", ["plan", "n"]]]
+      , ["L.Cons", "test", "rest",
+        { "let": [["n2", ["Prim.Int.add", 1, "n"]]], "in":
+          { "cased": "test", "of":
+            [["T.Tuple2", "desc", "ok",
+              ["ioThen", ["runTest", "n2", "ok", "desc"],
+                ["runTestsHelper", "n2", "rest"]]]]}}]]}}
+
+  , { "comment": "runTest :: Int -> Bool -> String -> IO ()"
+    , "func": ["runTest", "n", "ok", "desc"], "=":
+      ["putStrLn",
+        ["result",
+          "ok",
+          ["M.Just", "n"],
+          ["M.Just", "desc"],
+          "M.Nothing"]]}
+
+  , { "comment": "ioThen :: IO a -> IO b -> IO b"
+    , "func": ["ioThen", "ioa", "iob"], "=":
+      ["Prim.IO.bind", "ioa", ["F.const", "iob"]]}
+
+  , { "comment": "mapM_ :: (a -> IO b) -> List a -> IO ()"
+    , "func": ["mapM_", "f", "as"], "=":
+      ["L.foldr", "ioThen", ["Prim.IO.pure", "U.Unit"],
+        ["L.map", "f", "as"]]}
+
+  , { "comment": "putStrLn :: String -> IO ()"
+    , "func": ["putStrLn", "str"], "=":
+      ["ioThen", ["mapM_", "Prim.IO.putChar", "str"],
+        ["Prim.IO.putChar", {"str": "\n"}]]}
+
+  , { "comment": "version :: String"
+    , "func": ["version"], "=":
+      ["L.Cons", {"str": "T"},
+      ["L.Cons", {"str": "A"},
+      ["L.Cons", {"str": "P"},
+      ["L.Cons", {"str": " "},
+      ["L.Cons", {"str": "v"},
+      ["L.Cons", {"str": "e"},
+      ["L.Cons", {"str": "r"},
+      ["L.Cons", {"str": "s"},
+      ["L.Cons", {"str": "i"},
+      ["L.Cons", {"str": "o"},
+      ["L.Cons", {"str": "n"},
+      ["L.Cons", {"str": " "},
+      ["L.Cons", {"str": "1"},
+      ["L.Cons", {"str": "3"},
+        "L.Nil"]]]]]]]]]]]]]]}
+
+  , { "comment": "plan :: Int -> String"
+    , "func": ["plan", "n"], "=":
+      ["L.Cons", {"str": "1"},
+      ["L.Cons", {"str": "."},
+      ["L.Cons", {"str": "."},
+        ["Lolo.Digits.showInt", "n"]]]]}
+
+  , { "func": ["okStr"], "=":
+      ["L.Cons", {"str": "o"}, ["L.Cons", {"str": "k"}, "L.Nil"]]}
+
+  , { "func": ["notOkStr"], "=":
+      ["L.Cons", {"str": "n"},
+      ["L.Cons", {"str": "o"},
+      ["L.Cons", {"str": "t"},
+      ["L.Cons", {"str": " "},
+        "okStr"]]]]}
+
+  , { "comment": "result :: Bool -> Maybe Int -> Maybe String -> Maybe Directive -> String"
+    , "func": ["result", "ok", "n", "desc", "dir"], "=":
+      ["L.intercalate",
+        ["L.singleton", {"str": " "}],
+      ["L.append",
+        ["L.singleton", ["B.bool", "okStr", "notOkStr", "ok"]],
+      ["L.append",
+        ["L.map", "Lolo.Digits.showInt", ["L.maybeToList", "n"]],
+      ["L.append",
+        ["L.maybeToList", "desc"],
+        ["L.map", "directive", ["L.maybeToList", "dir"]]]]]] }
+
+  , { "comment": "data Directive = ToDo (Maybe String) | Skip (Maybe String)"
+    , "data": "Directive", "=": [["ToDo", 1], ["Skip", 1]] }
+
+  , { "comment": "directive :: Directive -> List String"
+    , "func": ["directive", "dir"], "=":
+      [ "L.Cons", ["L.singleton",
+        {"str": "#"}],
+      [ "L.Cons", ["L.singleton",
+        { "cased": "dir", "of":
+          [ ["ToDo", "_",
+            ["L.Cons", {"str": "T"},
+            ["L.Cons", {"str": "O"},
+            ["L.Cons", {"str": "D"},
+            ["L.Cons", {"str": "O"},
+              "L.Nil"]]]]]
+          , ["Skip", "_",
+            ["L.Cons", {"str": "S"},
+            ["L.Cons", {"str": "K"},
+            ["L.Cons", {"str": "I"},
+            ["L.Cons", {"str": "P"},
+              "L.Nil"]]]]] ]}],
+      { "cased": "dir", "of":
+        [ ["ToDo", "mstr", ["L.maybeToList", "mstr"]]
+        , ["Skip", "mstr", ["L.maybeToList", "mstr"]] ]}]]}
+
+  , { "comment": "bail :: Maybe String -> String"
+    , "func": ["bail", "message"], "=":
+      ["L.intercalate",
+        ["L.singleton", {"str": " "}],
+      ["L.Cons",
+        ["L.singleton",
+          ["L.Cons", {"str": "B"},
+          ["L.Cons", {"str": "a"},
+          ["L.Cons", {"str": "i"},
+          ["L.Cons", {"str": "l"},
+          ["L.Cons", {"str": " "},
+          ["L.Cons", {"str": "o"},
+          ["L.Cons", {"str": "u"},
+          ["L.Cons", {"str": "t"},
+          ["L.Cons", {"str": "!"},
+            "L.Nil"]]]]]]]]]],
+      ["L.maybeToList", "message"]]] }
+
+  , { "comment": "diagnostic :: String -> String"
+    , "func": ["diagnostic", "message"], "=":
+      ["L.Cons", {"str": "#"},
+      ["L.Cons", {"str": " "},
+        "message"]]}
+
+  ]
+}

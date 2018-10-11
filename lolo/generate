@@ -1,11 +1,26 @@
 #!/usr/bin/env bash
 set -euo pipefail
-compile() {
-  node ljc.js -o "$1".js "$1".lj
+echorun() {
+  echo "$@"
+  "$@"
 }
-set -x
+compile() {
+  lastarg=${!#}
+  otherargs=("${@:1:$#-1}")
+  echorun node ljc.js "${otherargs[@]}" -o "$lastarg".js "$lastarg".lj
+}
 compile Data/Bool
 compile Data/Function
+compile Data/JString
 compile Data/List
+compile Data/Maybe
 compile Data/Tuple
+compile Data/Unit
+compile Lolo/Digits
 compile Lolo/Parse
+compile Lolo/Random
+compile test/lj/lib/Tap
+compile -m test/lj/src/Data/List/Append
+compile -m test/lj/src/Data/List/IntSum
+compile -m test/lj/src/Data/List/Replicate
+compile -m test/lj/src/Lolo/Random/Test

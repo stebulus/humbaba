@@ -142,7 +142,7 @@ function letExpr(astNode, chunk, target) {
     chunk('return ');
     expr(astNode['in'], chunk, null);
     chunk(';');
-    chunk('}).call(this);');
+    chunk('}).call(this)');
   }
 }
 

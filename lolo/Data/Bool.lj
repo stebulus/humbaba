@@ -1,13 +1,13 @@
 {"declarations":
   [ {"data": "Bool", "=": [["True", 0], ["False", 0]]}
 
-  , {"func": ["and", "a", "b"], "=":
-    {"cased": "a", "of": [["True", "b"], ["False", "a"]]}}
+  , {"func": ["bool", "t", "f", "b"], "=":
+    {"cased": "b", "of": [["True", "t"], ["False", "f"]]}}
 
-  , {"func": ["or", "a", "b"], "=":
-    {"cased": "a", "of": [["True", "a"], ["False", "b"]]}}
+  , {"func": ["and", "a", "b"], "=": ["bool", "b", "a", "a"]}
 
-  , {"func": ["not", "a"], "=":
-    {"cased": "a", "of": [["True", "False"], ["False", "True"]]}}
+  , {"func": ["or", "a", "b"], "=": ["bool", "a", "b", "a"]}
+
+  , {"func": ["not", "a"], "=": ["bool", "False", "True", "a"]}
 
   ]}
