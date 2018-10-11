@@ -23,4 +23,5 @@ compile test/lj/lib/Tap
 compile -m test/lj/src/Data/List/Append
 compile -m test/lj/src/Data/List/IntSum
 compile -m test/lj/src/Data/List/Replicate
+compile -m test/lj/src/Data/List/Take
 compile -m test/lj/src/Lolo/Random/Test
