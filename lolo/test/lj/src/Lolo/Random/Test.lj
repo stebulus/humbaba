@@ -3,12 +3,36 @@
   , {"import": "Data.JString", "as": "JStr"}
   , {"import": "Data.List", "as": "L"}
   , {"import": "Data.Tuple", "as": "T"}
+  , {"import": "Lolo.Digits"}
   , {"import": "Lolo.Random", "as": "R"}
+  , {"import": "Lolo.Random.JS", "as": "RJS"}
   , {"import": "Tap"}
   , {"import": "Prim.Int", "as": "I"}
 
   , { "func": ["intEq", "a", "b"], "=":
     ["B.and", ["I.le", "a", "b"], ["I.le", "b", "a"]]}
+
+  , { "func": ["intsList", "tup"], "=":
+    {"cased": "tup", "of":
+    [["T.Tuple4", "a", "b", "c", "d",
+      ["L.Cons", "a",
+      ["L.Cons", "b",
+      ["L.Cons", "c",
+      ["L.Cons", "d",
+        "L.Nil"]]]]]]}}
+
+  , { "func": ["roundtripInts", "a", "b", "c", "d"], "=":
+    { "let":
+      [ ["tup", ["T.Tuple4", "a", "b", "c", "d"]]
+      , ["list", ["intsList", "tup"]]
+      , ["roundtripped",
+          ["intsList", ["RJS.toInts", ["RJS.fromInts", "tup"]]]]
+      ], "in":
+    ["T.Tuple2",
+      ["L.append", ["JStr.toString", {"str": "roundtrip ints "}],
+        ["L.intercalate", ["L.singleton", {"str": " "}],
+          ["L.map", "Lolo.Digits.showInt", "list"]]],
+      ["L.eq", "intEq", "list", "roundtripped"]]}}
 
   , { "func": ["main"], "=":
     ["Tap.runTests",
@@ -22,12 +46,74 @@
       ["L.Cons",
         ["T.Tuple2",
           ["JStr.toString",
+            {"str": "pad [0] != pad [1]"}],
+          ["B.not", ["L.eq", "intEq",
+            ["R.pad", ["L.Cons", 0, "L.Nil"]],
+            ["R.pad", ["L.Cons", 1, "L.Nil"]]]]],
+
+      ["L.Cons",
+        ["T.Tuple2",
+          ["JStr.toString",
+            {"str": "fromBits (pad [False]) != fromBits (pad [True])"}],
+          {"let":
+            [ ["a", ["R.fromBits",
+                ["R.pad", ["L.Cons", "B.False", "L.Nil"]]]]
+            , ["b", ["R.fromBits",
+                ["R.pad", ["L.Cons", "B.True", "L.Nil"]]]]
+            ], "in":
+            {"cased": "a", "of":
+              [["T.Tuple4", "a1", "a2", "a3", "a4",
+                {"cased": "b", "of":
+                  [["T.Tuple4", "b1", "b2", "b3", "b4",
+                    ["B.not",
+                      ["B.and", ["intEq", "a1", "b1"],
+                      ["B.and", ["intEq", "a2", "b2"],
+                      ["B.and", ["intEq", "a3", "b3"],
+                        ["intEq", "a4", "b4"]]]]]]]}]]}}],
+
+      ["L.Cons", ["roundtripInts", 0, 0, 0, 0],
+      ["L.Cons", ["roundtripInts", 1, 2, 3, 4],
+
+      ["L.Cons",
+        ["T.Tuple2",
+          ["JStr.toString", {"str": "R.bitsToInt [] == 0"}],
+          ["intEq", ["R.bitsToInt", "L.Nil"], 0]],
+
+      ["L.Cons",
+        ["T.Tuple2",
+          ["JStr.toString",
+            {"str": "R.bitsToInt (False : bs) == 2 * bitsToInt bs"}],
+          {"let": [["bs", ["L.Cons", "B.True", "L.Nil"]]]
+          , "in": ["intEq",
+            ["R.bitsToInt", ["L.Cons", "B.False", "bs"]],
+            ["I.mul", 2, ["R.bitsToInt", "bs"]]]}],
+
+      ["L.Cons",
+        ["T.Tuple2",
+          ["JStr.toString",
+            {"str": "R.bitsToInt (True : bs) == 2 * bitsToInt bs + 1"}],
+          {"let": [["bs", ["L.Cons", "B.True", "L.Nil"]]]
+          , "in": ["intEq",
+            ["R.bitsToInt", ["L.Cons", "B.True", "bs"]],
+            ["I.add", 1, ["I.mul", 2, ["R.bitsToInt", "bs"]]]]}],
+
+      ["L.Cons",
+        ["T.Tuple2",
+          ["JStr.toString",
             {"str": "different seeds -> different generators"}],
           ["B.not", ["intEq",
             ["R.rand", ["R.mkRand", 0]],
             ["R.rand", ["R.mkRand", 1]]]]],
 
-        "L.Nil"]]]}
+      ["L.Cons",
+        ["T.Tuple2",
+          ["JStr.toString",
+            {"str": "split -> different generators"}],
+          {"cased": ["R.split", ["R.mkRand", 0]], "of":
+            [["T.Tuple2", "a", "b",
+              ["B.not", ["intEq", ["R.rand", "a"], ["R.rand", "b"]]]]]}],
+
+        "L.Nil"]]]]]]]]]]]}
     
   ]
 }
