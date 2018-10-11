@@ -1,0 +1,57 @@
+{ "declarations":
+  [ {"import": "Data.Bool", "as": "B"}
+  , {"import": "Data.JString", "as": "JStr"}
+  , {"import": "Data.List", "as": "L"}
+  , {"import": "Data.Tuple", "as": "T"}
+  , {"import": "Lolo.Tap"}
+  , {"import": "Prim.Int", "as": "I"}
+
+  , { "func": ["intEq", "a", "b"], "=":
+    ["B.and", ["I.le", "a", "b"], ["I.le", "b", "a"]]}
+
+  , { "func": ["main"], "=":
+    ["Lolo.Tap.runTests",
+
+      ["L.Cons",
+        ["T.Tuple2",
+          ["JStr.toString",
+            {"str": "append Nil Nil == Nil"}],
+          ["L.eq", "intEq", ["L.append", "L.Nil", "L.Nil"], "L.Nil"]],
+
+      ["L.Cons",
+        ["T.Tuple2",
+          ["JStr.toString",
+            {"str": "append [1] Nil == [1]"}],
+          { "let": [["xs", ["L.Cons", 1, "L.Nil"]]]
+          , "in": ["L.eq", "intEq", ["L.append", "xs", "L.Nil"], "xs"]}],
+
+      ["L.Cons",
+        ["T.Tuple2",
+          ["JStr.toString",
+            {"str": "append Nil [1] == [1]"}],
+          { "let": [["xs", ["L.Cons", 1, "L.Nil"]]]
+          , "in": ["L.eq", "intEq", ["L.append", "L.Nil", "xs"], "xs"]}],
+
+      ["L.Cons",
+        ["T.Tuple2",
+          ["JStr.toString",
+            {"str": "append [1] [1] == [1, 1]"}],
+          { "let": [["xs", ["L.Cons", 1, "L.Nil"]]], "in":
+            ["L.eq", "intEq", ["L.append", "xs", "xs"],
+              ["L.Cons", 1, ["L.Cons", 1, "L.Nil"]]]}],
+
+      ["L.Cons",
+        ["T.Tuple2",
+          ["JStr.toString",
+            {"str": "append [1, 2] [3] == [1, 2, 3]"}],
+          { "let":
+            [ ["xs", ["L.Cons", 1, ["L.Cons", 2, "L.Nil"]]]
+            , ["ys", ["L.Cons", 3, "L.Nil"]]
+            , ["zs", ["L.Cons", 1, ["L.Cons", 2, ["L.Cons", 3, "L.Nil"]]]]
+            ], "in":
+            ["L.eq", "intEq", ["L.append", "xs", "ys"], "zs"]}],
+
+        "L.Nil"]]]]]]}
+    
+  ]
+}

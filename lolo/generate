@@ -20,5 +20,6 @@ compile Lolo/Digits
 compile Lolo/Parse
 compile Lolo/Random
 compile Lolo/Tap
+compile -m test/lj/src/Data/List/Append
 compile -m test/lj/src/Data/List/Replicate
 compile -m test/lj/src/Lolo/Random/Test
