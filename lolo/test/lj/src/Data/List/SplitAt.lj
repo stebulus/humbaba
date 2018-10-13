@@ -1,0 +1,47 @@
+{ "declarations":
+  [ {"import": "Data.Bool", "as": "B"}
+  , {"import": "Data.JString", "as": "JStr"}
+  , {"import": "Data.List", "as": "L"}
+  , {"import": "Data.Tuple", "as": "T"}
+  , {"import": "Tap"}
+  , {"import": "Prim.Int", "as": "I"}
+
+  , { "func": ["intEq", "a", "b"], "=":
+    ["B.and", ["I.le", "a", "b"], ["I.le", "b", "a"]]}
+
+  , { "func": ["splitThenAppend", "n", "xs", "desc"], "=":
+    ["T.Tuple2",
+      ["L.append",
+        ["JStr.toString",
+          {"str": "uncurry append (splitAt n xs) == xs; "}],
+        "desc"],
+      ["L.eq", "intEq", "xs",
+        ["T.uncurry", "L.append", ["L.splitAt", "n", "xs"]]]]}
+
+  , { "func": ["main"], "=":
+    ["Tap.runTests",
+
+      ["L.Cons",
+        ["splitThenAppend", 0, "L.Nil",
+          ["JStr.toString", {"str": "0, Nil"}]],
+
+      ["L.Cons",
+        ["splitThenAppend", 1, "L.Nil",
+          ["JStr.toString", {"str": "1, Nil"}]],
+
+      ["L.Cons",
+        ["splitThenAppend", 0, ["L.Cons", 7, "L.Nil"],
+          ["JStr.toString", {"str": "0, [7]"}]],
+
+      ["L.Cons",
+        ["splitThenAppend", 1, ["L.Cons", 7, "L.Nil"],
+          ["JStr.toString", {"str": "1, [7]"}]],
+
+      ["L.Cons",
+        ["splitThenAppend", 2, ["L.Cons", 7, "L.Nil"],
+          ["JStr.toString", {"str": "2, [7]"}]],
+
+        "L.Nil"]]]]]]}
+    
+  ]
+}

@@ -11,6 +11,7 @@
 
   [ {"import": "Prim.Int", "as": "I"}
   , {"import": "Data.Bool", "as": "B"}
+  , {"import": "Data.Function", "as": "F"}
   , {"import": "Data.List", "as": "L"}
   , {"import": "Data.Tuple", "as": "T"}
   , {"import": "Lolo.Random.JS", "as": "JS"}
@@ -66,20 +67,19 @@
        "in": ["L.append", "extra", "bits"]}}
 
   , {"comment": "boolToInt :: Bool -> Int",
-     "func": ["boolToInt", "bit"], "=":
-      {"cased": "bit", "of": [["B.True", 1], ["B.False", 0]]}}
+     "func": ["boolToInt", "bit"], "=": ["B.bool", 1, 0, "bit"]}
 
   , {"comment": "pushLSB :: Bool -> Int -> Int",
      "func": ["pushLSB", "bit", "n"], "=":
-      ["I.and", ["I.shiftl", "n", 1], ["boolToInt", "bit"]]}
+      ["I.or", ["I.shiftl", "n", 1], ["boolToInt", "bit"]]}
 
   , {"comment": "bitsToInt :: List Bool -> Int",
      "func": ["bitsToInt", "bits"], "=":
-     ["L.foldl", "pushLSB", 0, "bits"]}
+     ["L.foldr", "pushLSB", 0, "bits"]}
 
   , {"comment": "fromBits :: List Bool -> Tuple4 Int Int Int Int",
      "func": ["fromBits", "bits"], "=":
-     {"cased": ["splits", 8, "bits"], "of":
+     {"cased": ["splits", 32, "bits"], "of":
       [["L.Cons", "a", "xs",
        {"cased": "xs", "of":
           [["L.Cons", "b", "xs",
@@ -87,7 +87,11 @@
               [["L.Cons", "c", "xs",
                {"cased": "xs", "of":
                   [["L.Cons", "d", "xs",
-                    ["T.Tuple4", "a", "b", "c", "d"]]]}]]}]]}]]}}
+                    ["T.Tuple4",
+                      ["bitsToInt", "a"],
+                      ["bitsToInt", "b"],
+                      ["bitsToInt", "c"],
+                      ["bitsToInt", "d"]]]]}]]}]]}]]}}
 
   , {"comment": "splits :: Int -> List a -> List (List a)",
      "func": ["splits", "n", "xs"], "=":

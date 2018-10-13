@@ -30,10 +30,10 @@ exports.$fromInts = new rt.Box(fromInts);
 // toInts :: Block -> Tuple4 Int Int Int Int
 function toInts(block) {
   var buf = evalAndUnbox(block);
-  var a = new rt.Box(buf.readInt32BE(buf, 0));
-  var b = new rt.Box(buf.readInt32BE(buf, 4));
-  var c = new rt.Box(buf.readInt32BE(buf, 8));
-  var d = new rt.Box(buf.readInt32BE(buf, 12));
+  var a = new rt.Box(buf.readInt32BE(0));
+  var b = new rt.Box(buf.readInt32BE(4));
+  var c = new rt.Box(buf.readInt32BE(8));
+  var d = new rt.Box(buf.readInt32BE(12));
   rt.Apply.call(this, tuple.$Tuple4, [a, b, c, d]);
 }
 exports.$toInts = new rt.Box(toInts);

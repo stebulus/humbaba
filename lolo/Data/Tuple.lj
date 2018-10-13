@@ -12,4 +12,8 @@
   , {"func": ["swap", "ab"], "=":
     {"cased": "ab", "of":
       [["Tuple2", "a", "b", ["Tuple2", "b", "a"]]]}}
+
+  , {"func": ["uncurry", "f", "tup"], "=":
+    {"cased": "tup", "of": [["Tuple2", "a", "b", ["f", "a", "b"]]]}}
+
   ]}

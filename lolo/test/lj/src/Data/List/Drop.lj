@@ -1,0 +1,93 @@
+{ "declarations":
+  [ {"import": "Data.Bool", "as": "B"}
+  , {"import": "Data.JString", "as": "JStr"}
+  , {"import": "Data.List", "as": "L"}
+  , {"import": "Data.Tuple", "as": "T"}
+  , {"import": "Tap"}
+  , {"import": "Prim.Int", "as": "I"}
+
+  , { "func": ["intEq", "a", "b"], "=":
+    ["B.and", ["I.le", "a", "b"], ["I.le", "b", "a"]]}
+
+  , { "func": ["intMax", "a", "b"], "=":
+    ["B.bool", "b", "a", ["I.le", "a", "b"]]}
+
+  , { "func": ["main"], "=":
+    ["Tap.runTests",
+
+      ["L.Cons",
+        ["T.Tuple2",
+          ["JStr.toString",
+            {"str": "n + length (drop n xs) == max n (length xs); 0, Nil"}],
+          {"let":
+            [["n", 0],
+             ["xs", "L.Nil"]],
+          "in":
+            ["intEq",
+              ["I.add", "n", ["L.length", ["L.drop", "n", "xs"]]],
+              ["intMax", "n", ["L.length", "xs"]]]}],
+
+      ["L.Cons",
+        ["T.Tuple2",
+          ["JStr.toString",
+            {"str": "n + length (drop n xs) == max n (length xs); 1, Nil"}],
+          {"let":
+            [["n", 1],
+             ["xs", "L.Nil"]],
+          "in":
+            ["intEq",
+              ["I.add", "n", ["L.length", ["L.drop", "n", "xs"]]],
+              ["intMax", "n", ["L.length", "xs"]]]}],
+
+      ["L.Cons",
+        ["T.Tuple2",
+          ["JStr.toString",
+            {"str": "n + length (drop n xs) == max n (length xs); 0, [7]"}],
+          {"let":
+            [["n", 0],
+             ["xs", ["L.Cons", 7, "L.Nil"]]],
+          "in":
+            ["intEq",
+              ["I.add", "n", ["L.length", ["L.drop", "n", "xs"]]],
+              ["intMax", "n", ["L.length", "xs"]]]}],
+
+      ["L.Cons",
+        ["T.Tuple2",
+          ["JStr.toString",
+            {"str": "n + length (drop n xs) == max n (length xs); 1, [7]"}],
+          {"let":
+            [["n", 1],
+             ["xs", ["L.Cons", 7, "L.Nil"]]],
+          "in":
+            ["intEq",
+              ["I.add", "n", ["L.length", ["L.drop", "n", "xs"]]],
+              ["intMax", "n", ["L.length", "xs"]]]}],
+
+      ["L.Cons",
+        ["T.Tuple2",
+          ["JStr.toString",
+            {"str": "n + length (drop n xs) == max n (length xs); 2, [7]"}],
+          {"let":
+            [["n", 2],
+             ["xs", ["L.Cons", 7, "L.Nil"]]],
+          "in":
+            ["intEq",
+              ["I.add", "n", ["L.length", ["L.drop", "n", "xs"]]],
+              ["intMax", "n", ["L.length", "xs"]]]}],
+
+      ["L.Cons",
+        ["T.Tuple2",
+          ["JStr.toString",
+            {"str": "n + length (drop n xs) == max n (length xs); 1, [7,8]"}],
+          {"let":
+            [["n", 1],
+             ["xs", ["L.Cons", 8, ["L.Cons", 7, "L.Nil"]]]],
+          "in":
+            ["intEq",
+              ["I.add", "n", ["L.length", ["L.drop", "n", "xs"]]],
+              ["intMax", "n", ["L.length", "xs"]]]}],
+
+        "L.Nil"]]]]]]]}
+    
+  ]
+}

@@ -49,3 +49,33 @@ function intLe(a, b) {
   rt.Indirect.call(this, cmp);
 }
 exports.$le = new rt.Box(intLe);
+
+function intOr(a, b) {
+  rt.evaluate(a);
+  a = rt.smashIndirects(a);
+  rt.evaluate(b);
+  b = rt.smashIndirects(b);
+  var or = a.fields[0] | b.fields[0];
+  rt.Box.call(this, or)
+}
+exports.$or = new rt.Box(intOr);
+
+function intAnd(a, b) {
+  rt.evaluate(a);
+  a = rt.smashIndirects(a);
+  rt.evaluate(b);
+  b = rt.smashIndirects(b);
+  var and = a.fields[0] & b.fields[0];
+  rt.Box.call(this, and)
+}
+exports.$and = new rt.Box(intAnd);
+
+function intShiftl(a, b) {
+  rt.evaluate(a);
+  a = rt.smashIndirects(a);
+  rt.evaluate(b);
+  b = rt.smashIndirects(b);
+  var shift = a.fields[0] << b.fields[0];
+  rt.Box.call(this, shift)
+}
+exports.$shiftl = new rt.Box(intShiftl);

@@ -1,0 +1,34 @@
+{ "declarations":
+  [ {"import": "Data.Bool", "as": "B"}
+  , {"import": "Data.JString", "as": "JStr"}
+  , {"import": "Data.List", "as": "L"}
+  , {"import": "Data.Tuple", "as": "T"}
+  , {"import": "Lolo.Digits"}
+  , {"import": "Tap"}
+  , {"import": "Prim.Int", "as": "I"}
+
+  , { "func": ["intEq", "a", "b"], "=":
+    ["B.and", ["I.le", "a", "b"], ["I.le", "b", "a"]]}
+
+  , { "func": ["revrev", "xs"], "=":
+    ["T.Tuple2",
+      ["L.append",
+        ["JStr.toString", {"str": "reverse . reverse == id; "}],
+        ["L.intercalate",
+          ["L.singleton", {"str": " "}],
+          ["L.map", "Lolo.Digits.showInt", "xs"]]],
+      ["L.eq", "intEq", "xs", ["L.reverse", ["L.reverse", "xs"]]]]}
+
+  , { "func": ["main"], "=":
+    ["Tap.runTests",
+
+      ["L.Cons", ["revrev", "L.Nil"],
+      ["L.Cons", ["revrev", ["L.singleton", 3]],
+      ["L.Cons", ["revrev", ["L.Cons", 3, ["L.Cons", 5, "L.Nil"]]],
+      ["L.Cons", ["revrev",
+        ["L.Cons", 2, ["L.Cons", 3, ["L.Cons", 5, "L.Nil"]]]],
+
+        "L.Nil"]]]]]}
+
+  ]
+}
